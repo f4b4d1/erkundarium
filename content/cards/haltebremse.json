@@ -2,7 +2,7 @@
   "id": "haltebremse",
   "topic": "antriebstechnik",
   "sources": [
-    "Beckhoff Information System: Servomotoren AM8100, Motorhaltebremse, https://infosys.beckhoff.com/content/1031/am8100/1333496971.html"
+    "https://infosys.beckhoff.com/content/1031/am8100/1333496971.html"
   ],
   "texts": {
     "de": {
@@ -11,7 +11,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Die Haltebremse sitzt am Motor und blockiert seine Welle, sobald keine Spannung anliegt. So kann eine Achse im Stillstand und bei Stromausfall festgehalten werden."
+          "text": "Die Haltebremse sitzt am Motor und blockiert seine Welle, sobald keine Spannung anliegt. So kann eine Achse im Stillstand und bei Stromausfall festgehalten werden. Bei manchen Servomotoren ist sie eine Permanentmagnet-Bremse auf der B-Lagerseite. Man kann sie nicht nachrüsten, und sie macht den Motor länger. Ein Hersteller nennt mehr als zehn Millionen Schaltspiele."
         }
       ],
       "back": [

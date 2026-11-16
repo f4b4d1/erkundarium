@@ -2,8 +2,8 @@
   "id": "wellgetriebe",
   "topic": "antriebstechnik",
   "sources": [
-    "Harmonic Drive LLC: Technology, https://www.harmonicdrive.net/technology",
-    "Wikipedia (en): Strain wave gearing, https://en.wikipedia.org/wiki/Strain_wave_gearing"
+    "https://www.harmonicdrive.net/technology",
+    "https://en.wikipedia.org/wiki/Strain_wave_gearing"
   ],
   "link": "https://www.harmonicdrive.net/technology",
   "texts": {
@@ -13,7 +13,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Das Wellgetriebe hat ein verformbares Zahnrad. Ein ovaler Kern drückt eine dünne, außen verzahnte Stahlbüchse an zwei Stellen in einen festen Zahnring. Dreht sich der Kern, wandern diese Stellen mit, und die Büchse dreht sich langsam weiter."
+          "text": "Das Wellgetriebe hat ein verformbares Zahnrad. Ein ovaler Kern drückt eine dünne, außen verzahnte Stahlbüchse an zwei Stellen in einen festen Zahnring. Dreht sich der Kern, wandern diese Stellen mit, und die Büchse dreht sich langsam weiter. Eingang und Ausgang liegen auf derselben Achse. Beim Hersteller Harmonic Drive greifen bis zu 30 Prozent der Zähne gleichzeitig."
         }
       ],
       "back": [
@@ -25,10 +25,6 @@
             ["Flexspline", "dünne Stahlbüchse mit Außenzähnen, gibt die Drehung ab"],
             ["Circular Spline", "fester Ring mit Innenzähnen"]
           ]
-        },
-        {
-          "type": "text",
-          "text": "Der Flexspline hat zwei Zähne weniger als der Ring. Pro Umdrehung des Kerns rückt er deshalb nur um zwei Zähne weiter. Bei 200 Zähnen ergibt das eine Untersetzung von 100 zu 1: Der Motor dreht sich hundertmal, der Abtrieb einmal."
         },
         {
           "type": "facts",

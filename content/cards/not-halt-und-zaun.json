@@ -2,9 +2,9 @@
   "id": "not-halt-und-zaun",
   "topic": "maschinensicherheit",
   "sources": [
-    "WEKA: Not-Aus oder Not-Halt?, https://www.weka.de/produktsicherheit/not-aus-oder-not-halt/",
-    "industrie-fachwissen.de: Maschinenschutz an Roboterzellen, Schutzzaun nach ISO 14120, https://industrie-fachwissen.de/werkstatt/maschinenschutz-roboterzellen-schutzzaun-iso-14120-vergleich",
-    "Wikipedia: Industrieroboter, Abschnitt Sicherheit, https://de.wikipedia.org/wiki/Industrieroboter"
+    "https://www.weka.de/produktsicherheit/not-aus-oder-not-halt/",
+    "https://industrie-fachwissen.de/werkstatt/maschinenschutz-roboterzellen-schutzzaun-iso-14120-vergleich",
+    "https://de.wikipedia.org/wiki/Industrieroboter"
   ],
   "texts": {
     "de": {
@@ -13,7 +13,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Der Zaun hält Menschen vom Roboter fern. Wird die Schutztür geöffnet, hält der Roboter an. Für den Notfall gibt es den Not-Halt: einen roten Pilztaster auf gelbem Grund, der die gefährliche Bewegung stoppt."
+          "text": "Der Zaun hält Menschen vom Roboter fern. Wird die Schutztür geöffnet, hält der Roboter an. Für den Notfall gibt es den Not-Halt: einen roten Pilztaster auf gelbem Grund, der die gefährliche Bewegung stoppt. Er muss jederzeit schnell erreichbar sein. Hat eine Anlage mehrere Bedienplätze, braucht sie meist mehrere Not-Halt-Geräte. An Förderbändern gibt es auch Seilzugschalter."
         }
       ],
       "back": [

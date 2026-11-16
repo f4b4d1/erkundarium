@@ -2,8 +2,8 @@
   "id": "roboterzelle",
   "topic": "robotik",
   "sources": [
-    "Wikipedia: Industrieroboter, https://de.wikipedia.org/wiki/Industrieroboter",
-    "industrie-fachwissen.de: Maschinenschutz an Roboterzellen, Schutzzaun nach ISO 14120, https://industrie-fachwissen.de/werkstatt/maschinenschutz-roboterzellen-schutzzaun-iso-14120-vergleich"
+    "https://de.wikipedia.org/wiki/Industrieroboter",
+    "https://industrie-fachwissen.de/werkstatt/maschinenschutz-roboterzellen-schutzzaun-iso-14120-vergleich"
   ],
   "texts": {
     "de": {
@@ -12,19 +12,18 @@
       "front": [
         {
           "type": "text",
-          "text": "Eine Roboterzelle ist ein abgegrenzter Arbeitsplatz für Industrieroboter. Ein Schutzzaun trennt den Bereich, in dem sich der Roboter bewegt, von dem Bereich, in dem Menschen arbeiten."
+          "text": "Eine Roboterzelle ist ein abgegrenzter Arbeitsplatz für Industrieroboter. Ein Schutzzaun trennt den Bereich, in dem sich der Roboter bewegt, von dem Bereich, in dem Menschen arbeiten. Meist ist der Zaun ein Stahlgitter. Bei Schweiß-, Schleif- und Laserzellen schützt Blech vor Funken und Splittern. Zugänge sind Personentür, Materialtür und Notausgangstür."
         }
       ],
       "back": [
         {
           "type": "text",
-          "text": "Wie eine Zelle gesichert wird, ergibt sich aus einer Risikobeurteilung. Dabei wird geprüft, welche Gefahren auftreten und wo eine feste Schutzeinrichtung wie ein Zaun nötig ist. Mehrere Normen regeln die Einzelheiten."
+          "text": "Wie eine Zelle gesichert wird, ergibt sich aus einer Risikobeurteilung. Sie klärt, welche Gefahren auftreten und wo ein fester Schutz wie ein Zaun nötig ist. Für Robotersysteme gilt EN ISO 10218-2, für den Zaun diese Normen:"
         },
         {
           "type": "table",
           "rows": [
             ["Norm", "Regelt"],
-            ["EN ISO 10218-2", "Sicherheit von Robotersystemen und ihrer Einbindung"],
             ["EN ISO 13857", "Höhe des Zauns und Abstand zur Gefahrenstelle"],
             ["EN ISO 14120", "Bauart und Festigkeit des Zauns"],
             ["EN ISO 14119", "Verriegelung der Schutztür"]

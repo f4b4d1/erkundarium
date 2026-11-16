@@ -2,8 +2,8 @@
   "id": "hallenleuchte",
   "topic": "elektroinstallation",
   "sources": [
-    "Waldmann: Lighting for warehouses and logistics halls, https://www.waldmann.com/applications/industry/industrial-hall/warehouses-and-logistics-halls.6c9.en.html",
-    "baulinks.de: Hallenleuchten (Sammlung von Produktmeldungen), https://www.baulinks.de/licht/hallenleuchten.php"
+    "https://www.waldmann.com/applications/industry/industrial-hall/warehouses-and-logistics-halls.6c9.en.html",
+    "https://www.baulinks.de/licht/hallenleuchten.php"
   ],
   "texts": {
     "de": {
@@ -12,7 +12,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Hallenleuchten hängen hoch unter dem Dach und leuchten von dort große Flächen aus. Moderne Hallenleuchten arbeiten mit LEDs und brauchen deutlich weniger Strom als ältere Lampen."
+          "text": "Hallenleuchten hängen hoch unter dem Dach und leuchten von dort große Flächen aus. Moderne Hallenleuchten arbeiten mit LEDs und brauchen deutlich weniger Strom als ältere Lampen. LEDs lösen Quecksilberdampf- und Metalldampflampen ab. Hersteller nennen für ihre LED-Leuchten 50 000 bis 100 000 Betriebsstunden. Manche Modelle sind für Hallen über 13 Meter Höhe gebaut."
         }
       ],
       "back": [

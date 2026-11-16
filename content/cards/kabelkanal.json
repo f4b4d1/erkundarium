@@ -2,8 +2,8 @@
   "id": "kabelkanal",
   "topic": "elektroinstallation",
   "sources": [
-    "Baunetz Wissen: Kanalsysteme (Systemböden), https://www.baunetzwissen.de/boden/fachwissen/_systemboeden/kanalsysteme-988381",
-    "Heinze / PohlCon: Elektroinstallation im Boden (Produktserie), https://www.heinze.de/produktserie/elektroinstallation-im-boden/21550568/1/"
+    "https://www.baunetzwissen.de/boden/fachwissen/_systemboeden/kanalsysteme-988381",
+    "https://www.heinze.de/produktserie/elektroinstallation-im-boden/21550568/1/"
   ],
   "texts": {
     "de": {
@@ -12,7 +12,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Unter dem Hallenboden liegen die Kabel nicht lose im Beton. Sie laufen in flachen Kanälen aus Metall oder Kunststoff. So bleiben sie geschützt, und neue Leitungen lassen sich später nachziehen."
+          "text": "Unter dem Hallenboden liegen die Kabel nicht lose im Beton. Sie laufen in flachen Kanälen aus Metall oder Kunststoff. So bleiben sie geschützt, und neue Leitungen lassen sich später nachziehen. Solche Kanalböden sind eine Alternative zu Doppel- und Hohlraumböden. Über den Kanälen muss eine Mindestschicht Estrich bleiben, sonst reißt der Boden."
         }
       ],
       "back": [

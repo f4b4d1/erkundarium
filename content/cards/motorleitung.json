@@ -2,7 +2,7 @@
   "id": "motorleitung",
   "topic": "elektroinstallation",
   "sources": [
-    "Marcel Diehl: An der Verbindung soll es nicht scheitern. ema 11-12/2022, S. 14–17, nach Unterlagen der Lapp Holding AG, https://www.elektro.net/file/show/120416/626a09/EMA_2022_11-12_Lapp.pdf"
+    "https://www.elektro.net/file/show/120416/626a09/EMA_2022_11-12_Lapp.pdf"
   ],
   "texts": {
     "de": {
@@ -11,7 +11,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Die Motorleitung bringt die elektrische Leistung vom Umrichter zum Motor. Der Umrichter ist das Gerät, das den Strom für den Motor passend formt. Weil er dabei sehr schnell schaltet, ist die Leitung abgeschirmt, damit sie andere Leitungen nicht stört."
+          "text": "Die Motorleitung bringt die elektrische Leistung vom Umrichter zum Motor. Der Umrichter ist das Gerät, das den Strom für den Motor passend formt. Weil er dabei sehr schnell schaltet, ist die Leitung abgeschirmt, damit sie andere Leitungen nicht stört. Lapp verseilt bei einer Bauart die Phasenleiter innen und den Schutzleiter außen; das senkt Ausgleichsströme laut Hersteller um bis zu 80 Prozent."
         }
       ],
       "back": [
@@ -29,7 +29,7 @@
         },
         {
           "type": "funfact",
-          "text": "Solche hochfrequenten Ausgleichsströme erreichen laut Kabelhersteller Lapp nicht selten 10 Ampere oder mehr. Dann lösen etwa Fehlerstrom-Schutzschalter scheinbar grundlos aus, und die Fehlersuche wird mühsam."
+          "text": "Ausgleichsströme von 10 Ampere oder mehr sind laut Lapp keine Seltenheit. Dann lösen Fehlerstrom-Schutzschalter scheinbar grundlos aus."
         }
       ]
     }
