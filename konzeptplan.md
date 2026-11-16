@@ -141,30 +141,22 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `7c919ed`)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `745e30c`)
 
 Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
 
 ### Einstieg für die nächste Session
 
-Die Kartenansicht ist fertig: Design, Längenvorgaben, Karten-Guidelines und alle elf Kartentexte. Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
+Zoom (F3) und Pfadanzeige (F4) sind fertig, mit einer vorläufigen Szene `roboterzelle` als Zoom-Ziel (Entscheidung des Nutzers: Platzhalter zuerst, Zeichnen in Schritt 2). Der Nutzer hat den Zoom-Schritt in zwei Aufträge geteilt; Auftrag 1 ist erledigt und reviewt. Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
 
-Als Nächstes steht Schritt 1 der „Nächsten Schritte“ an: Zoom mit Pfadanzeige und Eintrittskarte. Vor dem ersten Agentenauftrag mit dem Nutzer klären:
+Als Nächstes Auftrag 2 des Zoom-Schritts (Spec F11, F30 bis F32; Begriffe Eintrittskarte, Abgeschlossen im Glossar):
 
-1. **Reihenfolge Zoom oder Zeichnen.** Es gibt nur die Szene `fabrikhalle`. Ihr einziger Zoom-Hotspot `roboter` zeigt auf die Szene `roboterzelle`, die noch fehlt. Ohne Zielszene lässt sich der Zoom im Spiel weder ansehen noch prüfen, und `npm run build` bricht ab. Möglich: (a) zuerst Schritt 2, die Szene `roboterzelle` nach `design-guidelines.md` und `stilprofil-fabrik.md` zeichnen; (b) für den Zoom eine schlichte, vorläufige `roboterzelle` (wenige Hotspots, Eintrittskarte `roboterzelle`) anlegen, die Schritt 2 später ersetzt. Empfehlung: (b), weil der Zoom dann sofort prüfbar ist und das Zeichnen nicht unter Zeitdruck gerät; das Prüfskript verlangt von ihr nur Schema, gültige Ziele, Abgleich mit der SVG und erlaubte Elemente, nicht die Design-Guidelines.
-2. **Startszene angleichen** (offene Entscheidung 1) betrifft erst Schritt 2.
-
-Inhalt des Zoom-Schritts (Spec F3, F4, F11, F30 bis F32; Begriffe Zoom, Pfad, Eintrittskarte, Abgeschlossen im Glossar):
-
-- F3: Klick auf einen Hotspot mit Aktion `scene` zoomt auf das Ding und wechselt in die Zielszene. Heute tut `loeseAus` in `src/oberflaeche/anwendung.tsx` für `scene` noch nichts.
-- F4: Pfadanzeige von der Startszene bis zur aktuellen Szene; Klick auf eine Ebene kürzt den Pfad. Der Pfad gilt nur für die Sitzung, nicht im Spielstand.
-- F30: Beim ersten Betreten einer Szene mit Eintrittskarte erst Zoom, dann deckt sich die Karte von selbst auf und gilt als gefunden (wie F6 und F7, also `oeffneKarte`).
-- F31: Kartenknopf am Szenentitel in der Pfadanzeige öffnet die Eintrittskarte.
+- F30: Beim ersten Betreten einer Szene mit Eintrittskarte erst Zoom, dann deckt sich die Karte von selbst auf und gilt als gefunden (wie F6 und F7, also `oeffneKarte`). Der Szenenwechsel liegt in `wechsleSzene` in `src/oberflaeche/anwendung.tsx`; `roboterzelle` trägt die Eintrittskarte `roboterzelle`.
+- F31: Kartenknopf am Szenentitel in der Pfadanzeige (`src/oberflaeche/pfadanzeige.tsx`) öffnet die Eintrittskarte.
 - F32 und F11: Der Hinweis eines Zoom-Hotspots nennt den Stand („3 von 5 Karten“, Zielszene samt tieferen Szenen) und trägt einen Kartenknopf, sobald die Eintrittskarte der Zielszene gefunden ist.
-- Vorhandene Logik zum Wiederverwenden: `zoomZiele`, `tiefereSzenen` in `src/logik/szenennetz.ts`; `kartenDerSzene`, `standDerSzene`, `istAbgeschlossen` in `src/logik/fortschritt.ts`; `hinweisinhalt` in `src/logik/hinweis.ts`. Neue reine Logik (etwa Pfad kürzen) testgetrieben unter `src/logik/`.
-- Die Zoom-Animation respektiert `prefers-reduced-motion`. Ladefehler der Zielszene werden gemeldet, ohne den Spielstand zu verlieren.
+- Vorhandene Logik zum Wiederverwenden: `zoomZiele`, `tiefereSzenen` in `src/logik/szenennetz.ts`; `kartenDerSzene`, `standDerSzene`, `istAbgeschlossen` in `src/logik/fortschritt.ts`; `hinweisinhalt` in `src/logik/hinweis.ts`. Neue reine Logik testgetrieben unter `src/logik/`.
 
-Ablauf wie unter „Arbeitsweise“: Auftrag an einen Sonnet-Agenten, selbst nachprüfen (Typprüfung, Tests, Prüfskript, Bildschirmfotos), Review auf zwei Achsen, Befunde in eigenem Commit, dann auf den Nutzer warten. Für Bildschirmfotos haben die Agenten bisher Edge headless über CDP genutzt (`--remote-debugging-port=9333`, Vite auf Port 5199); die Skripte lagen im Scratchpad der alten Session und sind nicht mehr verfügbar.
+Ablauf wie unter „Arbeitsweise“: Auftrag an einen Sonnet-Agenten, selbst nachprüfen (Typprüfung, Tests, Prüfskript, Bildschirmfotos), Review auf zwei Achsen, Befunde in eigenem Commit, dann auf den Nutzer warten. Bildschirmfotos: Edge headless über CDP (`--remote-debugging-port=9333`, Vite auf Port 5199); die Skripte liegen im Scratchpad dieser Session und sind in einer neuen Session nicht mehr verfügbar. Review-Agenten starten `npm test` oft aus der Git-Bash mit kleinem `c:` und können dann nicht testen; im Auftrag ausdrücklich PowerShell mit `C:\` verlangen.
 
 ### Arbeitsweise
 
@@ -193,10 +185,11 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 | 8 | Kartenansicht: Aufdecken, Wenden, Schließen, fünf Bausteine, Entwurfsstempel, vier Symbole der Themengebiete; Kartentitel im Inhaltsverzeichnis |
 | 8a | Wissensgebiete (ADR 0005): `content/domains.json` mit Technik in Stahlgrau `#6B7785`, `topics.json` verweist mit `domain` darauf, keine Ersatzfarbe; Kartenvorderseite mit Bild und Text je zur Hälfte |
 | 8b | Kartendesign abgeschlossen: Schild auf beiden Seiten mit Themengebiet, Titel hinten als kleine Überschrift, Schrift vorne +10 %, Quellen als bloße URL ohne Nummern, Bedienregeln in der Spec (F8a), endgültige `limits.json` (Kurztext 300 bis 400 Zeichen), alle elf Kurztexte verlängert, `design-guidelines-karte.md` mit Regeln für Kartentexte (Allgemeingültigkeit, Belege, Verständlichkeit) |
+| 9a | Zoom (F3) und Pfadanzeige (F4): vorläufige Szene `roboterzelle`, `src/logik/pfad.ts` mit Tests, Zoom per Web Animations mit `prefers-reduced-motion`, Ladefehler und nicht darstellbare Zielszene lassen die aktuelle Szene stehen, Szene als `role="group"` mit Titel benannt; reviewt, Befunde behoben (Commits `f3831ae`, `745e30c`) |
 
 Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt und die Befunde behoben (Commit `aabd984`). Ungeprüft im Browser: der Name des Dialogs im Fehlerzustand und die Ansage „Neue Karte gefunden“ im Screenreader. Offen, gleiches Muster: `.karte-laedt` ist eine bedingt gerenderte `role="status"`-Region.
 
-Umgesetzte Anforderungen der Spec: F1, F2, F5, F7 bis F10, F17, F18, F21, F22, F24, F25, F33 bis F36. Teilweise: F6 (der Zähler fehlt), F11 (Haken ja; Schalter und Stand im Hinweis fehlen), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe unten), F23 (Stand und Kartenknopf im Hinweis fehlen), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
+Umgesetzte Anforderungen der Spec: F1 bis F5, F7 bis F10, F17, F18, F21, F22, F24, F25, F33 bis F36. Teilweise: F6 (der Zähler fehlt), F11 (Haken ja; Schalter und Stand im Hinweis fehlen), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe unten), F23 (Stand und Kartenknopf im Hinweis fehlen), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
 
 ### Offene Entscheidungen des Nutzers
 
@@ -217,7 +210,9 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
 ### Bekannte Mängel und Ungeprüftes
 
-- `npm run build` bricht ab, bis die Szene `roboterzelle` existiert: Der Hotspot `roboter` zeigt auf sie. `npm run pruefen` meldet deshalb 1 Fehler und 11 Entwurfs-Warnungen; das ist der erwartete Stand. Ein erfolgreicher Build ist seit dem Umbau des Prüfskripts ungeprüft.
+- `roboterzelle` ist ein Platzhalter (drei Hotspots, schlichte Grafik); Schritt 2 ersetzt ihn. `npm run pruefen` meldet 0 Fehler und 11 Entwurfs-Warnungen, `npm run build` läuft.
+- Zoom: Während eines Wechsels (450 ms plus Laden) tun Pfadknöpfe nichts, ohne Rückmeldung. Scheitert das Laden, kommt die Meldung erst nach dem vollen Zoom. Beides bewusst so gelassen.
+- `pruefeSvg` in `src/szene/szene.ts` ist ohne Test, weil es keine DOM-Testumgebung gibt; nur im Browser geprüft. Eine SVG mit verbotenen Elementen wird bereinigt statt abgelehnt und lädt dann gegebenenfalls ohne Hotspots.
 - `npm test` scheitert, wenn das Terminal im Pfad ein kleines `c:` zeigt (`Cannot read properties of undefined (reading 'config')`). Abhilfe: mit großem `C:\` ins Verzeichnis wechseln. Die Ursache ist nicht geklärt.
 - Manche Haken sitzen neben der Form, weil sie an der Ecke der Begrenzungsbox hängen (Hallenleuchten, Roboter, Schaltschrank).
 - Der Hinweis lässt Klicks durch. Nach dem Schließen einer Karte mit der Maus bleibt er offen, bis die Maus sich bewegt.
