@@ -34,7 +34,7 @@ Stand: nach der Grilling-Session vom 2026-11-16. Alle Fragen aus Abschnitt 8 sin
 | E4 | Daten statt Code: Inhalte liegen als Dateien unter `content/`, die Engine unter `src/`. |
 | E5 | Die Engine kennt nur allgemeine Begriffe, keine Fachbegriffe wie Fabrik oder Roboter, auch keine Namen von Beziehungstypen. |
 | E6 | Keine feste Tiefe und kein eigener Begriff für Oberebenen: Eine Stadt ist eine Szene. |
-| E7 | Der Spielstand speichert nur IDs gefundener Karten und Einstellungen. Prozentwerte, Abschluss und betretene Szenen werden berechnet. |
+| E7 | Der Spielstand speichert nur die IDs gefundener Karten mit Fundzeitpunkt und die Einstellungen. Prozentwerte, Abschluss und betretene Szenen werden berechnet. |
 | E8 | IDs sind nach Veröffentlichung unveränderlich. |
 | E9 | Jede Karte braucht mindestens eine Quelle. Jede Textfassung einer Karte hat einen Prüfstatus. |
 | E10 | Das Wissensnetz hat zwei Schichten: berechnete Fundorte und von Hand gesetzte Beziehungen (ADR 0003). |
@@ -84,6 +84,8 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
 - F26: Auslösen je Eingabegerät. Maus: Klick löst sofort aus. Tastatur: Eingabetaste löst aus. Touch: Das erste Tippen zeigt Hinweis und Hervorhebung; ein zweites Tippen auf denselben Hotspot oder auf das Symbol im Hinweis löst aus; Tippen daneben schließt den Hinweis.
 - F27: Im Ruhezustand ist kein Hotspot hervorgehoben; sichtbar sind nur die Haken gefundener Karten. Beim Überfahren, bei Fokus und nach dem ersten Tippen bekommt der Hotspot einen hellen Umriss entlang seiner Form und ein Abzeichen in der oberen rechten Ecke.
 - F28: Das Abzeichen zeigt Aktion und Zustand über ein Symbol, nicht über Farbe: verdeckte Karte (Karte nicht gefunden), Haken (Karte gefunden), Lupe (Zoom), Lupe mit Haken (Zielszene abgeschlossen), „i“ (Info).
+- F36: Hotspots dürfen verschachtelt sein. Es gilt immer der innerste getroffene Hotspot; der äußere wird nicht mit ausgelöst.
+- F37: Über dünne Linien (Kabel, Rohre, Schläuche) legt die Anwendung eine unsichtbare, breitere Klickfläche, damit sie mit Maus und Finger zu treffen sind.
 - F29: Ein Hilfe-Schalter blendet die Abzeichen aller Hotspots der Szene ein, bis er wieder ausgeschaltet wird.
 
 **Karten**
@@ -112,7 +114,7 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
 **Speichern**
 
 - F17: Nach jedem Fund und jeder Änderung einer Einstellung wird automatisch gespeichert.
-- F18: Der Spielstand trägt eine Schema-Version. Unbekannte Karten-IDs im Spielstand bleiben erhalten und zählen nicht mit.
+- F18: Der Spielstand trägt eine Schema-Version. Unbekannte Karten-IDs im Spielstand bleiben erhalten und zählen nicht mit. Einzelne schiefe Einträge fallen beim Einlesen weg, der Rest bleibt. Stammt der Spielstand von einer neueren Version des Spiels, wird er weder gelesen noch überschrieben: Die Sitzung läuft mit leerem Stand, speichert nicht und sagt das sichtbar.
 - F19: Es gibt eine Funktion zum Zurücksetzen des Spielstands.
 - F33: Der Spielstand liegt in `localStorage` hinter einer Speicherschicht mit den Operationen Laden und Speichern.
 
@@ -126,10 +128,12 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
   - Kreise im Szenennetz und Szenen, die von der Startszene nicht erreichbar sind
   - Beziehungen mit unbekanntem Typ oder Ziel, symmetrische Beziehungen an beiden Karten, Kreise bei Typen mit `acyclic`
   - `info`-Hotspots ohne `hint`
-  - verbotene Elemente in Szenen-SVGs und Kartenbildern nach `design-guidelines.md` Abschnitt 1 Regel 2, dazu `aria-label`, Ereignis-Attribute wie `onclick` und Verweise nach außen
+  - verbotene Elemente in Szenen-SVGs und Kartenbildern nach `design-guidelines.md` Abschnitt 1 Regel 2, dazu `aria-label`, das Attribut `style`, Ereignis-Attribute wie `onclick` und Verweise nach außen
+  - jedes Element außerhalb der Erlaubnisliste: `svg`, `g`, `defs`, `clipPath`, `use`, `path`, `rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`. Die Anwendung lässt beim Einbetten ebenfalls nur diese Elemente und eine feste Liste von Attributen durch.
+  - Szenen-SVGs ohne Szenendatei und Dateien an unerwarteter Stelle im Inhaltsordner
   - Hotspot-Dichte außerhalb der Vorgabe für den Szenentyp (Warnung)
 - F34: Das Prüfskript hat zwei Stufen. Beim Entwickeln ist der Prüfstatus `entwurf` eine Warnung, und die Karte ist im Spiel als Entwurf gekennzeichnet. Beim Veröffentlichen ist `entwurf` ein Fehler, und der Build bricht ab.
-- F35: Das Prüfskript erzeugt das Inhaltsverzeichnis: alle Welten, Szenen und Karten, je Karte ID, Themengebiet und Beziehungen. Der Entwicklungsserver erzeugt es bei jeder Inhaltsänderung neu.
+- F35: Das Prüfskript erzeugt das Inhaltsverzeichnis: alle Welten, Szenen mit ihren Hotspots (ID, Aktion, Ziel), Karten, Themengebiete und Beziehungstypen; je Karte ID, Themengebiet, Titel je Textfassung und Beziehungen. Es enthält keine weiteren Texte. Der Entwicklungsserver erzeugt es bei jeder Inhaltsänderung neu.
 
 ## 5 Qualitätsanforderungen
 
@@ -350,7 +354,7 @@ Keine davon blockiert M1.
 
 ## 10 Abnahme
 
-- [ ] Alle Anforderungen F1 bis F35 sind an der Fabrik-Welt vorführbar
+- [ ] Alle Anforderungen F1 bis F37 sind an der Fabrik-Welt vorführbar
 - [ ] Die Karte `motorleitung` wird in der Halle gefunden und ist danach in der Roboterzelle abgehakt
 - [ ] Das Robotergelenk gibt beim ersten Betreten seine Eintrittskarte; danach ist sie über den Kartenknopf in der Szene und im Hinweis des Zoom-Hotspots zu öffnen
 - [ ] Eine vierte Szene mit zwei Karten kommt nur über Dateien in `content/` dazu

@@ -40,6 +40,10 @@ _Avoid_: Tooltip, Hover-Text, Popup (nur umgangssprachlich)
 Das Symbol in der oberen rechten Ecke eines Hotspots, das Aktion und Zustand zeigt: verdeckte Karte, Haken, Lupe oder Info.
 _Avoid_: Marker, Badge, Icon
 
+**Haken**:
+Das Abzeichen einer gefundenen Karte: ein grüner Kreis mit weißem Haken.
+_Avoid_: Fundmarker, Marker, Häkchen
+
 **Sammelobjekt**:
 Ein Ding in einer Szene, das man findet und sammelt, das aber keine Karte ist, zum Beispiel der Ammonit. Späteres Feature.
 _Avoid_: Item, Easter Egg (das ist eine versteckte Überraschung, nicht zwingend sammelbar)

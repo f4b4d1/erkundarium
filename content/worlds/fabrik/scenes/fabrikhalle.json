@@ -27,7 +27,7 @@
     { "id": "infotafel", "action": "info",
       "label": { "de": "Kennzahlen-Tafel" },
       "hint": { "de": "Zeigt der Schicht auf einen Blick, wie die Anlage läuft." } },
-    { "id": "not-halt", "action": "card", "target": "not-halt-und-zaun",
+    { "id": "not-halt", "action": "info",
       "label": { "de": "Not-Halt-Taster" },
       "hint": { "de": "Hängt griffbereit an der Wand neben dem Roboter." } },
     { "id": "verbandkasten", "action": "info",

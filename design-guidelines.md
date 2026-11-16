@@ -12,7 +12,7 @@ Bildaufbau und Motive einer neuen Szene folgen dem Thema, nicht der Referenz.
 ## 1 Harte Regeln
 
 1. Format: eine SVG-Datei, `viewBox="0 0 1600 900"`, kein `width`/`height`.
-2. Verboten in Szenen: `<script>`, `<style>`, `<text>`, `<title>` in Gruppen, `<image>`, Filter, Verläufe, externe Verweise.
+2. Verboten in Szenen: `<script>`, `<style>`, `<text>`, `<title>`, `<image>`, Filter, Verläufe, externe Verweise.
    (Die Referenzdatei enthält `<style>` und Labels nur zur Hover-Demo. Im Spiel zeichnet die Anwendung Hinweise und Haken.)
 3. Jedes benennbare Ding ist ein Hotspot: `<g id="…" data-hotspot="…">`. Namen stehen nie in der SVG, auch nicht als `aria-label`.
 4. Nichts endet in der Luft: Jede Verbindung (Kabel, Rohr, Ast, Wurzel, Ader, Weg, Bach) beginnt und endet sichtbar an etwas oder hinter etwas.
@@ -26,8 +26,8 @@ Bildaufbau und Motive einer neuen Szene folgen dem Thema, nicht der Referenz.
 - `hint` erklärt das Ding und enthält nie eine Bedienanweisung („Klicken, um …“). Was ein Klick bewirkt, zeigt die Anwendung über ein Symbol.
 - Hotspots dürfen verschachtelt sein. Das innere Element liegt im Quelltext nach den Flächen des äußeren.
 - Mehrere gleiche Dinge: Suffix mit Zahl (`fenster-1`, `fenster-2`).
-- Kleinste Klickfläche 24 × 24. Dünne Linien erfüllen das über ihre Kontur-Unterlage.
-- Die obere rechte Ecke jedes Hotspots bleibt für sein Abzeichen frei, das die Anwendung zeichnet: Fundmarker, verdeckte Karte, Lupe oder Info (Kreis r 9, Bereichsmarker r 13,5). Das gilt für alle Hotspots, auch ohne Karte.
+- Kleinste Klickfläche 24 × 24. Für dünne Linien (Kabel, Rohre, Schläuche) gilt das nicht für die Zeichnung: Die Anwendung legt eine unsichtbare, breitere Klickfläche über die Linie. Parallele Linien halten deshalb 8–10 Abstand (Abschnitt 5).
+- Die obere rechte Ecke jedes Hotspots bleibt für sein Abzeichen frei, das die Anwendung zeichnet: Haken, verdeckte Karte, Lupe oder Info (Kreis r 9, Lupe mit Haken r 13,5). Das gilt für alle Hotspots, auch ohne Karte.
 - Reine Dekoration ohne Lernwert (Fugen, Kiesel, Schatten, Grashalme) bekommt keinen Hotspot.
 
 Vorlage:
@@ -68,7 +68,7 @@ Das Farbsystem hat drei Stufen. Stufe 1 und 2 gelten überall, Stufe 3 gehört d
 | --- | --- |
 | Kontur | `#26262E` |
 | Weiß (nie `#FFFFFF` als Fläche in der Szene) | `#F7F9FB` |
-| Fundmarker (für nichts anderes mit weißem Haken) | `#3BB273` |
+| Haken einer gefundenen Karte (für nichts anderes mit weißem Haken) | `#3BB273` |
 | Signalfarben | Rot `#E4572E`, Gelb `#F6C945`, Grün `#3BB273`, Blau `#1F78C1`, Violett `#8E6FD8`, Orange `#FF7A1A`, Türkis `#19A7B8` |
 
 Rot heißt in jeder Welt Gefahr, Hitze oder Halt; Gelb heißt Warnung oder Licht. Die übrigen Signalfarben bekommen ihre Bedeutung im Stilprofil.
