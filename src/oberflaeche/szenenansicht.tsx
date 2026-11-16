@@ -7,6 +7,8 @@ import { baueSzene, type Darstellung, type Szene, type SzenenHotspot, type Szene
 
 interface Eigenschaften {
   svg: string;
+  /** Der Name der Szene für Screenreader. */
+  titel: string;
   hotspots: readonly SzenenHotspot[];
   darstellung: Darstellung;
   onEreignis: (ereignis: Szenenereignis) => void;
@@ -17,7 +19,7 @@ interface Eigenschaften {
   szeneRef: RefObject<Szene | undefined>;
 }
 
-export function Szenenansicht({ svg, hotspots, darstellung, onEreignis, onLageaenderung, onFehler, szeneRef }: Eigenschaften) {
+export function Szenenansicht({ svg, titel, hotspots, darstellung, onEreignis, onLageaenderung, onFehler, szeneRef }: Eigenschaften) {
   const behaelter = useRef<HTMLDivElement>(null);
   // Die Szene ruft immer die aktuellen Rückrufe, ohne bei jedem Zeichnen neu gebaut zu werden.
   const rueckrufe = useRef({ onEreignis, onLageaenderung, onFehler });
@@ -27,7 +29,7 @@ export function Szenenansicht({ svg, hotspots, darstellung, onEreignis, onLageae
     if (behaelter.current === null) return;
     let szene: Szene;
     try {
-      szene = baueSzene(behaelter.current, svg, hotspots, (e) => rueckrufe.current.onEreignis(e));
+      szene = baueSzene(behaelter.current, svg, titel, hotspots, (e) => rueckrufe.current.onEreignis(e));
     } catch (fehler) {
       rueckrufe.current.onFehler(fehler);
       return;
@@ -37,7 +39,7 @@ export function Szenenansicht({ svg, hotspots, darstellung, onEreignis, onLageae
       szene.abbauen();
       szeneRef.current = undefined;
     };
-  }, [svg, hotspots, szeneRef]);
+  }, [svg, titel, hotspots, szeneRef]);
 
   useLayoutEffect(() => {
     szeneRef.current?.zeige(darstellung);

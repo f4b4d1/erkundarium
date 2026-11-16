@@ -48,11 +48,12 @@ const SVG_NS = SVG_NAMENSRAUM;
 
 /**
  * Bettet die SVG in `behaelter` ein. Elemente mit `data-hotspot` ohne Eintrag in `hotspots` bleiben
- * gewöhnliche Grafik. Wirft, wenn `svgText` kein SVG ist.
+ * gewöhnliche Grafik. `titel` benennt die Szene für Screenreader. Wirft, wenn `svgText` kein SVG ist.
  */
 export function baueSzene(
   behaelter: HTMLElement,
   svgText: string,
+  titel: string,
   hotspots: readonly SzenenHotspot[],
   melde: (ereignis: Szenenereignis) => void,
 ): Szene {
@@ -71,6 +72,9 @@ export function baueSzene(
   }
   // Chromium nimmt die SVG-Wurzel sonst als eigenen Halt in die Tab-Reihenfolge auf.
   svg.setAttribute('tabindex', '-1');
+  // `group`, nicht `img`: Ein Bild würde die Hotspots darin für Screenreader verdecken.
+  svg.setAttribute('role', 'group');
+  svg.setAttribute('aria-label', titel);
   const hakenebene = document.createElementNS(SVG_NS, 'g');
   hakenebene.setAttribute('class', 'haken-ebene');
   hakenebene.setAttribute('aria-hidden', 'true');
@@ -168,6 +172,11 @@ export function baueSzene(
       svg.remove();
     },
   };
+}
+
+/** Wirft, wenn `svgText` nicht darstellbar ist; dieselbe Prüfung wie in `baueSzene`. */
+export function pruefeSvg(svgText: string): void {
+  alsSvg(svgText);
 }
 
 /**

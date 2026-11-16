@@ -11,7 +11,7 @@ import { aktiveEinstellungen, einlesen, gefundeneKarten, type Spielstand } from 
 import type { Hotspot } from '../logik/szenendatei.ts';
 import { STANDARDFASSUNG, text } from '../logik/textfassung.ts';
 import { ladeInhaltsverzeichnis, ladeSzene, type GeladeneSzene } from '../inhalte/laden.ts';
-import type { Rechteck, Szene, Szenenereignis } from '../szene/szene.ts';
+import { pruefeSvg, type Rechteck, type Szene, type Szenenereignis } from '../szene/szene.ts';
 import { Hinweis } from './hinweis.tsx';
 import { Kartenansicht } from './kartenansicht.tsx';
 import { Pfadanzeige, type Ebene } from './pfadanzeige.tsx';
@@ -119,7 +119,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const { themengebiete, wissensgebiete, verzeichnis, pfad } = ladezustand;
   const ebenen: Ebene[] = pfad.map((id) => ({
     id,
-    titel: text(verzeichnis.scenes.find((s) => s.id === id)?.title ?? {}, FASSUNG),
+    titel: text(verzeichnis.scenes.find((s) => s.id === id)?.title ?? {}, FASSUNG) || id,
   }));
   const finde = (id: string): Hotspot | undefined => datei.hotspots.find((h) => h.id === id);
 
@@ -157,6 +157,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       zoom.current = animation;
       // Scheitert das Laden, springt die Szene beim Abbrechen der Animation zurück.
       const geladen = await laden;
+      // Nicht darstellbar: Die aktuelle Szene bleibt, statt dass der Aufbau erst nach dem Wechsel scheitert.
+      pruefeSvg(geladen.svg);
       await animation?.finished;
       fokusAufSzene.current = true;
       setOffen(undefined);
@@ -195,16 +197,19 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   function beimEreignis(ereignis: Szenenereignis): void {
     switch (ereignis.art) {
       case 'betreten':
+        if (wechselt.current) break;
         setOffen({ hotspot: ereignis.hotspot, lage: ereignis.lage });
         break;
       case 'verlassen':
         setOffen((bisher) => (bisher?.hotspot === ereignis.hotspot ? undefined : bisher));
         break;
       case 'daneben':
+        setWechselFehler(false);
         setOffen(undefined);
         break;
       case 'ausgeloest': {
         if (wechselt.current) break;
+        setWechselFehler(false);
         setOffen({ hotspot: ereignis.hotspot, lage: ereignis.lage });
         const hotspot = finde(ereignis.hotspot);
         if (hotspot !== undefined) loeseAus(hotspot);
@@ -248,6 +253,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       >
         <Szenenansicht
           svg={svg}
+          titel={text(datei.title, FASSUNG)}
           hotspots={hotspotsDerSzene}
           darstellung={darstellung}
           onEreignis={beimEreignis}
@@ -323,10 +329,14 @@ function starteZoom(buehne: HTMLElement | null, lage: Rechteck): Animation | und
   const szene = buehne?.querySelector('.szene');
   if (!(szene instanceof HTMLElement) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
   const flaeche = szene.getBoundingClientRect();
-  const massstab = Math.min(
-    ZOOM_MAXIMUM,
-    (flaeche.width * ZOOM_FUELLUNG) / Math.max(lage.breite, 1),
-    (flaeche.height * ZOOM_FUELLUNG) / Math.max(lage.hoehe, 1),
+  // Der Zoom verkleinert nie, auch nicht bei einem Hotspot, der größer ist als die Szene.
+  const massstab = Math.max(
+    1,
+    Math.min(
+      ZOOM_MAXIMUM,
+      (flaeche.width * ZOOM_FUELLUNG) / Math.max(lage.breite, 1),
+      (flaeche.height * ZOOM_FUELLUNG) / Math.max(lage.hoehe, 1),
+    ),
   );
   // Der Mittelpunkt des Hotspots wandert in die Mitte der Szene.
   const dx = lage.links + lage.breite / 2 - (flaeche.left + flaeche.width / 2);
