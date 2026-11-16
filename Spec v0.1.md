@@ -161,7 +161,7 @@ content/
   relations.json
   limits.json
   schema/<name>.schema.json
-  topics/<id>.svg
+  topics/<name>.svg
   cards/<id>.json
   cards/<name>.svg
   worlds/<welt>/world.json
@@ -233,7 +233,7 @@ Welche Szenen zur Welt gehören, ergibt sich aus dem Ordner; welche Karten, aus 
 ```
 
 - `image`, `link`, `relations` und `linkLabel` sind freiwillig. `linkLabel` ohne `link` meldet das Prüfskript als Fehler.
-- `image` nennt eine SVG-Datei in `cards/`, ohne Pfad. Der Name ist frei; das Prüfskript prüft, dass die Datei existiert.
+- `image` nennt eine SVG-Datei in `cards/`, ohne Pfad. Der Name besteht wie eine ID aus Kleinbuchstaben, Ziffern und Bindestrichen und endet auf `.svg`; er muss nicht der Karten-ID gleichen. Das Prüfskript prüft, dass die Datei existiert.
 - `sources` sind beliebige Texte (auch Bücher), mindestens einer. `link` beginnt mit `http://` oder `https://`.
 - `status` ist `entwurf` oder `geprueft`. `geprueft` setzt nur ein Mensch, der den Text gegen die Quelle gelesen hat.
 - Jede Textfassung einer Karte ist vollständig: `status`, `title`, `front` und `back` sind Pflicht. `front` hat mindestens einen Baustein, `back` darf leer sein. Die Rückfallregel auf `de` greift, wenn einer Karte die ganze Fassung fehlt.
@@ -301,7 +301,7 @@ Schalter je Typ: `symmetric` (gilt in beide Richtungen) und `acyclic` (darf kein
 ]
 ```
 
-`domain` nennt ein Wissensgebiet aus `domains.json`. `icon` nennt eine SVG-Datei in `content/topics/`, ohne Pfad.
+`domain` nennt ein Wissensgebiet aus `domains.json`. `icon` nennt eine SVG-Datei in `content/topics/`, ohne Pfad; für den Namen gilt dieselbe Regel wie für `image` einer Karte.
 
 **Spielstand**
 

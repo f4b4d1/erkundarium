@@ -9,6 +9,6 @@ Grund: Kindgerechte Nutzung und Übersetzung sind Zukunftsziele. Dieselbe Karte 
 - Die Bausteine einer Kartenseite gehören zur Textfassung, nicht zur Struktur: Eine einfache Fassung darf weniger oder andere Bausteine haben.
 - Der Prüfstatus gilt je Textfassung; Quellen gelten für die Karte.
 - Der Spielstand kennt keine Textfassung. Eine gefundene Karte ist in jeder Fassung gefunden.
-- Fehlt ein Text in der gewählten Fassung, wird `de` angezeigt.
+- Fehlt die gewählte Fassung, wird `de` angezeigt. Bei einer Karte gilt das für die ganze Karte: Jede ihrer Fassungen ist vollständig, einzelne Texte daraus fallen nicht zurück. Bei den einzelnen Texten einer Szene oder eines Themengebiets gilt es je Text.
 - Die erste Version enthält nur `de` und keine Auswahl. Die Auswahl (Sprache, Kinder-Schalter) kommt mit dem Startbildschirm.
 - Eigene Karten oder Welten nur für Kinder bleiben daneben möglich; sie sind gewöhnliche Karten und Welten.
