@@ -16,6 +16,8 @@ export interface Hinweisinhalt {
   gefunden?: boolean;
   /** Nur bei `scene` mit bekannter Zielszene: Stand der Zielszene samt tieferen Szenen (F11). */
   stand?: Stand;
+  /** Nur bei `scene`: die Eintrittskarte der Zielszene, sobald sie gefunden ist (F32). */
+  eintrittskarte?: string;
 }
 
 export function hinweisinhalt(
@@ -26,6 +28,7 @@ export function hinweisinhalt(
 ): Hinweisinhalt {
   const name = text(hotspot.label, fassung);
   const stand = standDerZielszene(hotspot, verzeichnis, gefunden);
+  const eintrittskarte = gefundeneEintrittskarte(hotspot, verzeichnis, gefunden);
   const kartenstand = hotspot.action === 'card' ? { gefunden: karteGefunden(hotspot, gefunden) } : undefined;
   const zeigtErklaerung = kartenstand === undefined || kartenstand.gefunden;
   return {
@@ -34,6 +37,7 @@ export function hinweisinhalt(
     aktion: hotspot.action,
     ...kartenstand,
     ...(stand === undefined ? {} : { stand }),
+    ...(eintrittskarte === undefined ? {} : { eintrittskarte }),
   };
 }
 
@@ -46,6 +50,17 @@ function standDerZielszene(
   const ziel = hotspot.target;
   if (hotspot.action !== 'scene' || ziel === undefined || !verzeichnis.scenes.some((s) => s.id === ziel)) return undefined;
   return standDerSzene(verzeichnis, ziel, gefunden);
+}
+
+/** Die Eintrittskarte der Zielszene eines Zoom-Hotspots, nur wenn sie gefunden ist. */
+function gefundeneEintrittskarte(
+  hotspot: Hotspot,
+  verzeichnis: Inhaltsverzeichnis,
+  gefunden: ReadonlySet<string>,
+): string | undefined {
+  if (hotspot.action !== 'scene') return undefined;
+  const karte = verzeichnis.scenes.find((s) => s.id === hotspot.target)?.card;
+  return karte !== undefined && gefunden.has(karte) ? karte : undefined;
 }
 
 /** Die IDs der Hotspots, deren Karte gefunden ist; keine, wenn die Haken ausgeblendet sind. */

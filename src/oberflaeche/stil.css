@@ -75,7 +75,18 @@ body {
   border: 2px solid var(--kontur);
   border-radius: 8px;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.25);
-  pointer-events: none;
+}
+
+.hinweis-karte {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .hinweis-kopf {

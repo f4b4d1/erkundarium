@@ -47,6 +47,10 @@ export interface Browser {
   klickeHotspot(id: string): Promise<void>;
   /** Fährt mit der Maus über das Element, ohne zu klicken. */
   zeigeAuf(selektor: string): Promise<void>;
+  /** Bewegt die Maus an die Stelle (CSS-Pixel im Fenster), ohne zu klicken. */
+  mausNach(x: number, y: number): Promise<void>;
+  /** Mausklick an der Stelle (CSS-Pixel im Fenster), auch auf Verdecktes. */
+  klickeBei(x: number, y: number): Promise<void>;
   /** Taste drücken: Enter, Escape, Tab, Leertaste, Pfeiltasten; mit `umschalt` etwa Shift+Tab. */
   taste(name: 'Enter' | 'Escape' | 'Tab' | ' ' | 'ArrowLeft' | 'ArrowRight' | 'ArrowUp' | 'ArrowDown', umschalt?: boolean): Promise<void>;
   /** Speichert ein Bildschirmfoto im Ausgabeordner und gibt den absoluten Pfad zurück. */
@@ -226,6 +230,14 @@ async function verbinde(ausgabeordner: string): Promise<{ browser: Browser; schl
     async zeigeAuf(selektor) {
       const [x, y] = await trefferpunkt(selektor);
       await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+    },
+    async mausNach(x, y) {
+      await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+    },
+    async klickeBei(x, y) {
+      await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+      await cdp('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 });
+      await cdp('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
     },
     async taste(name, umschalt = false) {
       const t = tasten[name];

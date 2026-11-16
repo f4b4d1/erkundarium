@@ -53,6 +53,27 @@ describe('hinweisinhalt', () => {
     expect(hinweisinhalt(zoom, gefunden(), 'de', verzeichnis)).toEqual({ name: 'Ding 4', erklaerung: 'Erklärung 4', aktion: 'scene', stand: { gefunden: 0, vorhanden: 4 } });
   });
 
+  it('nennt bei einem Zoom-Hotspot die Eintrittskarte der Zielszene, sobald sie gefunden ist', () => {
+    expect(hinweisinhalt(zoom, gefunden('karte-a'), 'de', verzeichnis)).toEqual({
+      name: 'Ding 4',
+      erklaerung: 'Erklärung 4',
+      aktion: 'scene',
+      stand: { gefunden: 1, vorhanden: 4 },
+      eintrittskarte: 'karte-a',
+    });
+  });
+
+  it('nennt keine Eintrittskarte, wenn sie fehlt oder noch nicht gefunden ist', () => {
+    expect(hinweisinhalt(zoom, gefunden('karte-b'), 'de', verzeichnis)).not.toHaveProperty('eintrittskarte');
+    expect(hinweisinhalt(zoomLeer, gefunden('karte-a'), 'de', verzeichnis)).not.toHaveProperty('eintrittskarte');
+    expect(hinweisinhalt(zoomUnbekannt, gefunden('karte-a'), 'de', verzeichnis)).not.toHaveProperty('eintrittskarte');
+  });
+
+  it('nennt bei card und info nie eine Eintrittskarte', () => {
+    expect(hinweisinhalt(karte, gefunden('karte-a'), 'de', verzeichnis)).not.toHaveProperty('eintrittskarte');
+    expect(hinweisinhalt(info, gefunden('karte-a'), 'de', verzeichnis)).not.toHaveProperty('eintrittskarte');
+  });
+
   it('lässt die Erklärung weg, wenn ein Zoom-Hotspot keine hat', () => {
     expect(hinweisinhalt(zoomOhneErklaerung, gefunden(), 'de', verzeichnis)).toEqual({ name: 'Ding 5', aktion: 'scene', stand: { gefunden: 0, vorhanden: 4 } });
   });

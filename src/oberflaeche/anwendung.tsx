@@ -11,10 +11,11 @@ import { aktiveEinstellungen, einlesen, gefundeneKarten, type Spielstand } from 
 import type { Hotspot } from '../logik/szenendatei.ts';
 import { STANDARDFASSUNG, text } from '../logik/textfassung.ts';
 import { ladeInhaltsverzeichnis, ladeSzene, type GeladeneSzene } from '../inhalte/laden.ts';
-import { pruefeSvg, type Rechteck, type Szene, type Szenenereignis } from '../szene/szene.ts';
+import { pruefeSvg, type Punkt, type Rechteck, type Szene, type Szenenereignis } from '../szene/szene.ts';
 import { Hinweis } from './hinweis.tsx';
 import { Kartenansicht } from './kartenansicht.tsx';
 import { Pfadanzeige, type Ebene } from './pfadanzeige.tsx';
+import { sollNeuAnkern } from './platzierung.ts';
 import { Szenenansicht } from './szenenansicht.tsx';
 import { TEXTE } from './texte.ts';
 
@@ -37,7 +38,12 @@ type Ladezustand =
 interface OffenerHinweis {
   hotspot: string;
   lage: Rechteck;
+  /** Wo Maus oder Finger den Hotspot getroffen haben; fehlt bei Tastaturfokus (Lage an der Box). */
+  anker?: Punkt;
 }
+
+/** So lange bleibt der Hinweis offen, wenn der Zeiger Hotspot und Hinweis verlassen hat. */
+const SCHLIESS_VERZOEGERUNG_MS = 150;
 
 /** Wohin der Fokus zurückkehrt, wenn die Karte zugeht: dorthin, wo sie ausgelöst wurde. */
 type Fokusziel =
@@ -71,6 +77,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const wechselt = useRef(false);
   const zoom = useRef<Animation | undefined>(undefined);
   const fokusAufSzene = useRef(false);
+  const schliesstimer = useRef<number | undefined>(undefined);
   const [wechselFehler, setWechselFehler] = useState(false);
 
   useEffect(() => {
@@ -165,6 +172,9 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   function zeigeKarte(karte: string, fokus: Fokusziel): void {
     const { spielstand: neu, aufdecken } = oeffneKarte(spielstand, karte, new Date().toISOString());
     if (aufdecken) speichere(neu);
+    // Mit der Karte ist der Hinweis zu und bleibt es auch danach.
+    stoppeSchliesstimer();
+    setOffen(undefined);
     setOffeneKarte((bisher) => ({ karte, aufdecken, fokus, nummer: (bisher?.nummer ?? 0) + 1 }));
   }
 
@@ -237,23 +247,59 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     setOffeneKarte(undefined);
   }
 
+  function stoppeSchliesstimer(): void {
+    window.clearTimeout(schliesstimer.current);
+    schliesstimer.current = undefined;
+  }
+
+  /** Schließt den Hinweis des Hotspots nach kurzer Verzögerung, falls der Zeiger nicht zurückkehrt. */
+  function planeSchliessen(hotspot: string): void {
+    stoppeSchliesstimer();
+    schliesstimer.current = window.setTimeout(() => {
+      schliesstimer.current = undefined;
+      setOffen((bisher) => (bisher?.hotspot === hotspot ? undefined : bisher));
+    }, SCHLIESS_VERZOEGERUNG_MS);
+  }
+
+  /** Öffnet den Hinweis; ein schon offener am Zeigeranker desselben Hotspots bleibt, wo er ist. */
+  function oeffneHinweis(hotspot: string, lage: Rechteck, zeiger: Punkt | undefined): void {
+    stoppeSchliesstimer();
+    setOffen((bisher) =>
+      bisher?.hotspot === hotspot && bisher.anker !== undefined && zeiger !== undefined
+        ? bisher
+        : { hotspot, lage, ...(zeiger === undefined ? {} : { anker: zeiger }) },
+    );
+  }
+
   function beimEreignis(ereignis: Szenenereignis): void {
     switch (ereignis.art) {
       case 'betreten':
         if (wechselt.current) break;
-        setOffen({ hotspot: ereignis.hotspot, lage: ereignis.lage });
+        oeffneHinweis(ereignis.hotspot, ereignis.lage, ereignis.zeiger);
         break;
+      case 'bewegt': {
+        // Der Hinweis läuft nicht mit; erst weit weg vom Anker setzt er sich an den Zeiger.
+        const { hotspot, zeiger } = ereignis;
+        setOffen((bisher) =>
+          bisher?.hotspot === hotspot && bisher.anker !== undefined && sollNeuAnkern(bisher.anker, zeiger)
+            ? { ...bisher, anker: zeiger }
+            : bisher,
+        );
+        break;
+      }
       case 'verlassen':
-        setOffen((bisher) => (bisher?.hotspot === ereignis.hotspot ? undefined : bisher));
+        // Die Maus kann in den Hinweis fahren; erst nach kurzer Verzögerung schließt er.
+        planeSchliessen(ereignis.hotspot);
         break;
       case 'daneben':
+        stoppeSchliesstimer();
         setWechselFehler(false);
         setOffen(undefined);
         break;
       case 'ausgeloest': {
         if (wechselt.current) break;
         setWechselFehler(false);
-        setOffen({ hotspot: ereignis.hotspot, lage: ereignis.lage });
+        oeffneHinweis(ereignis.hotspot, ereignis.lage, ereignis.zeiger);
         const hotspot = finde(ereignis.hotspot);
         if (hotspot !== undefined) loeseAus(hotspot);
         break;
@@ -261,9 +307,13 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     }
   }
 
-  /** Der offene Hinweis folgt dem Hotspot, wenn sich Größe oder Lage der Szene ändern. */
+  /**
+   * Ändern sich Größe oder Lage der Szene, folgt ein Hinweis an der Begrenzungsbox dem Hotspot. Ein
+   * Hinweis am Zeigeranker schließt stattdessen: Der Anker liegt dann nicht mehr auf dem Hotspot.
+   */
   function beiLageaenderung(): void {
     setOffen((bisher) => {
+      if (bisher?.anker !== undefined) return undefined;
       const lage = bisher && szeneRef.current?.lageVon(bisher.hotspot);
       return bisher && lage ? { ...bisher, lage } : bisher;
     });
@@ -315,7 +365,16 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
         />
       </main>
       {offen && offenerHotspot && !offeneKarte && (
-        <Hinweis inhalt={hinweisinhalt(offenerHotspot, gefunden, FASSUNG, verzeichnis)} ziel={offen.lage} />
+        <Hinweis
+          inhalt={hinweisinhalt(offenerHotspot, gefunden, FASSUNG, verzeichnis)}
+          ziel={offen.lage}
+          anker={offen.anker}
+          onMausEin={stoppeSchliesstimer}
+          onMausAus={() => planeSchliessen(offen.hotspot)}
+          onOeffneKarte={(karte) => {
+            if (!wechselt.current) zeigeKarte(karte, { art: 'hotspot', id: offen.hotspot });
+          }}
+        />
       )}
       {offeneKarte && (
         <Kartenansicht

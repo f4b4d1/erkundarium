@@ -15,6 +15,12 @@ export interface Rechteck {
   hoehe: number;
 }
 
+/** Punkt in Bildschirmpixeln, bezogen auf das Fenster. */
+export interface Punkt {
+  x: number;
+  y: number;
+}
+
 export interface SzenenHotspot {
   /** Wert von `data-hotspot` in der SVG. */
   id: string;
@@ -29,7 +35,10 @@ export interface Darstellung {
 }
 
 export type Szenenereignis =
-  | { art: 'betreten' | 'ausgeloest'; hotspot: string; lage: Rechteck }
+  /** `zeiger`: wo Maus oder Finger den Hotspot getroffen haben; fehlt bei Tastatur und Screenreader. */
+  | { art: 'betreten' | 'ausgeloest'; hotspot: string; lage: Rechteck; zeiger?: Punkt }
+  /** Die Maus bewegt sich innerhalb des Hotspots, den sie zuletzt betreten hat. */
+  | { art: 'bewegt'; hotspot: string; zeiger: Punkt }
   | { art: 'verlassen'; hotspot: string }
   | { art: 'daneben' };
 
@@ -102,25 +111,29 @@ export function baueSzene(
     return r === undefined ? undefined : { links: r.left, oben: r.top, breite: r.width, hoehe: r.height };
   };
 
-  const meldeMitLage = (art: 'betreten' | 'ausgeloest', hotspot: string) => {
+  const meldeMitLage = (art: 'betreten' | 'ausgeloest', hotspot: string, zeiger?: Punkt) => {
     const lage = lageVon(hotspot);
-    if (lage !== undefined) melde({ art, hotspot, lage });
+    if (lage !== undefined) melde({ art, hotspot, lage, ...(zeiger === undefined ? {} : { zeiger }) });
   };
 
-  const zeigeAuf = (hotspot: string | undefined) => {
+  const zeigeAuf = (hotspot: string | undefined, zeiger: Punkt) => {
     if (hotspot === unterDerMaus) return;
     if (unterDerMaus !== undefined) melde({ art: 'verlassen', hotspot: unterDerMaus });
     unterDerMaus = hotspot;
-    if (hotspot !== undefined) meldeMitLage('betreten', hotspot);
+    if (hotspot !== undefined) meldeMitLage('betreten', hotspot, zeiger);
     // Verlässt die Maus einen Hotspot, gilt wieder der Hinweis am Tastaturfokus (F21).
     else if (imFokus !== undefined) meldeMitLage('betreten', imFokus);
   };
 
   svg.addEventListener('pointermove', (e) => {
-    if (e.pointerType === 'mouse') zeigeAuf(getroffen(e.target));
+    if (e.pointerType !== 'mouse') return;
+    const zeiger = { x: e.clientX, y: e.clientY };
+    const hotspot = getroffen(e.target);
+    if (hotspot !== undefined && hotspot === unterDerMaus) melde({ art: 'bewegt', hotspot, zeiger });
+    else zeigeAuf(hotspot, zeiger);
   });
   svg.addEventListener('pointerleave', (e) => {
-    if (e.pointerType === 'mouse') zeigeAuf(undefined);
+    if (e.pointerType === 'mouse') zeigeAuf(undefined, { x: e.clientX, y: e.clientY });
   });
   svg.addEventListener('pointerdown', (e) => {
     letztesGeraet = geraetDesZeigers(e.pointerType);
@@ -131,7 +144,7 @@ export function baueSzene(
     const folge = deuteAntippen(geraet, getroffen(e.target), { hervorgehoben, durchTippenGeoeffnet });
     durchTippenGeoeffnet = geraet === 'touch' && folge.art !== 'daneben' ? folge.hotspot : undefined;
     if (folge.art === 'daneben') melde({ art: 'daneben' });
-    else meldeMitLage(folge.art, folge.hotspot);
+    else meldeMitLage(folge.art, folge.hotspot, e.detail === 0 ? undefined : { x: e.clientX, y: e.clientY });
   });
   svg.addEventListener('keydown', (e) => {
     const hotspot = idVon.get(e.target as Element);

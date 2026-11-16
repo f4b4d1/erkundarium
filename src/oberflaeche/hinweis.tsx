@@ -1,18 +1,31 @@
 // Der Hinweis am Hotspot (F21 bis F23), von der Anwendung selbst gezeichnet. Inhaltstexte stehen
-// nur als Text im Markup, nie als HTML.
+// nur als Text im Markup, nie als HTML. Er ist bedienbar (F32): Er fängt Klicks ab und trägt bei
+// einem Zoom-Hotspot mit gefundener Eintrittskarte einen Kartenknopf.
 
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import type { Hinweisinhalt } from '../logik/hinweis.ts';
 import { KONTUR, WEISS } from '../szene/haken.ts';
-import type { Rechteck } from '../szene/szene.ts';
-import { platziereHinweis } from './platzierung.ts';
+import type { Punkt, Rechteck } from '../szene/szene.ts';
+import { platziereAmAnker, platziereHinweis } from './platzierung.ts';
 import { SymbolKarte } from './symbole.tsx';
 import { TEXTE } from './texte.ts';
 
 const ABSTAND = 10;
 const RAND = 8;
 
-export function Hinweis({ inhalt, ziel }: { inhalt: Hinweisinhalt; ziel: Rechteck }) {
+interface Eigenschaften {
+  inhalt: Hinweisinhalt;
+  /** Begrenzungsbox des Hotspots; Lage bei Tastaturfokus. */
+  ziel: Rechteck;
+  /** Wo Maus oder Finger den Hotspot getroffen haben; der Hinweis sitzt dann daran statt an `ziel`. */
+  anker?: Punkt | undefined;
+  /** Die Maus ist in den Hinweis gefahren oder hat ihn verlassen. */
+  onMausEin: () => void;
+  onMausAus: () => void;
+  onOeffneKarte: (karte: string) => void;
+}
+
+export function Hinweis({ inhalt, ziel, anker, onMausEin, onMausAus, onOeffneKarte }: Eigenschaften) {
   const feld = useRef<HTMLDivElement>(null);
 
   // Erst messen, dann setzen; beides vor dem Zeichnen, damit der Hinweis nicht springt.
@@ -30,7 +43,8 @@ export function Hinweis({ inhalt, ziel }: { inhalt: Hinweisinhalt; ziel: Rechtec
       breite: fenster.clientWidth - 2 * RAND,
       hoehe: fenster.clientHeight - 2 * RAND,
     };
-    const lage = platziereHinweis(ziel, { breite: width, hoehe: height }, bereich, ABSTAND);
+    const groesse = { breite: width, hoehe: height };
+    const lage = anker === undefined ? platziereHinweis(ziel, groesse, bereich, ABSTAND) : platziereAmAnker(anker, groesse, bereich);
     element.style.left = `${lage.links}px`;
     element.style.top = `${lage.oben}px`;
     element.style.visibility = 'visible';
@@ -38,13 +52,35 @@ export function Hinweis({ inhalt, ziel }: { inhalt: Hinweisinhalt; ziel: Rechtec
 
   const symbol = aktionssymbol(inhalt);
   return (
-    <div ref={feld} class="hinweis" role="tooltip" style={{ left: '0px', top: '0px', visibility: 'hidden' }}>
+    // `group` mit dem Namen des Hotspots, nicht `tooltip`: Ein Tooltip darf nichts Bedienbares tragen.
+    <div
+      ref={feld}
+      class="hinweis"
+      role="group"
+      aria-label={inhalt.name}
+      style={{ left: '0px', top: '0px', visibility: 'hidden' }}
+      onPointerEnter={(e) => e.pointerType === 'mouse' && onMausEin()}
+      onPointerLeave={(e) => e.pointerType === 'mouse' && onMausAus()}
+    >
       <div class="hinweis-kopf">
         <span class="hinweis-name">{inhalt.name}</span>
         <span class="hinweis-aktion">
           {symbol.bild}
           <span class="hinweis-aktion-text">{symbol.text}</span>
         </span>
+        {inhalt.eintrittskarte !== undefined && (
+          <button
+            type="button"
+            class="hinweis-karte"
+            aria-label={TEXTE.eintrittskarteOeffnen}
+            // Aus der Tab-Reihenfolge, bis die Tastaturbedienung des Hinweises da ist (Konzeptplan 1a):
+            // Sonst käme der Fokus hierher und der Hinweis schlösse sich unter ihm.
+            tabindex={-1}
+            onClick={() => onOeffneKarte(inhalt.eintrittskarte!)}
+          >
+            <SymbolKarte gefunden />
+          </button>
+        )}
       </div>
       {inhalt.erklaerung !== undefined && <p class="hinweis-erklaerung">{inhalt.erklaerung}</p>}
       {inhalt.stand !== undefined && <p class="hinweis-stand">{TEXTE.stand(inhalt.stand)}</p>}

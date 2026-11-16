@@ -2,9 +2,9 @@
 // Der Hinweis bleibt immer im Bereich und verdeckt den Hotspot möglichst nicht. Probiert werden
 // der Reihe nach: über, unter, rechts und links neben dem Hotspot, jeweils mittig und in den
 // Bereich geschoben. Die erste Lage ohne Überdeckung gewinnt; gibt es keine, die mit der
-// kleinsten Überdeckung.
+// kleinsten Überdeckung. Am Zeiger (Maus, Touch) sitzt der Hinweis stattdessen an einem Ankerpunkt.
 
-import type { Rechteck } from '../szene/szene.ts';
+import type { Punkt, Rechteck } from '../szene/szene.ts';
 
 export interface Groesse {
   breite: number;
@@ -43,6 +43,44 @@ export function platziereHinweis(ziel: Rechteck, hinweis: Groesse, bereich: Rech
     }
   }
   return beste;
+}
+
+/** Abstand des Hinweises vom Ankerpunkt, waagrecht wie senkrecht. */
+export const ANKERVERSATZ = 12;
+/** Entfernt sich der Zeiger weiter vom Anker, setzt sich der Anker an den Zeiger. */
+export const NEU_ANKERN_AB = 120;
+
+/**
+ * Lage des Hinweises an einem Ankerpunkt (dem Zeiger): rechts unterhalb. Fehlt dort der Platz, geht er
+ * auf die Gegenseite, links und/oder oben. Passt keine Lage ganz in den Bereich, wird die erste
+ * hineingeschoben, die den Anker nicht verdeckt. Der Hinweis darf den Hotspot verdecken, nie den Anker.
+ */
+export function platziereAmAnker(anker: Punkt, hinweis: Groesse, bereich: Rechteck, versatz = ANKERVERSATZ): Lage {
+  const rechts = anker.x + versatz;
+  const links = anker.x - versatz - hinweis.breite;
+  const unten = anker.y + versatz;
+  const oben = anker.y - versatz - hinweis.hoehe;
+  const kandidaten: Lage[] = [
+    { links: rechts, oben: unten },
+    { links, oben: unten },
+    { links: rechts, oben },
+    { links, oben },
+  ];
+  const passt = (l: Lage) => {
+    const r = inDenBereich(l, hinweis, bereich);
+    return r.links === l.links && r.oben === l.oben;
+  };
+  const ganz = kandidaten.find(passt);
+  if (ganz !== undefined) return ganz;
+  const geschoben = kandidaten.map((l) => inDenBereich(l, hinweis, bereich));
+  const deckt = (l: Lage) =>
+    anker.x >= l.links && anker.x <= l.links + hinweis.breite && anker.y >= l.oben && anker.y <= l.oben + hinweis.hoehe;
+  return geschoben.find((l) => !deckt(l)) ?? geschoben[0]!;
+}
+
+/** Ob sich der Anker an den Zeiger setzen soll, weil dieser sich weit genug entfernt hat. */
+export function sollNeuAnkern(anker: Punkt, zeiger: Punkt, schwelle = NEU_ANKERN_AB): boolean {
+  return Math.hypot(zeiger.x - anker.x, zeiger.y - anker.y) > schwelle;
 }
 
 /** Schiebt die Lage so, dass der Hinweis im Bereich liegt; ist er größer, an dessen linke obere Ecke. */
