@@ -9,6 +9,7 @@
     "build:veroeffentlichen": "vite build --mode veroeffentlichen",
     "pruefen": "node tools/pruefen.ts",
     "pruefen:veroeffentlichen": "node tools/pruefen.ts veroeffentlichen",
+    "browser": "node tools/browser.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/logik/tsconfig.json && tsc --noEmit -p tools/tsconfig.json",
     "test": "vitest run"
   },

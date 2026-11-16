@@ -156,7 +156,7 @@ Als Nächstes Auftrag 2 des Zoom-Schritts (Spec F11, F30 bis F32; Begriffe Eintr
 - F32 und F11: Der Hinweis eines Zoom-Hotspots nennt den Stand („3 von 5 Karten“, Zielszene samt tieferen Szenen) und trägt einen Kartenknopf, sobald die Eintrittskarte der Zielszene gefunden ist.
 - Vorhandene Logik zum Wiederverwenden: `zoomZiele`, `tiefereSzenen` in `src/logik/szenennetz.ts`; `kartenDerSzene`, `standDerSzene`, `istAbgeschlossen` in `src/logik/fortschritt.ts`; `hinweisinhalt` in `src/logik/hinweis.ts`. Neue reine Logik testgetrieben unter `src/logik/`.
 
-Ablauf wie unter „Arbeitsweise“: Auftrag an einen Sonnet-Agenten, selbst nachprüfen (Typprüfung, Tests, Prüfskript, Bildschirmfotos), Review auf zwei Achsen, Befunde in eigenem Commit, dann auf den Nutzer warten. Bildschirmfotos: Edge headless über CDP (`--remote-debugging-port=9333`, Vite auf Port 5199); die Skripte liegen im Scratchpad dieser Session und sind in einer neuen Session nicht mehr verfügbar. Review-Agenten starten `npm test` oft aus der Git-Bash mit kleinem `c:` und können dann nicht testen; im Auftrag ausdrücklich PowerShell mit `C:\` verlangen.
+Ablauf wie unter „Arbeitsweise“. Auftrag 2 bringt neue Logik und Abläufe, bekommt also ein Review.
 
 ### Arbeitsweise
 
@@ -165,8 +165,13 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 - Die Hauptsession orchestriert und schreibt selbst keinen Anwendungscode. Dokumente und kleine Inhaltsänderungen macht sie selbst.
 - Die Hauptsession läuft auf Opus, Stufe medium. Code schreiben Subagenten mit dem Modell Sonnet (seit 2026-11-16 für alle Coding-Aufgaben), nacheinander, je Auftrag ein abgegrenzter Schritt mit Verweis auf Spec, Glossar und ADRs.
 - Der Nutzer arbeitet nah am 5-Stunden-Limit: nichts Großes ohne Rückfrage starten.
-- Ablauf je Schritt nach dem implement-Skill: testgetrieben an den vereinbarten Nahtstellen (Szenennetz, Fundorte, Fortschritt und Abschluss, Spielstand, Prüfskript; dazu jede weitere reine Logik), Typprüfung und Tests regelmäßig, danach Code-Review auf zwei Achsen (Standards und Spec) mit zwei parallelen Agenten, Befunde in einem eigenen Commit beheben.
-- Die Hauptsession prüft jedes Ergebnis selbst nach (Typprüfung, Tests, Prüfskript, Bildschirmfoto ansehen) und übernimmt keinen Agentenbericht ungeprüft. Was nur der Agent geprüft hat, wird dem Nutzer so gesagt.
+- Ablauf je Schritt nach dem implement-Skill: testgetrieben an den vereinbarten Nahtstellen (Szenennetz, Fundorte, Fortschritt und Abschluss, Spielstand, Prüfskript; dazu jede weitere reine Logik), Typprüfung und Tests regelmäßig. Danach Code-Review, Befunde in einem eigenen Commit beheben.
+- Review nach Größe des Schritts (seit 2026-11-16, um Tokens zu sparen): Neue Logik oder neue Abläufe bekommen ein Review durch einen einzigen Agenten, der beide Achsen (Standards und Spec) in einem Bericht prüft. Reine Inhalts- und CSS-Änderungen und kleine Fixes bekommen kein Review, nur die Nachprüfung durch die Hauptsession.
+- Review-Befunde gehen per SendMessage an den Agenten zurück, der den Schritt umgesetzt hat; kein neuer Agent für die Fixes.
+- Jeder Auftrag verlangt einen Bericht von höchstens 15 Zeilen; Einzelheiten nur auf Nachfrage.
+- Befehle in Aufträgen: `npm test` nur aus PowerShell mit großem `C:\` (Git-Bash mit `c:` scheitert, siehe Mängel). Das gilt auch für Review-Agenten.
+- Im Browser prüfen Agenten mit `npm run browser -- <szenario> [ausgabeordner]` (`tools/browser.ts`): Das Tool startet Vite und Edge headless, ruft das Szenario auf und beendet beide wieder. Das Szenario ist eine kleine .ts-Datei im Scratchpad mit Standardfunktion `(b: Browser) => Promise<void>`; Befehle und ein Beispiel stehen im Kopf von `tools/browser.ts`. Kein eigenes CDP-Skript schreiben; fehlt dem Tool etwas, ergänzen.
+- Die Hauptsession prüft jedes Ergebnis selbst nach (Typprüfung, Tests, Prüfskript) und übernimmt keinen Agentenbericht ungeprüft. Sie sieht je Schritt ein Bildschirmfoto an; weitere Zustände misst der Agent über `zustand()` und meldet sie. Was nur der Agent geprüft hat, wird dem Nutzer so gesagt.
 - Nach jedem Schritt auf die Rückmeldung des Nutzers warten.
 - Commits direkt auf `main`, Commit-Nachrichten auf Englisch. Nicht pushen, außer der Nutzer verlangt es. `CLAUDE.md` ist nicht eingecheckt und bleibt es.
 - Änderungen an Design-Guidelines, Stilprofil und Mindmap nur nach Vorschlag und Okay des Nutzers.
@@ -221,7 +226,7 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 - Die Migration zwischen Spielstand-Versionen ist ungetestet, weil es nur Version 1 gibt.
 - Nie geprüft: Firefox, echte Touch-Geräte, Screenreader, Handy im Hochformat, eine Karte mit eigenem Bild, eine zweite Textfassung. Alle Prüfungen am laufenden Spiel liefen in ferngesteuertem Edge.
 - Alle elf Karten sind gegen `design-guidelines-karte.md` Abschnitt 8 geprüft, aber kein Kartentext und kein Hotspot-Text ist von einem Menschen gegengelesen. Die Agenten lasen die Quellen über WebFetch, also als Zusammenfassung, nicht im Volltext. Schwache Stellen: `hallenleuchte` ohne eigene unabhängige Quelle zu Hallenleuchten; `kabelkanal` stützt sich auf ein Fachportal und eine Herstellerseite, die Rückseite ist dadurch dünn; `not-halt-und-zaun` nutzt einen Fachverlag (WEKA). Hotspot-Texte haben keinen Prüfstatus.
-- Ein im Hintergrund gestarteter Vite-Server läuft weiter, wenn die Hintergrund-Aufgabe gestoppt wird. Danach Port 5199 prüfen und den eigenen Prozess per PID beenden.
+- Ein im Hintergrund gestarteter Vite-Server läuft weiter, wenn die Hintergrund-Aufgabe gestoppt wird. Danach Port 5199 prüfen und den eigenen Prozess per PID beenden. `npm run browser` räumt selbst auf und bricht ab, wenn Port 5199 oder 9333 schon belegt ist.
 
 ### Anhaltspunkte im Code
 
@@ -229,5 +234,5 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 - `src/szene/`: Szenenmodul ohne Preact (`szene.ts`, `eingabe.ts`, `haken.ts`).
 - `src/oberflaeche/`: Preact (`anwendung.tsx`, `szenenansicht.tsx`, `hinweis.tsx`, `kartenansicht.tsx`, `kartenseiten.tsx`); das Aussehen der Karte mit allen Maßen und Farben als Variablen in `karte.css`.
 - `src/inhalte/laden.ts`, `src/speicher/lokaler-speicher.ts`: Anbindung an Netz und `localStorage`.
-- `tools/`: Prüfskript (`pruefung.ts`), Einlesen, Kommandozeile, Vite-Plugin.
+- `tools/`: Prüfskript (`pruefung.ts`), Einlesen, Kommandozeile, Vite-Plugin; `browser.ts` für Prüfungen im echten Browser.
 - Starten: `npm run dev`. Prüfen: `npm run typecheck`, `npm test`, `npm run pruefen`.
