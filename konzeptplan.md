@@ -141,9 +141,30 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `7c919ed`)
 
-Eine neue Session liest diesen Abschnitt zuerst und macht bei „Nächste Schritte“ weiter.
+Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
+
+### Einstieg für die nächste Session
+
+Die Kartenansicht ist fertig: Design, Längenvorgaben, Karten-Guidelines und alle elf Kartentexte. Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
+
+Als Nächstes steht Schritt 1 der „Nächsten Schritte“ an: Zoom mit Pfadanzeige und Eintrittskarte. Vor dem ersten Agentenauftrag mit dem Nutzer klären:
+
+1. **Reihenfolge Zoom oder Zeichnen.** Es gibt nur die Szene `fabrikhalle`. Ihr einziger Zoom-Hotspot `roboter` zeigt auf die Szene `roboterzelle`, die noch fehlt. Ohne Zielszene lässt sich der Zoom im Spiel weder ansehen noch prüfen, und `npm run build` bricht ab. Möglich: (a) zuerst Schritt 2, die Szene `roboterzelle` nach `design-guidelines.md` und `stilprofil-fabrik.md` zeichnen; (b) für den Zoom eine schlichte, vorläufige `roboterzelle` (wenige Hotspots, Eintrittskarte `roboterzelle`) anlegen, die Schritt 2 später ersetzt. Empfehlung: (b), weil der Zoom dann sofort prüfbar ist und das Zeichnen nicht unter Zeitdruck gerät; die vorläufige Szene muss trotzdem die Guidelines einhalten, damit das Prüfskript sie annimmt.
+2. **Startszene angleichen** (offene Entscheidung 1) betrifft erst Schritt 2.
+
+Inhalt des Zoom-Schritts (Spec F3, F4, F11, F30 bis F32; Begriffe Zoom, Pfad, Eintrittskarte, Abgeschlossen im Glossar):
+
+- F3: Klick auf einen Hotspot mit Aktion `scene` zoomt auf das Ding und wechselt in die Zielszene. Heute tut `loeseAus` in `src/oberflaeche/anwendung.tsx` für `scene` noch nichts.
+- F4: Pfadanzeige von der Startszene bis zur aktuellen Szene; Klick auf eine Ebene kürzt den Pfad. Der Pfad gilt nur für die Sitzung, nicht im Spielstand.
+- F30: Beim ersten Betreten einer Szene mit Eintrittskarte erst Zoom, dann deckt sich die Karte von selbst auf und gilt als gefunden (wie F6 und F7, also `oeffneKarte`).
+- F31: Kartenknopf am Szenentitel in der Pfadanzeige öffnet die Eintrittskarte.
+- F32 und F11: Der Hinweis eines Zoom-Hotspots nennt den Stand („3 von 5 Karten“, Zielszene samt tieferen Szenen) und trägt einen Kartenknopf, sobald die Eintrittskarte der Zielszene gefunden ist.
+- Vorhandene Logik zum Wiederverwenden: `zoomZiele`, `tiefereSzenen` in `src/logik/szenennetz.ts`; `kartenDerSzene`, `standDerSzene`, `istAbgeschlossen` in `src/logik/fortschritt.ts`; `hinweisinhalt` in `src/logik/hinweis.ts`. Neue reine Logik (etwa Pfad kürzen) testgetrieben unter `src/logik/`.
+- Die Zoom-Animation respektiert `prefers-reduced-motion`. Ladefehler der Zielszene werden gemeldet, ohne den Spielstand zu verlieren.
+
+Ablauf wie unter „Arbeitsweise“: Auftrag an einen Sonnet-Agenten, selbst nachprüfen (Typprüfung, Tests, Prüfskript, Bildschirmfotos), Review auf zwei Achsen, Befunde in eigenem Commit, dann auf den Nutzer warten. Für Bildschirmfotos haben die Agenten bisher Edge headless über CDP genutzt (`--remote-debugging-port=9333`, Vite auf Port 5199); die Skripte lagen im Scratchpad der alten Session und sind nicht mehr verfügbar.
 
 ### Arbeitsweise
 
