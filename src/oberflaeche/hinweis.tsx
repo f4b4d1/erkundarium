@@ -3,15 +3,14 @@
 
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import type { Hinweisinhalt } from '../logik/hinweis.ts';
-import { HAKEN_PFAD, HAKEN_RADIUS, HAKENFARBE, KONTUR, WEISS } from '../szene/haken.ts';
+import { KONTUR, WEISS } from '../szene/haken.ts';
 import type { Rechteck } from '../szene/szene.ts';
 import { platziereHinweis } from './platzierung.ts';
+import { SymbolKarte } from './symbole.tsx';
 import { TEXTE } from './texte.ts';
 
 const ABSTAND = 10;
 const RAND = 8;
-/** Der Haken im Kartensymbol: Radius 6 statt `HAKEN_RADIUS`, Striche 1,5 und 1,8 breit. */
-const HAKEN_MASSSTAB = 6 / HAKEN_RADIUS;
 
 export function Hinweis({ inhalt, ziel }: { inhalt: Hinweisinhalt; ziel: Rechteck }) {
   const feld = useRef<HTMLDivElement>(null);
@@ -48,6 +47,7 @@ export function Hinweis({ inhalt, ziel }: { inhalt: Hinweisinhalt; ziel: Rechtec
         </span>
       </div>
       {inhalt.erklaerung !== undefined && <p class="hinweis-erklaerung">{inhalt.erklaerung}</p>}
+      {inhalt.stand !== undefined && <p class="hinweis-stand">{TEXTE.stand(inhalt.stand)}</p>}
     </div>
   );
 }
@@ -63,27 +63,6 @@ function aktionssymbol(inhalt: Hinweisinhalt) {
     case 'info':
       return { text: TEXTE.aktion.info, bild: <SymbolInfo /> };
   }
-}
-
-function SymbolKarte({ gefunden }: { gefunden: boolean }) {
-  return (
-    <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="5" y="3" width="14" height="18" rx="2" fill={gefunden ? WEISS : '#6B7785'} stroke={KONTUR} stroke-width="2" />
-      {gefunden && (
-        <g transform={`translate(17 17) scale(${HAKEN_MASSSTAB})`}>
-          <circle r={HAKEN_RADIUS} fill={HAKENFARBE} stroke={KONTUR} stroke-width={1.5 / HAKEN_MASSSTAB} />
-          <path
-            d={HAKEN_PFAD}
-            fill="none"
-            stroke={WEISS}
-            stroke-width={1.8 / HAKEN_MASSSTAB}
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </g>
-      )}
-    </svg>
-  );
 }
 
 function SymbolLupe() {

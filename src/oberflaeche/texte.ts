@@ -1,6 +1,8 @@
 // Texte der Oberfläche selbst. Inhaltstexte kommen aus den Textfassungen der Inhalte.
 // Vorerst nur deutsch und an dieser einen Stelle gesammelt.
 
+import type { Stand } from '../logik/fortschritt.ts';
+
 export const TEXTE = {
   laedt: 'Lädt …',
   startFehlgeschlagen: 'Das Spiel konnte nicht starten.',
@@ -10,6 +12,10 @@ export const TEXTE = {
   szeneNichtDarstellbar: 'Die Szene konnte nicht dargestellt werden.',
   szeneNichtGeladen: 'Diese Szene konnte nicht geladen werden. Du bleibst, wo du bist.',
   pfad: 'Pfad',
+  eintrittskarteOeffnen: 'Eintrittskarte öffnen',
+  /** Stand einer Szene samt tieferen Szenen (F11). */
+  stand: ({ gefunden, vorhanden }: Stand): string =>
+    vorhanden === 0 ? 'Keine Karten' : `${gefunden} von ${vorhanden} ${vorhanden === 1 ? 'Karte' : 'Karten'}`,
   neuereVersion: 'Dieser Spielstand stammt von einer neueren Version. In dieser Sitzung wird nichts gespeichert.',
   speichernFehlgeschlagen:
     'Der Spielstand konnte nicht gespeichert werden. Was du in dieser Sitzung findest, geht beim Schließen verloren.',

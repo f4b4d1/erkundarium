@@ -39,11 +39,18 @@ interface OffenerHinweis {
   lage: Rechteck;
 }
 
+/** Wohin der Fokus zurückkehrt, wenn die Karte zugeht: dorthin, wo sie ausgelöst wurde. */
+type Fokusziel =
+  | { art: 'hotspot'; id: string }
+  | { art: 'kartenknopf' }
+  /** Die Karte öffnete sich von selbst (F30), es gibt keinen Auslöser. */
+  | { art: 'szene' };
+
 interface OffeneKarte {
   karte: string;
   aufdecken: boolean;
-  /** Der Hotspot, von dem aus sie geöffnet wurde; er bekommt nach dem Schließen den Fokus zurück. */
-  hotspot: string;
+  /** Wohin der Fokus nach dem Schließen zurückkehrt. */
+  fokus: Fokusziel;
   /** Zählt jedes Öffnen, damit die Kartenansicht jedes Mal neu beginnt. */
   nummer: number;
 }
@@ -56,7 +63,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const [speichernFehlgeschlagen, setSpeichernFehlgeschlagen] = useState(false);
   const [offen, setOffen] = useState<OffenerHinweis | undefined>(undefined);
   const [offeneKarte, setOffeneKarte] = useState<OffeneKarte | undefined>(undefined);
-  const fokusZurueck = useRef<string | undefined>(undefined);
+  const fokusZurueck = useRef<Fokusziel | undefined>(undefined);
   const szeneRef = useRef<Szene | undefined>(undefined);
   const buehneRef = useRef<HTMLElement>(null);
   /** Solange ein Wechsel läuft, löst nichts weiteres aus. */
@@ -67,7 +74,12 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 
   useEffect(() => {
     starte().then(
-      (geladen) => setLadezustand({ art: 'bereit', ...geladen }),
+      (geladen) => {
+        setLadezustand({ art: 'bereit', ...geladen });
+        // Trägt die Startszene eine Eintrittskarte, deckt sie sich nach dem Start auf (F30).
+        const karte = geladen.verzeichnis.scenes.find((s) => s.id === geladen.pfad[0])?.card;
+        if (karte !== undefined) zeigeKarte(karte, { art: 'szene' });
+      },
       (fehler: unknown) => setLadezustand(alsFehlerzustand(fehler)),
     );
   }, []);
@@ -75,7 +87,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   // Erst wenn die Kartenansicht aus der Seite ist, ist die Szene wieder bedienbar und fokussierbar.
   useEffect(() => {
     if (offeneKarte !== undefined || fokusZurueck.current === undefined) return;
-    szeneRef.current?.fokussiere(fokusZurueck.current);
+    fokussiere(fokusZurueck.current);
     fokusZurueck.current = undefined;
   }, [offeneKarte]);
 
@@ -86,7 +98,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     zoom.current = undefined;
     if (!fokusAufSzene.current) return;
     fokusAufSzene.current = false;
-    szeneRef.current?.fokussiereSzene();
+    // Öffnet sich mit dem Wechsel eine Karte (F30), gehört der Fokus ihr.
+    if (offeneKarte === undefined) szeneRef.current?.fokussiereSzene();
   }, [aktuelleSzene]);
 
   const gefunden = useMemo(() => gefundeneKarten(spielstand), [spielstand]);
@@ -117,10 +130,15 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 
   const { datei, svg } = ladezustand.szene;
   const { themengebiete, wissensgebiete, verzeichnis, pfad } = ladezustand;
-  const ebenen: Ebene[] = pfad.map((id) => ({
-    id,
-    titel: text(verzeichnis.scenes.find((s) => s.id === id)?.title ?? {}, FASSUNG) || id,
-  }));
+  const ebenen: Ebene[] = pfad.map((id) => {
+    const eintrag = verzeichnis.scenes.find((s) => s.id === id);
+    return {
+      id,
+      titel: text(eintrag?.title ?? {}, FASSUNG) || id,
+      ...(eintrag?.card === undefined ? {} : { eintrittskarte: { gefunden: gefunden.has(eintrag.card) } }),
+    };
+  });
+  const eintrittskarte = verzeichnis.scenes.find((s) => s.id === pfad[pfad.length - 1])?.card;
   const finde = (id: string): Hotspot | undefined => datei.hotspots.find((h) => h.id === id);
 
   function loeseAus(hotspot: Hotspot): void {
@@ -135,11 +153,31 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     }
     // `info` hat nur den Hinweis (F24).
     if (hotspot.action !== 'card' || hotspot.target === undefined) return;
-    const { spielstand: neu, aufdecken } = oeffneKarte(spielstand, hotspot.target, new Date().toISOString());
-    // Gespeichert wird vor dem Laden der Karte: Der Fund bleibt, auch wenn sie nicht lädt.
+    zeigeKarte(hotspot.target, { art: 'hotspot', id: hotspot.id });
+  }
+
+  /**
+   * Öffnet die Karte; beim ersten Mal deckt sie sich auf und gilt als gefunden. Gespeichert wird vor
+   * dem Laden der Karte: Der Fund bleibt, auch wenn sie nicht lädt.
+   */
+  function zeigeKarte(karte: string, fokus: Fokusziel): void {
+    const { spielstand: neu, aufdecken } = oeffneKarte(spielstand, karte, new Date().toISOString());
     if (aufdecken) speichere(neu);
-    const karte = hotspot.target;
-    setOffeneKarte((bisher) => ({ karte, aufdecken, hotspot: hotspot.id, nummer: (bisher?.nummer ?? 0) + 1 }));
+    setOffeneKarte((bisher) => ({ karte, aufdecken, fokus, nummer: (bisher?.nummer ?? 0) + 1 }));
+  }
+
+  function fokussiere(ziel: Fokusziel): void {
+    switch (ziel.art) {
+      case 'hotspot':
+        szeneRef.current?.fokussiere(ziel.id);
+        break;
+      case 'kartenknopf':
+        document.querySelector<HTMLElement>('.pfad-karte')?.focus();
+        break;
+      case 'szene':
+        szeneRef.current?.fokussiereSzene();
+        break;
+    }
   }
 
   /**
@@ -163,6 +201,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       fokusAufSzene.current = true;
       setOffen(undefined);
       setLadezustand((bisher) => (bisher.art === 'bereit' ? { ...bisher, szene: geladen, pfad: neuerWeg } : bisher));
+      // Erstes Betreten: Die Eintrittskarte deckt sich nach dem Wechsel von selbst auf (F30).
+      if (eintrag.card !== undefined && !gefunden.has(eintrag.card)) zeigeKarte(eintrag.card, { art: 'szene' });
     } catch {
       zoom.current?.cancel();
       zoom.current = undefined;
@@ -190,7 +230,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   }
 
   function schliesseKarte(): void {
-    fokusZurueck.current = offeneKarte?.hotspot;
+    fokusZurueck.current = offeneKarte?.fokus;
     setOffeneKarte(undefined);
   }
 
@@ -242,7 +282,13 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           ))}
         </div>
       )}
-      <Pfadanzeige ebenen={ebenen} onWaehle={geheZurEbene} />
+      <Pfadanzeige
+        ebenen={ebenen}
+        onWaehle={geheZurEbene}
+        onOeffneEintrittskarte={() => {
+          if (!wechselt.current && eintrittskarte !== undefined) zeigeKarte(eintrittskarte, { art: 'kartenknopf' });
+        }}
+      />
       <main
         ref={buehneRef}
         class="buehne"
@@ -265,7 +311,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
         />
       </main>
       {offen && offenerHotspot && !offeneKarte && (
-        <Hinweis inhalt={hinweisinhalt(offenerHotspot, gefunden, FASSUNG)} ziel={offen.lage} />
+        <Hinweis inhalt={hinweisinhalt(offenerHotspot, gefunden, FASSUNG, verzeichnis)} ziel={offen.lage} />
       )}
       {offeneKarte && (
         <Kartenansicht
