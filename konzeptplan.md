@@ -150,8 +150,8 @@ Eine neue Session liest diesen Abschnitt zuerst und macht bei „Nächste Schrit
 Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er sie ändert; in `CLAUDE.md` stehen sie nicht.
 
 - Die Hauptsession orchestriert und schreibt selbst keinen Anwendungscode. Dokumente und kleine Inhaltsänderungen macht sie selbst.
-- Code schreiben Subagenten mit dem Modell Opus auf Stufe medium, nacheinander, je Auftrag ein abgegrenzter Schritt mit Verweis auf Spec, Glossar und ADRs.
-- Einfache oder sich wiederholende Aufgaben gehen an Sonnet auf Stufe medium, um Kontingent zu sparen. Der Nutzer arbeitet nah am 5-Stunden-Limit: nichts Großes ohne Rückfrage starten.
+- Die Hauptsession läuft auf Opus, Stufe medium. Code schreiben Subagenten mit dem Modell Sonnet (seit 2026-11-16 für alle Coding-Aufgaben), nacheinander, je Auftrag ein abgegrenzter Schritt mit Verweis auf Spec, Glossar und ADRs.
+- Der Nutzer arbeitet nah am 5-Stunden-Limit: nichts Großes ohne Rückfrage starten.
 - Ablauf je Schritt nach dem implement-Skill: testgetrieben an den vereinbarten Nahtstellen (Szenennetz, Fundorte, Fortschritt und Abschluss, Spielstand, Prüfskript; dazu jede weitere reine Logik), Typprüfung und Tests regelmäßig, danach Code-Review auf zwei Achsen (Standards und Spec) mit zwei parallelen Agenten, Befunde in einem eigenen Commit beheben.
 - Die Hauptsession prüft jedes Ergebnis selbst nach (Typprüfung, Tests, Prüfskript, Bildschirmfoto ansehen) und übernimmt keinen Agentenbericht ungeprüft. Was nur der Agent geprüft hat, wird dem Nutzer so gesagt.
 - Nach jedem Schritt auf die Rückmeldung des Nutzers warten.

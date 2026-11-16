@@ -95,7 +95,8 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
 
 - F6: Ein Hotspot mit Aktion `card` deckt beim ersten Auslösen die Karte mit Animation auf, markiert sie als gefunden und erhöht den Zähler.
 - F7: Jedes weitere Auslösen öffnet die Karte ohne Aufdeck-Animation. Das gilt für jeden Hotspot derselben Karte in jeder Szene.
-- F8: Eine Karte lässt sich wenden. Die Vorderseite zeigt Titel, Bild und Kurztext; die Rückseite Vertiefung, Quellen und Link. Die Farbe kommt vom Wissensgebiet des Themengebiets (ADR 0005), Name und Symbol im Schild vom Themengebiet. Fehlt das Bild, zeigt die Karte das Symbol des Themengebiets.
+- F8: Eine Karte lässt sich wenden. Die Vorderseite zeigt Titel, Bild und Kurztext; die Rückseite den Titel als kleine Überschrift, Vertiefung, Quellen und Link. Das Schild oben auf beiden Seiten zeigt Name und Symbol des Themengebiets. Die Farbe kommt vom Wissensgebiet des Themengebiets (ADR 0005). Fehlt das Bild, zeigt die Karte das Symbol des Themengebiets.
+- F8a: Bedienung der offenen Karte. Ein Klick auf die Karte wendet sie, außer wenn dabei Text markiert wird; der Knopf „Wenden“ tut dasselbe. Ein Klick oder Tippen neben die Karte schließt sie, ebenso der Knopf „Schließen“ und die Escape-Taste. Wird die Karte während der Aufdeck-Animation gewendet, endet die Animation sofort. Kann eine Karte beim ersten Fund nicht geladen werden, ist sie trotzdem gefunden; die Anwendung meldet den Fehler, und beim nächsten Öffnen erscheint die Karte ohne Aufdeck-Animation (F7).
 - F9: Das Infofeld rendert die Bausteine `text`, `list`, `facts`, `table` und `funfact`.
 - F10: Der Link öffnet in einem neuen Tab.
 - F30: Beim ersten Betreten einer Szene mit Eintrittskarte läuft erst der Zoom, dann deckt sich die Karte in der neuen Szene von selbst auf und gilt als gefunden.
