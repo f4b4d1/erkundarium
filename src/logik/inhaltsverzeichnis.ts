@@ -61,7 +61,6 @@ export interface Themengebiet {
 export interface Beziehungstyp {
   id: string;
   symmetric: boolean;
-  acyclic: boolean;
   forward: Texte;
   /** Fehlt bei symmetrischen Typen. */
   backward?: Texte;

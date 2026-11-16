@@ -1,13 +1,15 @@
 // Die Prüfregeln auf den eingelesenen Inhalten. Kein Dateisystem: Das Einlesen steht in inhaltsordner.ts.
 // Die Regeln kennen nur allgemeine Begriffe, keinen Fachbegriff aus den Inhalten (Q2).
 import type {
+  Aktion,
+  Beziehung,
   Beziehungstyp,
   Inhaltsverzeichnis,
   Szeneneintrag,
   Themengebiet,
   Texte,
 } from '../src/logik/inhaltsverzeichnis.ts';
-import { pruefe as pruefeSchema, type SchemaName } from './schema.ts';
+import type { Schemapruefung, SchemaName } from './schema.ts';
 
 export type Stufe = 'entwickeln' | 'veroeffentlichen';
 
@@ -28,7 +30,7 @@ export interface Pruefbericht {
 interface Karte {
   id: string;
   topic: string;
-  relations?: { type: string; card: string }[];
+  relations?: Beziehung[];
   texts: Record<string, { status: 'entwurf' | 'geprueft' }>;
 }
 
@@ -42,10 +44,11 @@ interface Szene {
   id: string;
   title: Texte;
   card?: string;
-  hotspots: { id: string; action: 'card' | 'scene' | 'info'; target?: string }[];
+  hotspots: { id: string; action: Aktion; target?: string }[];
 }
 
-type RohBeziehungstyp = Omit<Beziehungstyp, 'symmetric' | 'acyclic'> & { symmetric?: boolean; acyclic?: boolean };
+// acyclic liest nur das Prüfskript, ins Inhaltsverzeichnis kommt es nicht.
+type RohBeziehungstyp = Omit<Beziehungstyp, 'symmetric'> & { symmetric?: boolean; acyclic?: boolean };
 
 interface Geladen<T> {
   pfad: string;
@@ -55,30 +58,55 @@ interface Geladen<T> {
 const KARTE = /^cards\/([^/]+)\.json$/;
 const WELTORDNER = /^worlds\/([^/]+)\//;
 const SZENE = /^worlds\/([^/]+)\/scenes\/([^/]+)\.json$/;
+const SZENEN_SVG = /^worlds\/([^/]+)\/scenes\/([^/]+)\.svg$/;
 
-// design-guidelines.md Abschnitt 1 Regel 2, dazu aria-label und Ereignis-Attribute (F20, F23).
-// Einfache Textsuche, kein XML-Parser.
+// Spec Abschnitt 6, Ordner. schema/ prüft das Prüfskript nicht.
+const ERWARTET: RegExp[] = [
+  /^(topics|relations|limits)\.json$/,
+  /^schema\//,
+  /^topics\/[^/]+\.svg$/,
+  /^cards\/[^/]+\.(json|svg)$/,
+  /^worlds\/[^/]+\/world\.json$/,
+  SZENE,
+  SZENEN_SVG,
+];
+
+// design-guidelines.md Abschnitt 1 Regel 2, dazu aria-label, Ereignis-Attribute und das Attribut style
+// (F20, F23). Einfache Textsuche, kein XML-Parser; Kommentare sind vorher entfernt.
+// Elemente auch mit Namensraum-Präfix, etwa <svg:script>.
 const VERBOTEN_IN_SVG: [string, RegExp][] = [
-  ['<script>', /<script[\s>/]/i],
-  ['<style>', /<style[\s>/]/i],
-  ['<text>', /<text[\s>/]/i],
-  ['<title>', /<title[\s>/]/i],
-  ['<image>', /<image[\s>/]/i],
-  ['Filter', /<filter[\s>/]|\sfilter\s*=/i],
-  ['Verlauf', /<(linear|radial)Gradient[\s>/]/i],
+  ['<script>', /<([\w.-]+:)?script[\s>/]/i],
+  ['<style>', /<([\w.-]+:)?style[\s>/]/i],
+  ['<text>', /<([\w.-]+:)?text[\s>/]/i],
+  ['<title>', /<([\w.-]+:)?title[\s>/]/i],
+  ['<image>', /<([\w.-]+:)?image[\s>/]/i],
+  ['Filter', /<([\w.-]+:)?filter[\s>/]|\sfilter\s*=/i],
+  ['Verlauf', /<([\w.-]+:)?(linear|radial)Gradient[\s>/]/i],
   ['Verweis nach außen', /href\s*=\s*["'](?!#)|url\(\s*['"]?(?!#)/i],
   ['aria-label', /aria-label/i],
   ['Ereignis-Attribut', /\son[a-z]+\s*=/i],
+  [
+    'Attribut style. Farben und Striche gehören als eigene Attribute an das Element, etwa fill und stroke',
+    /\sstyle\s*=/i,
+  ],
 ];
+
+const KOMMENTAR = /<!--[\s\S]*?-->/g;
 
 /**
  * Prüft die Inhalte und erzeugt das Inhaltsverzeichnis.
  * @param dateien Inhalt jeder Datei als Text, Schlüssel ist der Pfad relativ zum Inhaltsordner mit `/`.
+ * @param pruefeSchema Prüfung gegen die Schemas, siehe `ladeSchemas` in schema.ts.
  */
-export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: Stufe): Pruefbericht {
+export function pruefeInhalte(
+  dateien: Readonly<Record<string, string>>,
+  stufe: Stufe,
+  pruefeSchema: Schemapruefung,
+): Pruefbericht {
   const fehler: Meldung[] = [];
   const warnungen: Meldung[] = [];
-  const melde = (datei: string, regel: string, text: string) => fehler.push({ datei, regel, text });
+  const meldeFehler = (datei: string, regel: string, text: string) => fehler.push({ datei, regel, text });
+  const meldeWarnung = (datei: string, regel: string, text: string) => warnungen.push({ datei, regel, text });
 
   // Alle lesbaren JSON-Dateien, auch die, die am Schema scheitern: Sie machen ihre IDs trotzdem bekannt,
   // damit ein Schema-Fehler keine Folgefehler in anderen Dateien nach sich zieht.
@@ -87,19 +115,19 @@ export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: 
   function lade<T>(pfad: string, schema: SchemaName): Geladen<T> | undefined {
     const text = dateien[pfad];
     if (text === undefined) {
-      melde(pfad, 'datei-fehlt', 'Die Datei fehlt.');
+      meldeFehler(pfad, 'datei-fehlt', 'Die Datei fehlt.');
       return undefined;
     }
     let daten: unknown;
     try {
       daten = JSON.parse(text);
     } catch (e) {
-      melde(pfad, 'json', `Die Datei ist kein gültiges JSON: ${(e as Error).message}`);
+      meldeFehler(pfad, 'json', `Die Datei ist kein gültiges JSON: ${(e as Error).message}`);
       return undefined;
     }
     gelesen.push({ pfad, schema, daten });
     const ergebnis = pruefeSchema(schema, daten);
-    for (const f of ergebnis.fehler) melde(pfad, 'schema', `Entspricht nicht dem Schema: ${f}`);
+    for (const f of ergebnis.fehler) meldeFehler(pfad, 'schema', `Entspricht nicht dem Schema: ${f}`);
     return ergebnis.gueltig ? { pfad, daten: daten as T } : undefined;
   }
 
@@ -113,6 +141,12 @@ export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: 
   }
 
   const pfade = Object.keys(dateien).sort();
+
+  for (const pfad of pfade) {
+    if (!ERWARTET.some((muster) => muster.test(pfad))) {
+      meldeFehler(pfad, 'unerwartete-datei', 'Die Datei liegt an einer Stelle, an der keine Inhaltsdatei erwartet wird.');
+    }
+  }
 
   const themengebiete = lade<Themengebiet[]>('topics.json', 'topics')?.daten ?? [];
   const beziehungstypen = lade<RohBeziehungstyp[]>('relations.json', 'relations')?.daten ?? [];
@@ -135,17 +169,17 @@ export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: 
   // Dateiname gleich ID
   for (const { pfad, daten } of karten) {
     if (KARTE.exec(pfad)?.[1] !== daten.id) {
-      melde(pfad, 'dateiname', `Die Datei muss wie die Karte heißen: ${daten.id}.json.`);
+      meldeFehler(pfad, 'dateiname', `Die Datei muss wie die Karte heißen: ${daten.id}.json.`);
     }
   }
   for (const { pfad, daten } of szenen) {
     if (SZENE.exec(pfad)?.[2] !== daten.id) {
-      melde(pfad, 'dateiname', `Die Datei muss wie die Szene heißen: ${daten.id}.json.`);
+      meldeFehler(pfad, 'dateiname', `Die Datei muss wie die Szene heißen: ${daten.id}.json.`);
     }
   }
   for (const { pfad, daten } of welten) {
     if (WELTORDNER.exec(pfad)?.[1] !== daten.id) {
-      melde(pfad, 'dateiname', `Der Ordner der Welt muss wie die Welt heißen: worlds/${daten.id}/.`);
+      meldeFehler(pfad, 'dateiname', `Der Ordner der Welt muss wie die Welt heißen: worlds/${daten.id}/.`);
     }
   }
 
@@ -153,7 +187,7 @@ export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: 
   function meldeDoppelte(eintraege: { id: string; pfad: string }[], art: string) {
     const gesehen = new Set<string>();
     for (const { id, pfad } of eintraege) {
-      if (gesehen.has(id)) melde(pfad, 'doppelte-id', `${art} „${id}“ gibt es mehr als einmal.`);
+      if (gesehen.has(id)) meldeFehler(pfad, 'doppelte-id', `${art} „${id}“ gibt es mehr als einmal.`);
       gesehen.add(id);
     }
   }
@@ -174,32 +208,32 @@ export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: 
   for (const { pfad, daten } of welten) {
     const ordner = WELTORDNER.exec(pfad)?.[1];
     if (!bekannteIds('scene', (p) => SZENE.exec(p)?.[1] === ordner).has(daten.start)) {
-      melde(pfad, 'startszene', `Die Startszene „${daten.start}“ gibt es in dieser Welt nicht.`);
+      meldeFehler(pfad, 'startszene', `Die Startszene „${daten.start}“ gibt es in dieser Welt nicht.`);
     }
   }
   for (const { pfad, daten } of szenen) {
     if (daten.card !== undefined && !kartenIds.has(daten.card)) {
-      melde(pfad, 'eintrittskarte', `Die Eintrittskarte „${daten.card}“ gibt es nicht.`);
+      meldeFehler(pfad, 'eintrittskarte', `Die Eintrittskarte „${daten.card}“ gibt es nicht.`);
     }
     for (const h of daten.hotspots) {
       if (h.action === 'card' && !kartenIds.has(h.target!)) {
-        melde(pfad, 'hotspot-ziel', `Der Hotspot „${h.id}“ zeigt auf die Karte „${h.target}“, die es nicht gibt.`);
+        meldeFehler(pfad, 'hotspot-ziel', `Der Hotspot „${h.id}“ zeigt auf die Karte „${h.target}“, die es nicht gibt.`);
       }
       if (h.action === 'scene' && !szenenIds.has(h.target!)) {
-        melde(pfad, 'hotspot-ziel', `Der Hotspot „${h.id}“ zeigt auf die Szene „${h.target}“, die es nicht gibt.`);
+        meldeFehler(pfad, 'hotspot-ziel', `Der Hotspot „${h.id}“ zeigt auf die Szene „${h.target}“, die es nicht gibt.`);
       }
     }
   }
   for (const { pfad, daten } of karten) {
     if (!themengebietIds.has(daten.topic)) {
-      melde(pfad, 'themengebiet', `Das Themengebiet „${daten.topic}“ gibt es nicht.`);
+      meldeFehler(pfad, 'themengebiet', `Das Themengebiet „${daten.topic}“ gibt es nicht.`);
     }
     for (const b of daten.relations ?? []) {
       if (!beziehungstypIds.has(b.type)) {
-        melde(pfad, 'beziehungstyp', `Die Beziehung zu „${b.card}“ hat den unbekannten Typ „${b.type}“.`);
+        meldeFehler(pfad, 'beziehungstyp', `Die Beziehung zu „${b.card}“ hat den unbekannten Typ „${b.type}“.`);
       }
       if (!kartenIds.has(b.card)) {
-        melde(pfad, 'beziehungsziel', `Die Beziehung „${b.type}“ zeigt auf die Karte „${b.card}“, die es nicht gibt.`);
+        meldeFehler(pfad, 'beziehungsziel', `Die Beziehung „${b.type}“ zeigt auf die Karte „${b.card}“, die es nicht gibt.`);
       }
     }
   }
@@ -208,17 +242,17 @@ export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: 
   for (const { pfad, daten } of karten) {
     for (const [fassung, { status }] of Object.entries(daten.texts)) {
       if (status !== 'entwurf') continue;
-      const meldung = { datei: pfad, regel: 'pruefstatus', text: `Die Textfassung „${fassung}“ ist ein Entwurf.` };
-      (stufe === 'veroeffentlichen' ? fehler : warnungen).push(meldung);
+      const melde = stufe === 'veroeffentlichen' ? meldeFehler : meldeWarnung;
+      melde(pfad, 'pruefstatus', `Die Textfassung „${fassung}“ ist ein Entwurf.`);
     }
   }
 
   // Szenendatei und SVG
   for (const { pfad, daten } of szenen) {
     const svgPfad = pfad.replace(/\.json$/, '.svg');
-    const svg = dateien[svgPfad];
+    const svg = dateien[svgPfad]?.replace(KOMMENTAR, '');
     if (svg === undefined) {
-      melde(svgPfad, 'svg-fehlt', `Die SVG zur Szene „${daten.id}“ fehlt.`);
+      meldeFehler(svgPfad, 'svg-fehlt', `Die SVG zur Szene „${daten.id}“ fehlt.`);
       continue;
     }
     const ausSvg = [...svg.matchAll(/data-hotspot\s*=\s*["']([^"']*)["']/g)].map((t) => t[1]);
@@ -226,16 +260,23 @@ export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: 
     meldeDoppelte(ausSvg.map((id) => ({ pfad: svgPfad, id })), 'Das data-hotspot');
     for (const id of ausJson) {
       if (!ausSvg.includes(id)) {
-        melde(svgPfad, 'hotspot-ohne-svg', `Der Hotspot „${id}“ der Szenendatei hat kein Element mit data-hotspot="${id}".`);
+        meldeFehler(svgPfad, 'hotspot-ohne-svg', `Der Hotspot „${id}“ der Szenendatei hat kein Element mit data-hotspot="${id}".`);
       }
     }
     for (const id of new Set(ausSvg)) {
       if (!ausJson.has(id)) {
-        melde(svgPfad, 'svg-ohne-hotspot', `Das Element mit data-hotspot="${id}" hat keinen Hotspot in der Szenendatei.`);
+        meldeFehler(svgPfad, 'svg-ohne-hotspot', `Das Element mit data-hotspot="${id}" hat keinen Hotspot in der Szenendatei.`);
       }
     }
     for (const [name, muster] of VERBOTEN_IN_SVG) {
-      if (muster.test(svg)) melde(svgPfad, 'svg-verboten', `Die SVG enthält Verbotenes: ${name}.`);
+      if (muster.test(svg)) meldeFehler(svgPfad, 'svg-verboten', `Die SVG enthält Verbotenes: ${name}.`);
+    }
+  }
+
+  for (const pfad of pfade) {
+    const treffer = SZENEN_SVG.exec(pfad);
+    if (treffer && dateien[pfad.replace(/\.svg$/, '.json')] === undefined) {
+      meldeFehler(pfad, 'szene-fehlt', `Zur SVG fehlt die Szenendatei ${treffer[2]}.json.`);
     }
   }
 
@@ -254,7 +295,7 @@ export function pruefeInhalte(dateien: Readonly<Record<string, string>>, stufe: 
     })),
     cards: karten.map(({ daten: k }) => ({ id: k.id, topic: k.topic, relations: k.relations ?? [] })),
     topics: themengebiete,
-    relations: beziehungstypen.map((t) => ({ ...t, symmetric: t.symmetric ?? false, acyclic: t.acyclic ?? false })),
+    relations: beziehungstypen.map(({ acyclic: _, ...t }) => ({ ...t, symmetric: t.symmetric ?? false })),
   };
 
   const nachDatei = (a: Meldung, b: Meldung) => (a.datei < b.datei ? -1 : a.datei > b.datei ? 1 : 0);

@@ -3,26 +3,25 @@
 // liegt nur im Speicher, wird bei jeder Änderung unter content/ neu erzeugt und unter VERZEICHNIS ausgeliefert.
 // Build: Das Prüfskript läuft vorab und bricht bei Fehlern ab; danach landen Inhaltsdateien (ohne Schemas)
 // und Verzeichnis unter dist/content/. Mit --mode veroeffentlichen prüft es in der Stufe Veröffentlichen.
-import { readdirSync, readFileSync } from 'node:fs';
-import { isAbsolute, join, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { isAbsolute, relative } from 'node:path';
 import type { Logger, Plugin } from 'vite';
 import { formatiereBericht } from './bericht.ts';
-import { pruefeInhaltsordner } from './inhaltsordner.ts';
+import { leseInhaltsordner, pruefeInhaltsordner } from './inhaltsordner.ts';
+import { INHALTSORDNER as ordner } from './pfade.ts';
 import type { Pruefbericht, Stufe } from './pruefung.ts';
 
 /** Pfad des Inhaltsverzeichnisses relativ zur Seite. */
 export const VERZEICHNIS = 'content/inhaltsverzeichnis.json';
 
-const ordner = fileURLToPath(new URL('../content/', import.meta.url));
-
 function pruefe(stufe: Stufe, logger: Logger): Pruefbericht {
   const bericht = pruefeInhaltsordner(ordner, stufe);
-  for (const zeile of formatiereBericht(bericht, stufe, 'content/')) {
-    if (zeile.startsWith('Fehler')) logger.error(zeile);
-    else if (zeile.startsWith('Warnung')) logger.warn(zeile);
-    else logger.info(zeile);
-  }
+  // formatiereBericht liefert erst die Fehler, dann die Warnungen, zuletzt die Zusammenfassung.
+  const zeilen = formatiereBericht(bericht, stufe, 'content/');
+  const fehler = bericht.fehler.length;
+  const warnungen = bericht.warnungen.length;
+  for (const zeile of zeilen.slice(0, fehler)) logger.error(zeile);
+  for (const zeile of zeilen.slice(fehler, fehler + warnungen)) logger.warn(zeile);
+  for (const zeile of zeilen.slice(fehler + warnungen)) logger.info(zeile);
   return bericht;
 }
 
@@ -80,10 +79,9 @@ function bauen(): Plugin {
     },
     generateBundle() {
       this.emitFile({ type: 'asset', fileName: VERZEICHNIS, source: JSON.stringify(bericht.verzeichnis) });
-      for (const pfad of readdirSync(ordner, { recursive: true, encoding: 'utf8' })) {
-        const rel = pfad.replaceAll('\\', '/');
-        if (rel.startsWith('schema/') || !/\.(json|svg)$/.test(rel)) continue;
-        this.emitFile({ type: 'asset', fileName: `content/${rel}`, source: readFileSync(join(ordner, pfad)) });
+      for (const [pfad, inhalt] of Object.entries(leseInhaltsordner(ordner))) {
+        if (pfad.startsWith('schema/')) continue;
+        this.emitFile({ type: 'asset', fileName: `content/${pfad}`, source: inhalt });
       }
     },
   };

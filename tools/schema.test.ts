@@ -1,6 +1,10 @@
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { pruefe, type SchemaName } from './schema.ts';
+import { INHALTSORDNER } from './pfade.ts';
+import { ladeSchemas, type SchemaName } from './schema.ts';
+
+const pruefe = ladeSchemas(join(INHALTSORDNER, 'schema'));
 
 type Daten = Record<string, any>;
 
@@ -373,7 +377,7 @@ describe('limits.json', () => {
   it('akzeptiert eine vollständige Vorgabe', () => erwarteGueltig('limits', vorgaben));
 
   it('akzeptiert die Datei content/limits.json', () => {
-    const datei = JSON.parse(readFileSync(new URL('../content/limits.json', import.meta.url), 'utf8'));
+    const datei = JSON.parse(readFileSync(join(INHALTSORDNER, 'limits.json'), 'utf8'));
     erwarteGueltig('limits', datei);
   });
 

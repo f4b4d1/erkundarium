@@ -1,8 +1,9 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { pruefeInhaltsordner } from './inhaltsordner.ts';
+import { INHALTSORDNER } from './pfade.ts';
 
 let ordner: string | undefined;
 
@@ -13,6 +14,7 @@ afterEach(() => {
 
 function legeAn(dateien: Record<string, unknown>): string {
   ordner = mkdtempSync(join(tmpdir(), 'erkundarium-'));
+  cpSync(join(INHALTSORDNER, 'schema'), join(ordner, 'schema'), { recursive: true });
   for (const [pfad, wert] of Object.entries(dateien)) {
     const ziel = join(ordner, pfad);
     mkdirSync(dirname(ziel), { recursive: true });
@@ -46,5 +48,18 @@ describe('pruefeInhaltsordner', () => {
       },
     ]);
     expect(bericht.verzeichnis.scenes.map((s) => s.id)).toEqual(['szene-a']);
+  });
+
+  it('prüft gegen die Schemas im Ordner und liest sie bei jedem Aufruf neu', () => {
+    const ordner = legeAn(grundinhalt);
+    const regeln = () => pruefeInhaltsordner(ordner, 'entwickeln').fehler.map((m) => `${m.datei} ${m.regel}`);
+    expect(regeln()).not.toContain('worlds/welt-a/world.json schema');
+
+    const pfad = join(ordner, 'schema', 'world.schema.json');
+    const schema = JSON.parse(readFileSync(pfad, 'utf8'));
+    schema.required.push('neu');
+    schema.properties.neu = { type: 'string' };
+    writeFileSync(pfad, JSON.stringify(schema));
+    expect(regeln()).toContain('worlds/welt-a/world.json schema');
   });
 });

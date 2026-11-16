@@ -1,5 +1,10 @@
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { INHALTSORDNER } from './pfade.ts';
 import { pruefeInhalte, type Stufe } from './pruefung.ts';
+import { ladeSchemas } from './schema.ts';
+
+const pruefeSchema = ladeSchemas(join(INHALTSORDNER, 'schema'));
 
 type Daten = Record<string, any>;
 
@@ -60,7 +65,7 @@ function pruefe(inhalt: Record<string, Daten | string>, stufe: Stufe = 'entwicke
   const dateien = Object.fromEntries(
     Object.entries(inhalt).map(([pfad, wert]) => [pfad, typeof wert === 'string' ? wert : JSON.stringify(wert)]),
   );
-  return pruefeInhalte(dateien, stufe);
+  return pruefeInhalte(dateien, stufe, pruefeSchema);
 }
 
 /** Fehler als `datei regel`, damit die Erwartungen kurz bleiben. */
@@ -123,6 +128,41 @@ describe('Schema', () => {
         'worlds/welt-a/world.json datei-fehlt',
       ]),
     );
+  });
+});
+
+describe('Ordner', () => {
+  it.each([
+    'cards/sub/x.json',
+    'cards/sub/x.svg',
+    'topics/x.json',
+    'topics/sub/x.svg',
+    'andere.json',
+    'bild.svg',
+    'worlds/x.json',
+    'worlds/welt-a/x.json',
+    'worlds/welt-a/x.svg',
+    'worlds/welt-a/scenes/sub/x.json',
+    'worlds/welt-a/scenes/sub/x.svg',
+  ])('meldet eine Datei an unerwarteter Stelle: %s', (pfad) => {
+    const inhalt = grundinhalt();
+    inhalt[pfad] = pfad.endsWith('.svg') ? svg() : {};
+    expect(pruefe(inhalt).fehler).toEqual([
+      {
+        datei: pfad,
+        regel: 'unerwartete-datei',
+        text: 'Die Datei liegt an einer Stelle, an der keine Inhaltsdatei erwartet wird.',
+      },
+    ]);
+  });
+
+  it('erlaubt Bilder unter cards/ und topics/ und übergeht schema/', () => {
+    const inhalt = grundinhalt();
+    inhalt['cards/bild-a.svg'] = svg();
+    inhalt['topics/gebiet-a.svg'] = svg();
+    inhalt['schema/irgendwas.json'] = {};
+    inhalt['schema/sub/irgendwas.json'] = {};
+    expect(fehler(inhalt)).toEqual([]);
   });
 });
 
@@ -314,6 +354,62 @@ describe('Szenendatei und SVG', () => {
     expect(fehler(inhalt)).toEqual([`${pfadA}.svg svg-verboten`]);
   });
 
+  it.each([
+    ['<svg:script>', '<svg:script>alert(1)</svg:script>'],
+    ['<svg:style>', '<svg:style>g{}</svg:style>'],
+    ['<svg:text>', '<svg:text x="1">Name</svg:text>'],
+    ['<svg:title>', '<svg:title>Name</svg:title>'],
+    ['<svg:image>', '<svg:image href="#a"/>'],
+    ['<svg:filter>', '<svg:filter id="f"/>'],
+    ['<svg:linearGradient>', '<svg:linearGradient id="v"/>'],
+  ])('meldet verbotene Elemente mit Namensraum-Präfix: %s', (_name, schnipsel) => {
+    const inhalt = grundinhalt();
+    inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2', 'ding-3').replace('</svg>', `${schnipsel}\n</svg>`);
+    expect(fehler(inhalt)).toEqual([`${pfadA}.svg svg-verboten`]);
+  });
+
+  it('meldet das Attribut style mit einem eigenen Text, auch wenn es einen Filter enthält', () => {
+    const inhalt = grundinhalt();
+    inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2', 'ding-3').replace(
+      '</svg>',
+      '<rect style="filter:blur(3px)"/>\n</svg>',
+    );
+    expect(pruefe(inhalt).fehler).toEqual([
+      {
+        datei: `${pfadA}.svg`,
+        regel: 'svg-verboten',
+        text: 'Die SVG enthält Verbotenes: Attribut style. Farben und Striche gehören als eigene Attribute an das Element, etwa fill und stroke.',
+      },
+    ]);
+  });
+
+  it('übergeht Kommentare bei der Suche nach Verbotenem', () => {
+    const inhalt = grundinhalt();
+    inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2', 'ding-3').replace(
+      '</svg>',
+      '<!-- <script>alert(1)</script> <rect style="x"/> -->\n</svg>',
+    );
+    expect(fehler(inhalt)).toEqual([]);
+  });
+
+  it('zählt ein data-hotspot in einem Kommentar nicht als Hotspot', () => {
+    const inhalt = grundinhalt();
+    inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2').replace('</svg>', '<!-- data-hotspot="ding-3" -->\n</svg>');
+    expect(fehler(inhalt)).toEqual([`${pfadA}.svg hotspot-ohne-svg`]);
+  });
+
+  it('meldet eine Szenen-SVG ohne Szenendatei', () => {
+    const inhalt = grundinhalt();
+    inhalt['worlds/welt-a/scenes/szene-c.svg'] = svg();
+    expect(pruefe(inhalt).fehler).toEqual([
+      {
+        datei: 'worlds/welt-a/scenes/szene-c.svg',
+        regel: 'szene-fehlt',
+        text: 'Zur SVG fehlt die Szenendatei szene-c.json.',
+      },
+    ]);
+  });
+
   it('erlaubt Verweise innerhalb der Datei', () => {
     const inhalt = grundinhalt();
     const erlaubt = '<defs><clipPath id="c"><rect/></clipPath></defs><use href="#c"/><rect clip-path="url(#c)"/>';
@@ -380,12 +476,14 @@ describe('Inhaltsverzeichnis (F35)', () => {
     ]);
   });
 
-  it('enthält Themengebiete und Beziehungstypen mit ausgeschriebenen Schaltern', () => {
-    const { topics, relations } = pruefe(grundinhalt()).verzeichnis;
+  it('enthält Themengebiete und Beziehungstypen mit ausgeschriebenem symmetric, aber ohne acyclic', () => {
+    const inhalt = grundinhalt();
+    (inhalt['relations.json'] as Daten[])[0].acyclic = true;
+    const { topics, relations } = pruefe(inhalt).verzeichnis;
     expect(topics).toEqual([{ id: 'gebiet-a', title: { de: 'Gebiet A' }, color: '#112233', icon: 'gebiet-a.svg' }]);
     expect(relations).toEqual([
-      { id: 'typ-a', symmetric: false, acyclic: false, forward: { de: 'vor' }, backward: { de: 'zurück' } },
-      { id: 'typ-b', symmetric: true, acyclic: false, forward: { de: 'neben' } },
+      { id: 'typ-a', symmetric: false, forward: { de: 'vor' }, backward: { de: 'zurück' } },
+      { id: 'typ-b', symmetric: true, forward: { de: 'neben' } },
     ]);
   });
 
