@@ -17,8 +17,7 @@ export interface Hinweisinhalt {
 
 export function hinweisinhalt(hotspot: Hotspot, gefunden: ReadonlySet<string>, fassung: string): Hinweisinhalt {
   const name = text(hotspot.label, fassung);
-  const kartenstand =
-    hotspot.action === 'card' ? { gefunden: hotspot.target !== undefined && gefunden.has(hotspot.target) } : undefined;
+  const kartenstand = hotspot.action === 'card' ? { gefunden: karteGefunden(hotspot, gefunden) } : undefined;
   const zeigtErklaerung = kartenstand === undefined || kartenstand.gefunden;
   return {
     name,
@@ -35,9 +34,10 @@ export function abgehakteHotspots(
   einstellungen: Einstellungen,
 ): ReadonlySet<string> {
   if (!einstellungen.showMarkers) return new Set();
-  return new Set(
-    hotspots
-      .filter((h) => h.action === 'card' && h.target !== undefined && gefunden.has(h.target))
-      .map((h) => h.id),
-  );
+  return new Set(hotspots.filter((h) => karteGefunden(h, gefunden)).map((h) => h.id));
+}
+
+/** Gibt der Hotspot eine Karte, und ist sie gefunden? */
+export function karteGefunden(hotspot: Hotspot, gefunden: ReadonlySet<string>): boolean {
+  return hotspot.action === 'card' && hotspot.target !== undefined && gefunden.has(hotspot.target);
 }

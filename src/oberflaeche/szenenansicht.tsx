@@ -10,18 +10,18 @@ interface Eigenschaften {
   hotspots: readonly SzenenHotspot[];
   darstellung: Darstellung;
   onEreignis: (ereignis: Szenenereignis) => void;
-  /** Größe oder Lage der Szene auf dem Bildschirm hat sich geändert. */
-  onGroesse: () => void;
+  /** Größe oder Lage der Szene auf dem Bildschirm kann sich geändert haben. */
+  onLageaenderung: () => void;
   onFehler: (fehler: unknown) => void;
   /** Gibt dem Aufrufer Zugriff auf die laufende Szene, etwa für `lageVon`. */
   szeneRef: RefObject<Szene | undefined>;
 }
 
-export function Szenenansicht({ svg, hotspots, darstellung, onEreignis, onGroesse, onFehler, szeneRef }: Eigenschaften) {
+export function Szenenansicht({ svg, hotspots, darstellung, onEreignis, onLageaenderung, onFehler, szeneRef }: Eigenschaften) {
   const behaelter = useRef<HTMLDivElement>(null);
   // Die Szene ruft immer die aktuellen Rückrufe, ohne bei jedem Zeichnen neu gebaut zu werden.
-  const rueckrufe = useRef({ onEreignis, onGroesse, onFehler });
-  rueckrufe.current = { onEreignis, onGroesse, onFehler };
+  const rueckrufe = useRef({ onEreignis, onLageaenderung, onFehler });
+  rueckrufe.current = { onEreignis, onLageaenderung, onFehler };
 
   useLayoutEffect(() => {
     if (behaelter.current === null) return;
@@ -43,10 +43,12 @@ export function Szenenansicht({ svg, hotspots, darstellung, onEreignis, onGroess
     szeneRef.current?.zeige(darstellung);
   }, [darstellung, svg, hotspots, szeneRef]);
 
+  // Die Szene verschiebt sich auch, ohne ihre Größe zu ändern, etwa wenn das Fenster breiter wird und
+  // sie durch die Höhe begrenzt ist, oder wenn darüber eine Meldung erscheint. Dann ändert sich die
+  // Größe eines Vorfahren; darum werden die Szene und alle ihre Vorfahren bis zum Dokument beobachtet.
   useEffect(() => {
-    if (behaelter.current === null) return;
-    const beobachter = new ResizeObserver(() => rueckrufe.current.onGroesse());
-    beobachter.observe(behaelter.current);
+    const beobachter = new ResizeObserver(() => rueckrufe.current.onLageaenderung());
+    for (let e: Element | null = behaelter.current; e !== null; e = e.parentElement) beobachter.observe(e);
     return () => beobachter.disconnect();
   }, []);
 

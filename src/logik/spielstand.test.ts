@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   aendereEinstellung,
+  aktiveEinstellungen,
   einlesen,
   gefundeneKarten,
   markiereGefunden,
@@ -56,6 +57,17 @@ describe('aendereEinstellung', () => {
     const vorher = neuerSpielstand();
     aendereEinstellung(vorher, 'showMarkers', false);
     expect(vorher).toEqual(neuerSpielstand());
+  });
+});
+
+describe('aktiveEinstellungen', () => {
+  it('liefert die Einstellungen des aktiven Profils', () => {
+    const spielstand = aendereEinstellung(neuerSpielstand(), 'showMarkers', false);
+    expect(aktiveEinstellungen(spielstand)).toEqual({ showMarkers: false });
+  });
+
+  it('liefert die Standardeinstellungen, wenn das aktive Profil fehlt', () => {
+    expect(aktiveEinstellungen({ schema: 1, active: 'fehlt', profiles: {} })).toEqual({ showMarkers: true });
   });
 });
 

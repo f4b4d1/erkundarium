@@ -2,9 +2,9 @@
 // Meldungen. Sie startet immer in der Startszene der ersten Welt (F1).
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { abgehakteHotspots, hinweisinhalt } from '../logik/hinweis.ts';
+import { abgehakteHotspots, hinweisinhalt, karteGefunden } from '../logik/hinweis.ts';
 import type { Speicherschicht } from '../logik/speicherschicht.ts';
-import { einlesen, gefundeneKarten, markiereGefunden, type Spielstand } from '../logik/spielstand.ts';
+import { aktiveEinstellungen, einlesen, gefundeneKarten, markiereGefunden, type Spielstand } from '../logik/spielstand.ts';
 import type { Hotspot } from '../logik/szenendatei.ts';
 import { STANDARDFASSUNG, text } from '../logik/textfassung.ts';
 import { ladeInhaltsverzeichnis, ladeSzene, type GeladeneSzene } from '../inhalte/laden.ts';
@@ -51,7 +51,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   );
   const darstellung = useMemo(
     () => ({
-      abgehakt: abgehakteHotspots(hotspots ?? [], gefunden, spielstand.profiles[spielstand.active]!.settings),
+      abgehakt: abgehakteHotspots(hotspots ?? [], gefunden, aktiveEinstellungen(spielstand)),
       hervorgehoben: offen?.hotspot,
     }),
     [hotspots, gefunden, spielstand, offen?.hotspot],
@@ -73,7 +73,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 
   function loeseAus(hotspot: Hotspot): void {
     // `scene` zoomt erst im nächsten Schritt; `info` hat nur den Hinweis (F24).
-    if (hotspot.action !== 'card' || hotspot.target === undefined || gefunden.has(hotspot.target)) return;
+    if (hotspot.action !== 'card' || hotspot.target === undefined || karteGefunden(hotspot, gefunden)) return;
     const neu = markiereGefunden(spielstand, hotspot.target, new Date().toISOString());
     setSpielstand(neu);
     if (!speichernErlaubt) return;
@@ -105,7 +105,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     }
   }
 
-  function beiGroesse(): void {
+  /** Der offene Hinweis folgt dem Hotspot, wenn sich Größe oder Lage der Szene ändern. */
+  function beiLageaenderung(): void {
     setOffen((bisher) => {
       const lage = bisher && szeneRef.current?.lageVon(bisher.hotspot);
       return bisher && lage ? { ...bisher, lage } : bisher;
@@ -139,7 +140,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           hotspots={hotspotsDerSzene}
           darstellung={darstellung}
           onEreignis={beimEreignis}
-          onGroesse={beiGroesse}
+          onLageaenderung={beiLageaenderung}
           onFehler={(fehler) =>
             setLadezustand({ art: 'fehler', meldung: TEXTE.szeneNichtDarstellbar, detail: fehlertext(fehler) })
           }

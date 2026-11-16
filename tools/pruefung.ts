@@ -9,6 +9,7 @@ import type {
   Themengebiet,
   Texte,
 } from '../src/logik/inhaltsverzeichnis.ts';
+import { ERLAUBTE_ELEMENTE } from '../src/logik/erlaubte-svg.ts';
 import type { Schemapruefung, SchemaName } from './schema.ts';
 
 export type Stufe = 'entwickeln' | 'veroeffentlichen';
@@ -90,6 +91,25 @@ const VERBOTEN_IN_SVG: [string, RegExp][] = [
     /\sstyle\s*=/i,
   ],
 ];
+
+// Elemente, die oben schon eine eigene Meldung bekommen; sie werden nicht noch einmal als nicht
+// erlaubtes Element gemeldet.
+const EIGENS_GEMELDET = new Set(['script', 'style', 'text', 'title', 'image', 'filter', 'lineargradient', 'radialgradient']);
+
+// Öffnende Tags mit optionalem Namensraum-Präfix; schließende Tags, <!…> und <?…> passen nicht.
+const ELEMENTNAME = /<([A-Za-z_][\w.-]*)(?::([A-Za-z_][\w.-]*))?/g;
+
+/** Die Elemente der SVG, die nicht auf der Erlaubnisliste stehen, je Name einmal, wie im Quelltext geschrieben. */
+function nichtErlaubteElemente(svg: string): string[] {
+  const namen = new Set<string>();
+  for (const [, erster, zweiter] of svg.matchAll(ELEMENTNAME)) {
+    const [praefix, name] = zweiter === undefined ? [undefined, erster!] : [erster, zweiter];
+    if (EIGENS_GEMELDET.has(name.toLowerCase())) continue;
+    if ((praefix === undefined || praefix === 'svg') && ERLAUBTE_ELEMENTE.has(name)) continue;
+    namen.add(praefix === undefined ? name : `${praefix}:${name}`);
+  }
+  return [...namen];
+}
 
 const KOMMENTAR = /<!--[\s\S]*?-->/g;
 
@@ -270,6 +290,13 @@ export function pruefeInhalte(
     }
     for (const [name, muster] of VERBOTEN_IN_SVG) {
       if (muster.test(svg)) meldeFehler(svgPfad, 'svg-verboten', `Die SVG enthält Verbotenes: ${name}.`);
+    }
+    for (const element of nichtErlaubteElemente(svg)) {
+      meldeFehler(
+        svgPfad,
+        'svg-verboten',
+        `Die SVG enthält das Element <${element}>, das in Szenen nicht erlaubt ist. Erlaubt sind nur: ${[...ERLAUBTE_ELEMENTE].join(', ')}.`,
+      );
     }
   }
 

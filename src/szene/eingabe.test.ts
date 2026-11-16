@@ -1,31 +1,46 @@
 import { describe, expect, it } from 'vitest';
 import { deuteAntippen, geraetDesZeigers } from './eingabe.ts';
 
+const ruhe = { hervorgehoben: undefined, durchTippenGeoeffnet: undefined };
+
 describe('deuteAntippen', () => {
   it('Maus: ein Klick auf einen Hotspot löst sofort aus, auch ohne offenen Hinweis', () => {
-    expect(deuteAntippen('maus', 'ding-a', undefined)).toEqual({ art: 'ausgeloest', hotspot: 'ding-a' });
+    expect(deuteAntippen('maus', 'ding-a', ruhe)).toEqual({ art: 'ausgeloest', hotspot: 'ding-a' });
   });
 
   it('Tastatur: löst sofort aus', () => {
-    expect(deuteAntippen('tastatur', 'ding-a', undefined)).toEqual({ art: 'ausgeloest', hotspot: 'ding-a' });
+    expect(deuteAntippen('tastatur', 'ding-a', ruhe)).toEqual({ art: 'ausgeloest', hotspot: 'ding-a' });
   });
 
   it('Touch: das erste Tippen betritt den Hotspot', () => {
-    expect(deuteAntippen('touch', 'ding-a', undefined)).toEqual({ art: 'betreten', hotspot: 'ding-a' });
+    expect(deuteAntippen('touch', 'ding-a', ruhe)).toEqual({ art: 'betreten', hotspot: 'ding-a' });
   });
 
-  it('Touch: das zweite Tippen auf den hervorgehobenen Hotspot löst aus', () => {
-    expect(deuteAntippen('touch', 'ding-a', 'ding-a')).toEqual({ art: 'ausgeloest', hotspot: 'ding-a' });
+  it('Touch: das zweite Tippen auf den Hotspot, dessen Hinweis das erste Tippen geöffnet hat, löst aus', () => {
+    const zustand = { hervorgehoben: 'ding-a', durchTippenGeoeffnet: 'ding-a' };
+    expect(deuteAntippen('touch', 'ding-a', zustand)).toEqual({ art: 'ausgeloest', hotspot: 'ding-a' });
+  });
+
+  it('Touch: das erste Tippen auf einen per Maus oder Tastatur hervorgehobenen Hotspot betritt ihn nur', () => {
+    const zustand = { hervorgehoben: 'ding-a', durchTippenGeoeffnet: undefined };
+    expect(deuteAntippen('touch', 'ding-a', zustand)).toEqual({ art: 'betreten', hotspot: 'ding-a' });
+  });
+
+  it('Touch: löst nicht aus, wenn der durch Tippen geöffnete Hinweis nicht mehr offen ist', () => {
+    const zustand = { hervorgehoben: undefined, durchTippenGeoeffnet: 'ding-a' };
+    expect(deuteAntippen('touch', 'ding-a', zustand)).toEqual({ art: 'betreten', hotspot: 'ding-a' });
   });
 
   it('Touch: Tippen auf einen anderen Hotspot betritt diesen, statt auszulösen', () => {
-    expect(deuteAntippen('touch', 'ding-b', 'ding-a')).toEqual({ art: 'betreten', hotspot: 'ding-b' });
+    const zustand = { hervorgehoben: 'ding-a', durchTippenGeoeffnet: 'ding-a' };
+    expect(deuteAntippen('touch', 'ding-b', zustand)).toEqual({ art: 'betreten', hotspot: 'ding-b' });
   });
 
   it('Tippen oder Klicken neben jeden Hotspot ist daneben', () => {
-    expect(deuteAntippen('touch', undefined, 'ding-a')).toEqual({ art: 'daneben' });
-    expect(deuteAntippen('touch', undefined, undefined)).toEqual({ art: 'daneben' });
-    expect(deuteAntippen('maus', undefined, 'ding-a')).toEqual({ art: 'daneben' });
+    const offen = { hervorgehoben: 'ding-a', durchTippenGeoeffnet: 'ding-a' };
+    expect(deuteAntippen('touch', undefined, offen)).toEqual({ art: 'daneben' });
+    expect(deuteAntippen('touch', undefined, ruhe)).toEqual({ art: 'daneben' });
+    expect(deuteAntippen('maus', undefined, offen)).toEqual({ art: 'daneben' });
   });
 });
 

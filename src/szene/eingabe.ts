@@ -1,23 +1,24 @@
 // Deutung von Klick, Tippen und Eingabetaste auf einen Hotspot nach Eingabegerät (F26).
 // Touch braucht zwei Tippen: Das erste zeigt Hinweis und Hervorhebung, das zweite auf denselben
-// Hotspot löst aus. Den Zustand dazwischen hält kein eigener Speicher, sondern die Hervorhebung,
-// die die Oberfläche vorgibt: Ausgelöst wird nur, was gerade sichtbar hervorgehoben ist.
+// Hotspot löst aus. Ausgelöst wird nur, wenn der Hinweis dieses Hotspots durch ein vorheriges
+// Tippen geöffnet wurde und noch offen ist; eine Hervorhebung durch Maus oder Tastatur zählt nicht.
 
 export type Eingabegeraet = 'maus' | 'touch' | 'tastatur';
 
 export type Antippfolge = { art: 'betreten' | 'ausgeloest'; hotspot: string } | { art: 'daneben' };
 
-/**
- * @param getroffen der innerste getroffene Hotspot, `undefined` daneben
- * @param hervorgehoben der Hotspot, der gerade hervorgehoben ist
- */
-export function deuteAntippen(
-  geraet: Eingabegeraet,
-  getroffen: string | undefined,
-  hervorgehoben: string | undefined,
-): Antippfolge {
+export interface Antippzustand {
+  /** Der Hotspot, der gerade hervorgehoben ist, gleich woher. */
+  hervorgehoben: string | undefined;
+  /** Der Hotspot, dessen Hinweis zuletzt durch ein Tippen geöffnet wurde. */
+  durchTippenGeoeffnet: string | undefined;
+}
+
+/** @param getroffen der innerste getroffene Hotspot, `undefined` daneben */
+export function deuteAntippen(geraet: Eingabegeraet, getroffen: string | undefined, zustand: Antippzustand): Antippfolge {
   if (getroffen === undefined) return { art: 'daneben' };
-  if (geraet === 'touch' && getroffen !== hervorgehoben) return { art: 'betreten', hotspot: getroffen };
+  const zweitesTippen = getroffen === zustand.hervorgehoben && getroffen === zustand.durchTippenGeoeffnet;
+  if (geraet === 'touch' && !zweitesTippen) return { art: 'betreten', hotspot: getroffen };
   return { art: 'ausgeloest', hotspot: getroffen };
 }
 

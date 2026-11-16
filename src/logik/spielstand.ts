@@ -51,7 +51,12 @@ export function aendereEinstellung<N extends keyof Einstellungen>(
 
 /** Die gefundenen Karten des aktiven Profils, auch die, die es im Verzeichnis nicht gibt. */
 export function gefundeneKarten(spielstand: Spielstand): ReadonlySet<string> {
-  return new Set(Object.keys(spielstand.profiles[spielstand.active]!.cards));
+  return new Set(Object.keys(aktivesProfil(spielstand).cards));
+}
+
+/** Die Einstellungen des aktiven Profils; die Standardeinstellungen, wenn das Profil fehlt. */
+export function aktiveEinstellungen(spielstand: Spielstand): Einstellungen {
+  return aktivesProfil(spielstand).settings;
 }
 
 /** F19: leert die gefundenen Karten des aktiven Profils und setzt seine Einstellungen zurück. */
@@ -122,9 +127,14 @@ function leeresProfil(): Profil {
   return { cards: {}, settings: { ...STANDARDEINSTELLUNGEN } };
 }
 
-function mitAktivemProfil(spielstand: Spielstand, aendern: (profil: Profil) => Profil): Spielstand {
+/** Das aktive Profil; ein leeres, wenn es fehlt. */
+function aktivesProfil(spielstand: Spielstand): Profil {
   const { active, profiles } = spielstand;
-  return { ...spielstand, profiles: { ...profiles, [active]: aendern(profiles[active]!) } };
+  return Object.hasOwn(profiles, active) ? profiles[active]! : leeresProfil();
+}
+
+function mitAktivemProfil(spielstand: Spielstand, aendern: (profil: Profil) => Profil): Spielstand {
+  return { ...spielstand, profiles: { ...spielstand.profiles, [spielstand.active]: aendern(aktivesProfil(spielstand)) } };
 }
 
 function istObjekt(wert: unknown): wert is Record<string, unknown> {

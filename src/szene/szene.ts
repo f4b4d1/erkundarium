@@ -3,9 +3,9 @@
 // meldet, was mit den Hotspots geschieht. Es kennt weder Karten noch Spielstand: Was hervorgehoben
 // und abgehakt ist, gibt der Aufrufer über `zeige` vor.
 
+import { attributErlaubt, elementErlaubt, SVG_NAMENSRAUM } from '../logik/erlaubte-svg.ts';
 import { deuteAntippen, geraetDesZeigers, type Eingabegeraet } from './eingabe.ts';
-
-export type { Eingabegeraet } from './eingabe.ts';
+import { HAKEN_PFAD, HAKEN_RADIUS, HAKENFARBE, KONTUR, WEISS } from './haken.ts';
 
 /** Rechteck in Bildschirmpixeln, bezogen auf das Fenster. */
 export interface Rechteck {
@@ -29,9 +29,9 @@ export interface Darstellung {
 }
 
 export type Szenenereignis =
-  | { art: 'betreten' | 'ausgeloest'; hotspot: string; geraet: Eingabegeraet; lage: Rechteck }
-  | { art: 'verlassen'; hotspot: string; geraet: Eingabegeraet }
-  | { art: 'daneben'; geraet: Eingabegeraet };
+  | { art: 'betreten' | 'ausgeloest'; hotspot: string; lage: Rechteck }
+  | { art: 'verlassen'; hotspot: string }
+  | { art: 'daneben' };
 
 export interface Szene {
   zeige(darstellung: Darstellung): void;
@@ -40,12 +40,7 @@ export interface Szene {
   abbauen(): void;
 }
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-const HAKEN_RADIUS = 9;
-// Farben nach design-guidelines.md Abschnitt 4, Stufe 1.
-const KONTUR = '#26262E';
-const WEISS = '#F7F9FB';
-const FUNDMARKER = '#3BB273';
+const SVG_NS = SVG_NAMENSRAUM;
 
 /**
  * Bettet die SVG in `behaelter` ein. Elemente mit `data-hotspot` ohne Eintrag in `hotspots` bleiben
@@ -82,6 +77,7 @@ export function baueSzene(
   let hervorgehoben: string | undefined;
   let unterDerMaus: string | undefined;
   let imFokus: string | undefined;
+  let durchTippenGeoeffnet: string | undefined;
   let letztesGeraet: Eingabegeraet = 'maus';
 
   /** Der innerste Hotspot mit Eintrag, in dem `ziel` liegt. */
@@ -98,16 +94,18 @@ export function baueSzene(
     return r === undefined ? undefined : { links: r.left, oben: r.top, breite: r.width, hoehe: r.height };
   };
 
-  const meldeMitLage = (art: 'betreten' | 'ausgeloest', hotspot: string, geraet: Eingabegeraet) => {
+  const meldeMitLage = (art: 'betreten' | 'ausgeloest', hotspot: string) => {
     const lage = lageVon(hotspot);
-    if (lage !== undefined) melde({ art, hotspot, geraet, lage });
+    if (lage !== undefined) melde({ art, hotspot, lage });
   };
 
   const zeigeAuf = (hotspot: string | undefined) => {
     if (hotspot === unterDerMaus) return;
-    if (unterDerMaus !== undefined) melde({ art: 'verlassen', hotspot: unterDerMaus, geraet: 'maus' });
+    if (unterDerMaus !== undefined) melde({ art: 'verlassen', hotspot: unterDerMaus });
     unterDerMaus = hotspot;
-    if (hotspot !== undefined) meldeMitLage('betreten', hotspot, 'maus');
+    if (hotspot !== undefined) meldeMitLage('betreten', hotspot);
+    // Verlässt die Maus einen Hotspot, gilt wieder der Hinweis am Tastaturfokus (F21).
+    else if (imFokus !== undefined) meldeMitLage('betreten', imFokus);
   };
 
   svg.addEventListener('pointermove', (e) => {
@@ -122,33 +120,36 @@ export function baueSzene(
   svg.addEventListener('click', (e) => {
     // detail 0: ausgelöst ohne Zeiger, etwa von einem Screenreader.
     const geraet = e.detail === 0 ? 'tastatur' : letztesGeraet;
-    const folge = deuteAntippen(geraet, getroffen(e.target), hervorgehoben);
-    if (folge.art === 'daneben') melde({ art: 'daneben', geraet });
-    else meldeMitLage(folge.art, folge.hotspot, geraet);
+    const folge = deuteAntippen(geraet, getroffen(e.target), { hervorgehoben, durchTippenGeoeffnet });
+    durchTippenGeoeffnet = geraet === 'touch' && folge.art !== 'daneben' ? folge.hotspot : undefined;
+    if (folge.art === 'daneben') melde({ art: 'daneben' });
+    else meldeMitLage(folge.art, folge.hotspot);
   });
   svg.addEventListener('keydown', (e) => {
     const hotspot = idVon.get(e.target as Element);
     if (hotspot === undefined || (e.key !== 'Enter' && e.key !== ' ')) return;
     e.preventDefault();
-    meldeMitLage('ausgeloest', hotspot, 'tastatur');
+    meldeMitLage('ausgeloest', hotspot);
   });
   svg.addEventListener('focusin', (e) => {
     const hotspot = idVon.get(e.target as Element);
     // Ein Klick mit der Maus fokussiert den Hotspot auch; als Tastaturfokus zählt nur ein sichtbarer.
     if (hotspot === undefined || !(e.target as Element).matches(':focus-visible')) return;
     imFokus = hotspot;
-    meldeMitLage('betreten', hotspot, 'tastatur');
+    meldeMitLage('betreten', hotspot);
   });
   svg.addEventListener('focusout', (e) => {
     const hotspot = idVon.get(e.target as Element);
     if (hotspot === undefined || hotspot !== imFokus) return;
     imFokus = undefined;
-    melde({ art: 'verlassen', hotspot, geraet: 'tastatur' });
+    melde({ art: 'verlassen', hotspot });
   });
 
   return {
     zeige(darstellung) {
       hervorgehoben = darstellung.hervorgehoben;
+      // Ein durch Tippen geöffneter Hinweis gilt nur, solange er ohne Unterbrechung offen ist.
+      if (hervorgehoben !== durchTippenGeoeffnet) durchTippenGeoeffnet = undefined;
       for (const [id, element] of elemente) element.classList.toggle('hervorgehoben', id === hervorgehoben);
       zeichneHaken(svg, hakenebene, darstellung.abgehakt, elemente);
     },
@@ -159,22 +160,29 @@ export function baueSzene(
   };
 }
 
-/** Parst den SVG-Text und entfernt alles, was Code ausführen oder Dateien nachladen könnte. */
+/**
+ * Parst den SVG-Text und behält nur, was nach `erlaubte-svg.ts` zum Zeichnen erlaubt ist: Jedes
+ * andere Element fällt samt Inhalt weg, jedes andere Attribut fällt weg. Bereinigt wird im
+ * geparsten, nicht eingebetteten Dokument, in dem nichts ausgeführt wird.
+ */
 function alsSvg(svgText: string): SVGSVGElement {
   const dokument = new DOMParser().parseFromString(svgText, 'image/svg+xml');
   const wurzel = dokument.documentElement;
   if (dokument.querySelector('parsererror') !== null || wurzel.namespaceURI !== SVG_NS || wurzel.localName !== 'svg') {
     throw new Error('Die Szenendatei ist kein gültiges SVG.');
   }
-  for (const element of Array.from(wurzel.querySelectorAll('script, foreignObject'))) element.remove();
-  for (const element of [wurzel, ...Array.from(wurzel.querySelectorAll('*'))]) {
-    for (const attribut of Array.from(element.attributes)) {
-      const name = attribut.localName.toLowerCase();
-      const verweistNachAussen = (name === 'href' || name === 'src') && !attribut.value.trim().startsWith('#');
-      if (name.startsWith('on') || verweistNachAussen) element.removeAttributeNode(attribut);
-    }
-  }
+  bereinige(wurzel);
   return document.importNode(wurzel, true) as unknown as SVGSVGElement;
+}
+
+function bereinige(element: Element): void {
+  for (const attribut of Array.from(element.attributes)) {
+    if (!attributErlaubt(element.localName, attribut.name, attribut.value)) element.removeAttributeNode(attribut);
+  }
+  for (const kind of Array.from(element.children)) {
+    if (elementErlaubt(kind.namespaceURI, kind.localName)) bereinige(kind);
+    else kind.remove();
+  }
 }
 
 /**
@@ -216,9 +224,9 @@ function haken(x: number, y: number, hotspot: string): SVGGElement {
   gruppe.setAttribute('data-haken', hotspot);
   gruppe.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
   gruppe.append(
-    svgElement('circle', { r: String(HAKEN_RADIUS), fill: FUNDMARKER, stroke: KONTUR, 'stroke-width': '2' }),
+    svgElement('circle', { r: String(HAKEN_RADIUS), fill: HAKENFARBE, stroke: KONTUR, 'stroke-width': '2' }),
     svgElement('path', {
-      d: 'M-4,0.5L-1.2,3.3L4.2,-2.6',
+      d: HAKEN_PFAD,
       fill: 'none',
       stroke: WEISS,
       'stroke-width': '2.4',

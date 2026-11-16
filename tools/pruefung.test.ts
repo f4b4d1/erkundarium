@@ -368,6 +368,48 @@ describe('Szenendatei und SVG', () => {
     expect(fehler(inhalt)).toEqual([`${pfadA}.svg svg-verboten`]);
   });
 
+  it.each([
+    ['<a>', '<a href="#ding-1"><rect width="1" height="1"/></a>', 'a'],
+    ['<set>', '<rect><set attributeName="fill" to="#000"/></rect>', 'set'],
+    ['<animate>', '<rect><animate attributeName="x" to="1"/></rect>', 'animate'],
+    ['<object>', '<object data="a.svg"/>', 'object'],
+    ['<foreignObject>', '<foreignObject width="1" height="1"/>', 'foreignObject'],
+    ['<svg:set>', '<svg:set attributeName="fill" to="#000"/>', 'svg:set'],
+    ['Element aus fremdem Namensraum', '<h:iframe xmlns:h="http://www.w3.org/1999/xhtml" srcdoc="x"/>', 'h:iframe'],
+    ['fremdes Präfix vor erlaubtem Namen', '<h:rect xmlns:h="http://www.w3.org/1999/xhtml"/>', 'h:rect'],
+  ])('meldet ein Element, das nicht auf der Liste steht: %s', (_name, schnipsel, element) => {
+    const inhalt = grundinhalt();
+    inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2', 'ding-3').replace('</svg>', `${schnipsel}\n</svg>`);
+    expect(pruefe(inhalt).fehler).toEqual([
+      {
+        datei: `${pfadA}.svg`,
+        regel: 'svg-verboten',
+        text: `Die SVG enthält das Element <${element}>, das in Szenen nicht erlaubt ist. Erlaubt sind nur: svg, g, defs, clipPath, use, path, rect, circle, ellipse, line, polyline, polygon.`,
+      },
+    ]);
+  });
+
+  it('meldet jedes nicht erlaubte Element nur einmal', () => {
+    const inhalt = grundinhalt();
+    inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2', 'ding-3').replace('</svg>', '<set/><set/><animate/>\n</svg>');
+    expect(fehler(inhalt)).toEqual([`${pfadA}.svg svg-verboten`, `${pfadA}.svg svg-verboten`]);
+  });
+
+  it('erlaubt die Zeichenelemente, auch mit dem Präfix svg:', () => {
+    const inhalt = grundinhalt();
+    const erlaubt =
+      '<g><line x1="0" y1="0" x2="1" y2="1"/><polyline points="0,0 1,1"/><polygon points="0,0 1,1 1,0"/>' +
+      '<circle r="1"/><ellipse rx="1" ry="1"/><path d="M0,0"/><svg:rect width="1" height="1"/></g>';
+    inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2', 'ding-3').replace('</svg>', `${erlaubt}\n</svg>`);
+    expect(fehler(inhalt)).toEqual([]);
+  });
+
+  it('übergeht nicht erlaubte Elemente in Kommentaren', () => {
+    const inhalt = grundinhalt();
+    inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2', 'ding-3').replace('</svg>', '<!-- <a><set/></a> -->\n</svg>');
+    expect(fehler(inhalt)).toEqual([]);
+  });
+
   it('meldet das Attribut style mit einem eigenen Text, auch wenn es einen Filter enthält', () => {
     const inhalt = grundinhalt();
     inhalt[`${pfadA}.svg`] = svg('ding-1', 'ding-2', 'ding-3').replace(

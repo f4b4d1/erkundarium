@@ -10,11 +10,9 @@ const ID_MUSTER = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** Eine Inhaltsdatei fehlt, ist nicht erreichbar oder hat nicht die erwartete Form. */
 export class Ladefehler extends Error {
-  readonly pfad: string;
   constructor(pfad: string, grund: string) {
     super(`${pfad}: ${grund}`);
     this.name = 'Ladefehler';
-    this.pfad = pfad;
   }
 }
 

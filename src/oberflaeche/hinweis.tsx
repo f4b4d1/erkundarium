@@ -3,12 +3,15 @@
 
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import type { Hinweisinhalt } from '../logik/hinweis.ts';
+import { HAKEN_PFAD, HAKEN_RADIUS, HAKENFARBE, KONTUR, WEISS } from '../szene/haken.ts';
 import type { Rechteck } from '../szene/szene.ts';
 import { platziereHinweis } from './platzierung.ts';
 import { TEXTE } from './texte.ts';
 
 const ABSTAND = 10;
 const RAND = 8;
+/** Der Haken im Kartensymbol: Radius 6 statt `HAKEN_RADIUS`, Striche 1,5 und 1,8 breit. */
+const HAKEN_MASSSTAB = 6 / HAKEN_RADIUS;
 
 export function Hinweis({ inhalt, ziel }: { inhalt: Hinweisinhalt; ziel: Rechteck }) {
   const feld = useRef<HTMLDivElement>(null);
@@ -65,11 +68,18 @@ function aktionssymbol(inhalt: Hinweisinhalt) {
 function SymbolKarte({ gefunden }: { gefunden: boolean }) {
   return (
     <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="5" y="3" width="14" height="18" rx="2" fill={gefunden ? '#F7F9FB' : '#6B7785'} stroke="#26262E" stroke-width="2" />
+      <rect x="5" y="3" width="14" height="18" rx="2" fill={gefunden ? WEISS : '#6B7785'} stroke={KONTUR} stroke-width="2" />
       {gefunden && (
-        <g>
-          <circle cx="17" cy="17" r="6" fill="#3BB273" stroke="#26262E" stroke-width="1.5" />
-          <path d="M14.3,17.2L16.3,19.2L19.8,15.3" fill="none" stroke="#F7F9FB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        <g transform={`translate(17 17) scale(${HAKEN_MASSSTAB})`}>
+          <circle r={HAKEN_RADIUS} fill={HAKENFARBE} stroke={KONTUR} stroke-width={1.5 / HAKEN_MASSSTAB} />
+          <path
+            d={HAKEN_PFAD}
+            fill="none"
+            stroke={WEISS}
+            stroke-width={1.8 / HAKEN_MASSSTAB}
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </g>
       )}
     </svg>
@@ -79,8 +89,8 @@ function SymbolKarte({ gefunden }: { gefunden: boolean }) {
 function SymbolLupe() {
   return (
     <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="10" cy="10" r="6" fill="#F7F9FB" stroke="#26262E" stroke-width="2" />
-      <path d="M14.5,14.5L20,20" stroke="#26262E" stroke-width="3" stroke-linecap="round" />
+      <circle cx="10" cy="10" r="6" fill={WEISS} stroke={KONTUR} stroke-width="2" />
+      <path d="M14.5,14.5L20,20" stroke={KONTUR} stroke-width="3" stroke-linecap="round" />
     </svg>
   );
 }
@@ -88,9 +98,9 @@ function SymbolLupe() {
 function SymbolInfo() {
   return (
     <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" fill="#1F78C1" stroke="#26262E" stroke-width="2" />
-      <circle cx="12" cy="7.5" r="1.4" fill="#F7F9FB" />
-      <path d="M12,11V17" stroke="#F7F9FB" stroke-width="2.4" stroke-linecap="round" />
+      <circle cx="12" cy="12" r="9" fill="#1F78C1" stroke={KONTUR} stroke-width="2" />
+      <circle cx="12" cy="7.5" r="1.4" fill={WEISS} />
+      <path d="M12,11V17" stroke={WEISS} stroke-width="2.4" stroke-linecap="round" />
     </svg>
   );
 }

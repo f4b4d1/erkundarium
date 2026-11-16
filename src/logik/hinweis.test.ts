@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { abgehakteHotspots, hinweisinhalt } from './hinweis.ts';
+import { abgehakteHotspots, hinweisinhalt, karteGefunden } from './hinweis.ts';
 import type { Hotspot } from './szenendatei.ts';
 
 const karte: Hotspot = { id: 'ding-1', action: 'card', target: 'karte-a', label: { de: 'Ding 1' }, hint: { de: 'Erklärung 1' } };
@@ -44,6 +44,18 @@ describe('hinweisinhalt', () => {
 
   it('liest die Texte in der gewählten Fassung und fällt auf de zurück', () => {
     expect(hinweisinhalt(info, gefunden(), 'en')).toEqual({ name: 'Thing 3', erklaerung: 'Erklärung 3', aktion: 'info' });
+  });
+});
+
+describe('karteGefunden', () => {
+  it('ist wahr, wenn der Hotspot eine Karte gibt und diese gefunden ist', () => {
+    expect(karteGefunden(karte, gefunden('karte-a'))).toBe(true);
+    expect(karteGefunden(karte, gefunden('karte-b'))).toBe(false);
+  });
+
+  it('ist falsch bei Hotspots ohne Karte, auch wenn ihr Ziel als gefunden gilt', () => {
+    expect(karteGefunden(zoom, gefunden('szene-b'))).toBe(false);
+    expect(karteGefunden(info, gefunden('karte-a'))).toBe(false);
   });
 });
 
