@@ -186,14 +186,13 @@ Umgesetzte Anforderungen der Spec: F1, F2, F5, F7 bis F10, F17, F18, F21, F22, F
 
 Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
-1. Kartentexte nachbessern: Die fünf Karten mit Herstellerangaben sind nach `design-guidelines-karte.md` neu gefasst. Offen: Die Rückseite von `haltebremse` beginnt mit „Das nennt man …“ und bezieht sich damit auf die Vorderseite; `motorleitung` nennt „beidseitig großflächig aufgelegt“ ohne Erklärung. Die übrigen sechs Karten sind noch nicht gegen Abschnitt 8 geprüft.
-2. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11).
-3. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
-4. Karte `servomotor` und Beziehungen.
-5. Sammlung mit Fundorten und Beziehungen an der geöffneten Karte (F14 bis F16), Fortschrittsanzeige (F13).
-6. Abzeichen, Hilfe-Schalter, Schalter für die Haken, Auslösen über das Symbol im Hinweis, breitere Klickfläche (F26 bis F29, F37, F11), Zurücksetzen des Spielstands (F19 in der Oberfläche).
-7. Rest des Prüfskripts (F20): Längenvorgaben und Bausteinzahl, Karten ohne Hotspot, Kreise und Erreichbarkeit im Szenennetz (die Funktionen liegen in `src/logik/szenennetz.ts`), symmetrische Beziehungen an beiden Karten, Kreise bei `acyclic`, `linkLabel` ohne `link`, fehlende Bild- und Symboldateien, Prüfung von Kartenbildern und Symbolen auf verbotene Inhalte, Hotspot-Dichte.
-8. Abnahme nach Spec Abschnitt 10.
+1. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11).
+2. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
+3. Karte `servomotor` und Beziehungen.
+4. Sammlung mit Fundorten und Beziehungen an der geöffneten Karte (F14 bis F16), Fortschrittsanzeige (F13).
+5. Abzeichen, Hilfe-Schalter, Schalter für die Haken, Auslösen über das Symbol im Hinweis, breitere Klickfläche (F26 bis F29, F37, F11), Zurücksetzen des Spielstands (F19 in der Oberfläche).
+6. Rest des Prüfskripts (F20): Längenvorgaben und Bausteinzahl, Karten ohne Hotspot, Kreise und Erreichbarkeit im Szenennetz (die Funktionen liegen in `src/logik/szenennetz.ts`), symmetrische Beziehungen an beiden Karten, Kreise bei `acyclic`, `linkLabel` ohne `link`, fehlende Bild- und Symboldateien, Prüfung von Kartenbildern und Symbolen auf verbotene Inhalte, Hotspot-Dichte.
+7. Abnahme nach Spec Abschnitt 10.
 
 ### Bekannte Mängel und Ungeprüftes
 
@@ -205,7 +204,8 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 - Schema-Fehler erscheinen teils englisch. Das Prüfskript sieht nur `.json` und `.svg`.
 - Die Migration zwischen Spielstand-Versionen ist ungetestet, weil es nur Version 1 gibt.
 - Nie geprüft: Firefox, echte Touch-Geräte, Screenreader, Handy im Hochformat, eine Karte mit eigenem Bild, eine zweite Textfassung. Alle Prüfungen am laufenden Spiel liefen in ferngesteuertem Edge.
-- Kein Kartentext und kein Hotspot-Text ist von einem Menschen gegen seine Quelle gegengelesen; die Agenten haben die Quellen abgerufen. Schwache Stellen: `not-halt-und-zaun` und `roboterzelle` (Zaun und Normen aus einem Sekundärartikel), Zahlen bei `encoder` und `kabelkanal` (je ein Produkt). Hotspot-Texte haben keinen Prüfstatus.
+- Alle elf Karten sind gegen `design-guidelines-karte.md` Abschnitt 8 geprüft, aber kein Kartentext und kein Hotspot-Text ist von einem Menschen gegengelesen. Die Agenten lasen die Quellen über WebFetch, also als Zusammenfassung, nicht im Volltext. Schwache Stellen: `hallenleuchte` ohne eigene unabhängige Quelle zu Hallenleuchten; `kabelkanal` stützt sich auf ein Fachportal und eine Herstellerseite, die Rückseite ist dadurch dünn; `not-halt-und-zaun` nutzt einen Fachverlag (WEKA). Hotspot-Texte haben keinen Prüfstatus.
+- Ein im Hintergrund gestarteter Vite-Server läuft weiter, wenn die Hintergrund-Aufgabe gestoppt wird. Danach Port 5199 prüfen und den eigenen Prozess per PID beenden.
 
 ### Anhaltspunkte im Code
 
