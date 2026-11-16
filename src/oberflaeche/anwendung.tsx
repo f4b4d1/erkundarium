@@ -92,6 +92,9 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     );
   }, []);
 
+  // Ein ausstehendes Schließen darf nach dem Abbau nichts mehr setzen.
+  useEffect(() => () => window.clearTimeout(schliesstimer.current), []);
+
   // Erst wenn die Kartenansicht aus der Seite ist, ist die Szene wieder bedienbar und fokussierbar.
   useEffect(() => {
     if (offeneKarte !== undefined || fokusZurueck.current === undefined) return;
@@ -211,6 +214,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       pruefeSvg(geladen.svg);
       await animation?.finished;
       fokusAufSzene.current = true;
+      stoppeSchliesstimer();
       setOffen(undefined);
       setLadezustand((bisher) => (bisher.art === 'bereit' ? { ...bisher, szene: geladen, pfad: neuerWeg } : bisher));
       // Erstes Betreten: Die Eintrittskarte deckt sich nach dem Wechsel von selbst auf (F30).
@@ -264,8 +268,9 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   /** Öffnet den Hinweis; ein schon offener am Zeigeranker desselben Hotspots bleibt, wo er ist. */
   function oeffneHinweis(hotspot: string, lage: Rechteck, zeiger: Punkt | undefined): void {
     stoppeSchliesstimer();
+    // Auch ohne Zeiger (Fokus, Taste) bleibt ein vorhandener Anker desselben Hotspots.
     setOffen((bisher) =>
-      bisher?.hotspot === hotspot && bisher.anker !== undefined && zeiger !== undefined
+      bisher?.hotspot === hotspot && bisher.anker !== undefined
         ? bisher
         : { hotspot, lage, ...(zeiger === undefined ? {} : { anker: zeiger }) },
     );
@@ -279,11 +284,18 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
         break;
       case 'bewegt': {
         // Der Hinweis läuft nicht mit; erst weit weg vom Anker setzt er sich an den Zeiger.
+        // Ist keiner für diesen Hotspot offen (etwa nach einer Lageänderung oder einer Karte), öffnet
+        // die Bewegung ihn am Zeiger; bloßes Schließen der Karte öffnet ihn nicht.
         const { hotspot, zeiger } = ereignis;
+        const lage = szeneRef.current?.lageVon(hotspot);
+        if (wechselt.current || offeneKarte !== undefined || lage === undefined) break;
+        stoppeSchliesstimer();
         setOffen((bisher) =>
-          bisher?.hotspot === hotspot && bisher.anker !== undefined && sollNeuAnkern(bisher.anker, zeiger)
-            ? { ...bisher, anker: zeiger }
-            : bisher,
+          bisher?.hotspot !== hotspot
+            ? { hotspot, lage, anker: zeiger }
+            : bisher.anker !== undefined && sollNeuAnkern(bisher.anker, zeiger)
+              ? { ...bisher, anker: zeiger }
+              : bisher,
         );
         break;
       }

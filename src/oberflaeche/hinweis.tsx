@@ -59,6 +59,8 @@ export function Hinweis({ inhalt, ziel, anker, onMausEin, onMausAus, onOeffneKar
       role="group"
       aria-label={inhalt.name}
       style={{ left: '0px', top: '0px', visibility: 'hidden' }}
+      // Ein Druck auf den Hinweis nimmt dem Hotspot den Tastaturfokus nicht; sonst schlösse er sich unter dem Klick.
+      onMouseDown={(e) => e.preventDefault()}
       onPointerEnter={(e) => e.pointerType === 'mouse' && onMausEin()}
       onPointerLeave={(e) => e.pointerType === 'mouse' && onMausAus()}
     >

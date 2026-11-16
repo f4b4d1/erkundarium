@@ -220,16 +220,14 @@ async function verbinde(ausgabeordner: string): Promise<{ browser: Browser; schl
     warte: pause,
     async klicke(selektor) {
       const [x, y] = await trefferpunkt(selektor);
-      await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
-      await cdp('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 });
-      await cdp('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
+      await browser.klickeBei(x, y);
     },
     klickeHotspot(id) {
       return browser.klicke(`[data-hotspot="${id}"]`);
     },
     async zeigeAuf(selektor) {
       const [x, y] = await trefferpunkt(selektor);
-      await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+      await browser.mausNach(x, y);
     },
     async mausNach(x, y) {
       await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
