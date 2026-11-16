@@ -141,17 +141,41 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `535a6b5`)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `ce27563`)
 
 Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
 
 ### Einstieg für die nächste Session
 
-Schritt 1 der nächsten Schritte ist fertig und reviewt: Zoom (F3), Pfadanzeige (F4), Eintrittskarte (F30, F31), Stand im Hinweis (F11), bedienbarer Hinweis am Zeiger mit Kartenknopf (F32). `roboterzelle` ist weiterhin ein Platzhalter (Entscheidung des Nutzers: Platzhalter zuerst, Zeichnen in Schritt 2). Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
+Schritt 2 (Zeichnen) läuft. Erledigt und committet (`ce27563`): Schutzzaun in der Halle, Startszene an die Guidelines angeglichen, neue Regel „Zoom-Ansicht“ in `design-guidelines.md` Abschnitt 5. **Nächste Aufgabe: die Zoomszene `roboterzelle` zeichnen**, genau nach „Auftrag Zoomszene `roboterzelle`“ unten. Der Nutzer hat alle Details freigegeben; vor dem Start trotzdem kurz Bescheid geben (großer Auftrag). Danach `robotergelenk`.
+
+Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
 
 Kartenknopf und Aktionssymbol (Lupe „Hineinzoomen“) stehen im Hinweis nebeneinander und sehen gleich aus; nur der Kartenknopf ist ein Knopf. Der Nutzer lässt das vorerst so (2026-11-16).
 
-Als Nächstes entscheidet der Nutzer zwischen Schritt 2 (Zeichnen) und den anderen Punkten unter „Nächste Schritte in M1“.
+### Auftrag Zoomszene `roboterzelle`
+
+Entscheidungen des Nutzers vom 2026-11-16:
+
+- Der Zoom soll quasi nahtlos in die Zelle führen. `roboterzelle` ist eine Zoom-Ansicht (Guidelines Abschnitt 5): Sie zeigt genau den Endausschnitt des Zooms in der Halle, Lage, Form und Farbe von allem Sichtbaren bleiben gleich, dazu kommen Details. Typ in der Szenendatei bleibt `ansicht`.
+- Zoomausschnitt, gemessen per `getBBox` von `#roboter` (x 720, y 332,6, 310 × 307,4): **Faktor f = 2,342; Ausschnitt x 533,4–1216,6, y 294,2–678,5.** Abbildung: x' = (x − 533,4) · f, y' = (y − 294,2) · f. Maßstab der Zoomszene 128 · f ≈ 300 Einheiten/m. Ändert sich die Box von `#roboter` in der Halle, ändert sich der Ausschnitt.
+- Der Konturensprung beim Tausch (in der vergrößerten Halle etwa 7 px, in der Zoomszene 3) wird hingenommen. Eine Überblendung käme erst in M4.
+- Zum Tokensparen erst ein Skript (im Scratchpad, nicht im Projekt): Elemente der Halle im Ausschnitt übernehmen und Koordinaten umrechnen. Konturen, Binnenlinien und Leitungskerne behalten ihre Breite (Linien werden im Zoom nicht dicker); Robotergliedbreiten (40/31/19 plus Unterlagen) und Radien werden mit f skaliert, weil sie Körpermaße sind. Kein `transform="scale(…)"` über alles. Danach ergänzt ein Sonnet-Agent die Details von Hand.
+- Wird im Bild ab x 533 etwas angeschnitten (Infotafel links, Förderband, Paket, Warnschild rechts, Kabelpritsche oben), ist das gewollt.
+
+Details, alle freigegeben ([H] = eigener Hotspot, [D] = Dekoration):
+
+- Roboter: alle sechs Achsen erkennbar [H je Achse]: Achse 1 Drehteller auf dem Sockel, Achse 4 Ring am Unterarm, Achse 6 Flansch. Achse 3 mit Motor und Getriebegehäuse, später Zoom-Hotspot zu `robotergelenk`. Servomotoren an Achse 2 und 3 mit Abgang ins Schlauchpaket [D]. Steckerplatte am Sockel [H], an der Motorleitung (rot) und Geberleitung (grün) aus dem Boden enden. Fußplatte mit Ankerschrauben, Schellen am Schlauchpaket, Drehrichtungspfeile ohne Text [D].
+- Greifer [H]: Parallelgreifer mit zwei Fingern am Karton, zwei Druckluftschläuche (Kern 3, `#6B7785`) [D], violetter Teilekontroll-Sensor [D].
+- Zaun: Türschalter mit Betätiger [H], Quittiertaster blau [H], Signalsäule [H], Teach-Pendant [H], Fußplatten mit Dübeln, Gitterklemmen, kleines Warnschild am Zaun [D].
+- Boden: Bodenmarkierung gelb-schwarz vor dem Zaun [H], Kabelschutz am Austritt der Leitungen [D].
+- Förderband: Lager an der Umlenkrolle, Gurtstoß, Stecker der Feldbusleitung am Lichttaster, Klebeband am Paket [D].
+- Wand: Not-Halt mit Leitung zur Kabelpritsche, Infotafel detaillierter. Katze bleibt (Ding außerhalb des Themas).
+- Weggelassen: Robotersteuerung (liegt außerhalb des Ausschnitts).
+
+Hotspots und Aktionen (etwa 24): Eintrittskarte `roboterzelle` (Szenendatei `card`). Karten: `industrieroboter` am ganzen Roboter (Achsen, Greifer, Steckerplatte verschachtelt darin), `greifer`, `motorleitung`, `not-halt-und-zaun` an Zaun, Türschalter und Not-Halt. Info: Achsen 1–6, Schlauchpaket, Geberleitung, Feldbusleitung, Steckerplatte, Quittiertaster, Signalsäule, Teach-Pendant, Bodenmarkierung, Förderband, Paket, Lichttaster, Katze, Infotafel, Verbandkasten, Warnschild. Der Zoom-Hotspot an Achse 3 zu `robotergelenk` kommt erst, wenn es die Szene gibt; bis dahin ist Achse 3 `info`. Hint-Texte nach Guidelines Abschnitt 2 (erklären, keine Bedienanweisung); bestehende Texte der Halle übernehmen, wo das Ding dasselbe ist.
+
+Ablauf: Skript, Agent zeichnet und schreibt `roboterzelle.svg` und `.json` (ersetzt den Platzhalter), Prüfskript, Abgabe-Prüfung Guidelines Abschnitt 8. Die Hauptsession prüft selbst: PNG der Szene neben dem Halle-Ausschnitt (`viewBox="533 294 684 385"`), Übergang im Spiel per `npm run browser` mit Bildschirmfoto kurz vor und nach dem Tausch. Dann dem Nutzer zeigen, Rückmeldung abwarten, committen.
 
 ### Arbeitsweise
 
@@ -188,6 +212,7 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 | 9a | Zoom (F3) und Pfadanzeige (F4): vorläufige Szene `roboterzelle`, `src/logik/pfad.ts` mit Tests, Zoom per Web Animations mit `prefers-reduced-motion`, Ladefehler und nicht darstellbare Zielszene lassen die aktuelle Szene stehen, Szene als `role="group"` mit Titel benannt; reviewt, Befunde behoben (Commits `f3831ae`, `745e30c`) |
 | 9b | Auftrag 2a: Eintrittskarte deckt sich beim ersten Betreten nach dem Zoom auf (F30, auch für die Startszene; `aufzudeckendeEintrittskarte` in `src/logik/karte-oeffnen.ts`), Kartenknopf an der aktuellen Szene in der Pfadanzeige (F31), Stand im Hinweis eines Zoom-Hotspots (F11); Fokus nach dem Schließen über `Fokusziel` (Hotspot, Kartenknopf, Szene); reviewt, Befunde behoben (Commits `e893b5d`, `f860462`). Nur in Logiktests geprüft: Startszene mit Eintrittskarte |
 | 9c | Auftrag 2b: Hinweis als `role="group"`, lässt keine Klicks durch, bleibt beim Fahren in den Hinweis offen, schließt 150 ms nach Verlassen und nach dem Schließen einer Karte; Lage am Zeiger (`platziereAmAnker`, `sollNeuAnkern` in `src/oberflaeche/platzierung.ts`; seit `535a6b5` über dem Zeiger mit 12 px Abstand, waagerecht mittig, nur ohne Platz oben darunter mit 32 px Abstand, damit die Hand ihn nicht verdeckt; neu ankern ab 120 px), bei Tastaturfokus an der Box; Ereignis `bewegt` und `zeiger` im Szenenmodul; Kartenknopf im Hinweis eines Zoom-Hotspots (F32, `eintrittskarte` in `hinweisinhalt`); `mausNach`, `klickeBei` in `tools/browser.ts`; reviewt, Befunde behoben (Commits `43e7f1c`, `d323dbf`) |
+| 10a | Halle (Commit `ce27563`): Schutzzaun 1,4 m (DIN EN ISO 13857) als Hotspot `schutzzaun` mit Schutztür rechts vom Roboter (x 1002–1108), Türschalter, Quittiertaster, Signalsäule; Hotspot `programmierhandgeraet`; zwischen x 715 und 870 nur Gitter, Klicks durch die Maschen treffen den Roboter (vom Agenten im Browser geprüft). Farben und Strichstärken an die Guidelines angeglichen, Lichtstrahl des Lichttasters bei x 1141. Die Halle hat jetzt 35 Hotspots, die Obergrenze einer Ansicht. Guidelines: Regel „Zoom-Ansicht“; Stilprofil: Gelb für Zaun, Blau für Quittiertaster, Druckluftschlauch, Leitplanke Schutzzaun; Mindmap angepasst |
 
 Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt und die Befunde behoben (Commit `aabd984`). Ungeprüft im Browser: der Name des Dialogs im Fehlerzustand und die Ansage „Neue Karte gefunden“ im Screenreader. Offen, gleiches Muster: `.karte-laedt` ist eine bedingt gerenderte `role="status"`-Region.
 
@@ -195,7 +220,7 @@ Umgesetzte Anforderungen der Spec: F1 bis F5, F7 bis F10, F17, F18, F21, F22, F2
 
 ### Offene Entscheidungen des Nutzers
 
-1. **Startszene angleichen.** Offen ist, ob beim Zeichnen des Zauns auch Farben und Strichstärken der Startszene an die Guidelines angeglichen werden (reines Weiß, etwa zehn Farben außerhalb der Paletten, krumme Strichstärken). Empfehlung: ja.
+1. Erledigt: Startszene angeglichen (Entscheidung vom 2026-11-16).
 2. **Farben weiterer Wissensgebiete.** Der Vorschlag in ADR 0005 stößt sich mit festen Bedeutungen: Rot heißt in jeder Welt Gefahr, Orange in der Fabrik Roboter. Erst zu klären, wenn es Karten außerhalb der Technik gibt.
 
 ### Nächste Schritte in M1
@@ -206,7 +231,7 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
    - 2a: F30, F31, Stand im Hinweis (F11).
    - 2b: Hinweis bedienbar: lässt keine Klicks mehr durch, bleibt offen, solange der Zeiger darin ist, trägt den Kartenknopf (F32); schließt nach dem Schließen einer Karte. Dazu sitzt der Hinweis am Zeiger statt an der Begrenzungsbox: Anker ist der Eintrittspunkt der Maus (bei Touch der Tippunkt), etwa 12 px versetzt, im Fenster gehalten, darf den Hotspot verdecken; er läuft nicht mit, setzt sich aber neu an den Zeiger, wenn dieser sich im Hotspot mehr als etwa 120 px vom Anker entfernt. Bei Tastaturfokus bleibt die Lage an der Begrenzungsbox.
 1a. Tastaturbedienung des Hinweises: den Kartenknopf im Hinweis (F32) ohne Maus erreichen. Vom Nutzer zurückgestellt (2026-11-16), bleibt aber Teil der M1-Abnahme „Alles ist ohne Maus bedienbar“ und muss vor Schritt 7 erledigt sein. Vorschlag: Der Hinweis hängt im DOM direkt hinter dem fokussierten Hotspot, der Knopf ist per Tab erreichbar.
-2. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
+2. Zeichnen: Zaun und Angleichen der Startszene erledigt (10a). Offen: `roboterzelle` (Auftrag oben), dann `robotergelenk` als Zoom-Ansicht von Achse 3 der Roboterzelle, gleiche Regel; danach den Zoom-Hotspot an Achse 3 ergänzen.
 3. Karte `servomotor` und Beziehungen.
 4. Sammlung mit Fundorten und Beziehungen an der geöffneten Karte (F14 bis F16), Fortschrittsanzeige (F13).
 5. Abzeichen, Hilfe-Schalter, Schalter für die Haken, Auslösen über das Symbol im Hinweis, breitere Klickfläche (F26 bis F29, F37, F11), Zurücksetzen des Spielstands (F19 in der Oberfläche).
@@ -215,7 +240,9 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
 ### Bekannte Mängel und Ungeprüftes
 
-- `roboterzelle` ist ein Platzhalter (drei Hotspots, schlichte Grafik); Schritt 2 ersetzt ihn. `npm run pruefen` meldet 0 Fehler und 11 Entwurfs-Warnungen, `npm run build` läuft.
+- `roboterzelle` ist noch ein Platzhalter (drei Hotspots, schlichte Grafik); der Auftrag oben ersetzt ihn.
+- Halle: Das Pendantkabel ist violett (Daten), das Stilprofil legt dafür nichts fest. Der Reflexstreifen der Weste hat noch Strich 4.
+- SVGs lassen sich ohne Spiel mit Edge headless rendern: `msedge.exe --headless --disable-gpu --hide-scrollbars --window-size=1600,900 --screenshot=<png> file:///<svg>`; für Ausschnitte eine HTML-Datei im Scratchpad mit `<svg viewBox="…"><image href="file:///…svg" width="1600" height="900"/></svg>`. `npm run pruefen` meldet 0 Fehler und 11 Entwurfs-Warnungen, `npm run build` läuft.
 - Zoom: Während eines Wechsels (450 ms plus Laden) tun Pfadknöpfe nichts, ohne Rückmeldung. Scheitert das Laden, kommt die Meldung erst nach dem vollen Zoom. Beides bewusst so gelassen.
 - `pruefeSvg` in `src/szene/szene.ts` ist ohne Test, weil es keine DOM-Testumgebung gibt; nur im Browser geprüft. Eine SVG mit verbotenen Elementen wird bereinigt statt abgelehnt und lädt dann gegebenenfalls ohne Hotspots.
 - `npm test` scheitert, wenn das Terminal im Pfad ein kleines `c:` zeigt (`Cannot read properties of undefined (reading 'config')`). Abhilfe: mit großem `C:\` ins Verzeichnis wechseln. Die Ursache ist nicht geklärt.
