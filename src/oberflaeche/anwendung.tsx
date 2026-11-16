@@ -4,7 +4,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { abgehakteHotspots, hinweisinhalt } from '../logik/hinweis.ts';
 import type { Inhaltsverzeichnis, Szeneneintrag, Themengebiet, Wissensgebiet } from '../logik/inhaltsverzeichnis.ts';
-import { oeffneKarte } from '../logik/karte-oeffnen.ts';
+import { aufzudeckendeEintrittskarte, oeffneKarte } from '../logik/karte-oeffnen.ts';
 import { betreten, kuerzenBis, neuerPfad, type Pfad } from '../logik/pfad.ts';
 import type { Speicherschicht } from '../logik/speicherschicht.ts';
 import { aktiveEinstellungen, einlesen, gefundeneKarten, type Spielstand } from '../logik/spielstand.ts';
@@ -66,6 +66,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const fokusZurueck = useRef<Fokusziel | undefined>(undefined);
   const szeneRef = useRef<Szene | undefined>(undefined);
   const buehneRef = useRef<HTMLElement>(null);
+  const kartenknopfRef = useRef<HTMLButtonElement>(null);
   /** Solange ein Wechsel läuft, löst nichts weiteres aus. */
   const wechselt = useRef(false);
   const zoom = useRef<Animation | undefined>(undefined);
@@ -77,7 +78,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       (geladen) => {
         setLadezustand({ art: 'bereit', ...geladen });
         // Trägt die Startszene eine Eintrittskarte, deckt sie sich nach dem Start auf (F30).
-        const karte = geladen.verzeichnis.scenes.find((s) => s.id === geladen.pfad[0])?.card;
+        const karte = aufzudeckendeEintrittskarte(geladen.verzeichnis, geladen.pfad[0]!, gefundeneKarten(start.spielstand));
         if (karte !== undefined) zeigeKarte(karte, { art: 'szene' });
       },
       (fehler: unknown) => setLadezustand(alsFehlerzustand(fehler)),
@@ -130,21 +131,22 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 
   const { datei, svg } = ladezustand.szene;
   const { themengebiete, wissensgebiete, verzeichnis, pfad } = ladezustand;
+  const szeneEintrag = (id: string): Szeneneintrag | undefined => verzeichnis.scenes.find((s) => s.id === id);
   const ebenen: Ebene[] = pfad.map((id) => {
-    const eintrag = verzeichnis.scenes.find((s) => s.id === id);
+    const eintrag = szeneEintrag(id);
     return {
       id,
       titel: text(eintrag?.title ?? {}, FASSUNG) || id,
       ...(eintrag?.card === undefined ? {} : { eintrittskarte: { gefunden: gefunden.has(eintrag.card) } }),
     };
   });
-  const eintrittskarte = verzeichnis.scenes.find((s) => s.id === pfad[pfad.length - 1])?.card;
+  const eintrittskarte = szeneEintrag(pfad[pfad.length - 1]!)?.card;
   const finde = (id: string): Hotspot | undefined => datei.hotspots.find((h) => h.id === id);
 
   function loeseAus(hotspot: Hotspot): void {
     if (hotspot.action === 'scene' && hotspot.target !== undefined) {
       const ziel = hotspot.target;
-      const eintrag = verzeichnis.scenes.find((s) => s.id === ziel);
+      const eintrag = szeneEintrag(ziel);
       const lage = szeneRef.current?.lageVon(hotspot.id);
       setOffen(undefined);
       if (eintrag === undefined) setWechselFehler(true);
@@ -172,7 +174,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
         szeneRef.current?.fokussiere(ziel.id);
         break;
       case 'kartenknopf':
-        document.querySelector<HTMLElement>('.pfad-karte')?.focus();
+        kartenknopfRef.current?.focus();
         break;
       case 'szene':
         szeneRef.current?.fokussiereSzene();
@@ -202,7 +204,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       setOffen(undefined);
       setLadezustand((bisher) => (bisher.art === 'bereit' ? { ...bisher, szene: geladen, pfad: neuerWeg } : bisher));
       // Erstes Betreten: Die Eintrittskarte deckt sich nach dem Wechsel von selbst auf (F30).
-      if (eintrag.card !== undefined && !gefunden.has(eintrag.card)) zeigeKarte(eintrag.card, { art: 'szene' });
+      const karte = aufzudeckendeEintrittskarte(verzeichnis, eintrag.id, gefunden);
+      if (karte !== undefined) zeigeKarte(karte, { art: 'szene' });
     } catch {
       zoom.current?.cancel();
       zoom.current = undefined;
@@ -213,7 +216,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   }
 
   function geheZurEbene(id: string): void {
-    const eintrag = verzeichnis.scenes.find((s) => s.id === id);
+    const eintrag = szeneEintrag(id);
     if (eintrag === undefined) setWechselFehler(true);
     else void wechsleSzene(eintrag, kuerzenBis(pfad, id));
   }
@@ -285,6 +288,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       <Pfadanzeige
         ebenen={ebenen}
         onWaehle={geheZurEbene}
+        kartenknopfRef={kartenknopfRef}
         onOeffneEintrittskarte={() => {
           if (!wechselt.current && eintrittskarte !== undefined) zeigeKarte(eintrittskarte, { art: 'kartenknopf' });
         }}

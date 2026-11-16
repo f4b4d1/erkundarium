@@ -2,6 +2,7 @@
 // Knöpfe, die aktuelle ist nur beschriftet und mit `aria-current` markiert. Trägt sie eine
 // Eintrittskarte, steht daneben der Kartenknopf (F31).
 
+import type { Ref } from 'preact';
 import { SymbolKarte } from './symbole.tsx';
 import { TEXTE } from './texte.ts';
 
@@ -16,9 +17,11 @@ interface Eigenschaften {
   ebenen: readonly Ebene[];
   onWaehle: (id: string) => void;
   onOeffneEintrittskarte: () => void;
+  /** Für den Fokus, wenn die Karte zugeht. */
+  kartenknopfRef: Ref<HTMLButtonElement>;
 }
 
-export function Pfadanzeige({ ebenen, onWaehle, onOeffneEintrittskarte }: Eigenschaften) {
+export function Pfadanzeige({ ebenen, onWaehle, onOeffneEintrittskarte, kartenknopfRef }: Eigenschaften) {
   return (
     <nav class="pfad" aria-label={TEXTE.pfad}>
       <ol>
@@ -36,6 +39,7 @@ export function Pfadanzeige({ ebenen, onWaehle, onOeffneEintrittskarte }: Eigens
                 </span>
                 {ebene.eintrittskarte !== undefined && (
                   <button
+                    ref={kartenknopfRef}
                     type="button"
                     class="pfad-karte"
                     aria-label={TEXTE.eintrittskarteOeffnen}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { oeffneKarte } from './karte-oeffnen.ts';
+import { aufzudeckendeEintrittskarte, oeffneKarte } from './karte-oeffnen.ts';
+import { testverzeichnis } from './testverzeichnis.ts';
 import { gefundeneKarten, markiereGefunden, neuerSpielstand } from './spielstand.ts';
 
 const ZEIT_1 = '2026-11-20T19:12:00.000Z';
@@ -31,5 +32,25 @@ describe('oeffneKarte', () => {
     const vorher = neuerSpielstand();
     oeffneKarte(vorher, 'karte-a', ZEIT_1);
     expect(gefundeneKarten(vorher).size).toBe(0);
+  });
+});
+
+describe('aufzudeckendeEintrittskarte', () => {
+  const verzeichnis = testverzeichnis({
+    szenen: { 'szene-a': { eintrittskarte: 'karte-a' }, 'szene-b': {} },
+    karten: ['karte-a'],
+  });
+
+  it('nennt die Eintrittskarte, solange sie nicht gefunden ist', () => {
+    expect(aufzudeckendeEintrittskarte(verzeichnis, 'szene-a', new Set())).toBe('karte-a');
+  });
+
+  it('nennt keine, wenn die Eintrittskarte schon gefunden ist', () => {
+    expect(aufzudeckendeEintrittskarte(verzeichnis, 'szene-a', new Set(['karte-a']))).toBeUndefined();
+  });
+
+  it('nennt keine, wenn die Szene keine Eintrittskarte trägt oder unbekannt ist', () => {
+    expect(aufzudeckendeEintrittskarte(verzeichnis, 'szene-b', new Set())).toBeUndefined();
+    expect(aufzudeckendeEintrittskarte(verzeichnis, 'gibt-es-nicht', new Set())).toBeUndefined();
   });
 });
