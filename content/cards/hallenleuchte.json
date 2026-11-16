@@ -1,0 +1,42 @@
+{
+  "id": "hallenleuchte",
+  "topic": "elektroinstallation",
+  "sources": [
+    "Waldmann: Lighting for warehouses and logistics halls, https://www.waldmann.com/applications/industry/industrial-hall/warehouses-and-logistics-halls.6c9.en.html",
+    "baulinks.de: Hallenleuchten (Sammlung von Produktmeldungen), https://www.baulinks.de/licht/hallenleuchten.php"
+  ],
+  "texts": {
+    "de": {
+      "status": "entwurf",
+      "title": "Hallenleuchte",
+      "front": [
+        {
+          "type": "text",
+          "text": "Hallenleuchten hängen hoch unter dem Dach und leuchten von dort große Flächen aus. Moderne Hallenleuchten arbeiten mit LEDs und brauchen deutlich weniger Strom als ältere Lampen."
+        }
+      ],
+      "back": [
+        {
+          "type": "list",
+          "items": [
+            "Hallenstrahler: einzelne Leuchten, teils an Pendeln von der Decke abgehängt",
+            "Lichtband: lange Reihe aus Leuchten, die das Licht weitflächig verteilt",
+            "Verschiedene Abstrahlwinkel passen das Licht an Hallenhöhe und Nutzung an"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Gutes Hallenlicht ist gleichmäßig. Dann sind Beschriftungen in jeder Höhe lesbar, und wer nach oben schaut, wird nicht geblendet."
+        },
+        {
+          "type": "facts",
+          "items": [
+            "Häufige Schutzart IP65: staubdicht und gegen Strahlwasser geschützt",
+            "Präsenzmelder schalten Bereiche nur ein, wenn dort jemand arbeitet",
+            "Ein Hersteller nennt rund 65 Prozent Energieersparnis nach einer Umrüstung"
+          ]
+        }
+      ]
+    }
+  }
+}

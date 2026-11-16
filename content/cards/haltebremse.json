@@ -1,0 +1,34 @@
+{
+  "id": "haltebremse",
+  "topic": "antriebstechnik",
+  "sources": [
+    "Beckhoff Information System: Servomotoren AM8100, Motorhaltebremse, https://infosys.beckhoff.com/content/1031/am8100/1333496971.html"
+  ],
+  "texts": {
+    "de": {
+      "status": "entwurf",
+      "title": "Haltebremse",
+      "front": [
+        {
+          "type": "text",
+          "text": "Die Haltebremse sitzt am Motor und blockiert seine Welle, sobald keine Spannung anliegt. So kann eine Achse im Stillstand und bei Stromausfall festgehalten werden."
+        }
+      ],
+      "back": [
+        {
+          "type": "text",
+          "text": "Sie arbeitet nach dem Ruhestromprinzip: Ohne Spannung ist sie geschlossen. Erst mit Spannung, bei den Motoren eines Herstellers 24 Volt Gleichspannung, öffnet sie und gibt die Welle frei. Fällt der Strom aus, greift sie von selbst."
+        },
+        {
+          "type": "facts",
+          "items": [
+            "Gedacht zum Halten im Stillstand, nicht zum Abbremsen im Betrieb",
+            "Bremsen bei Not-Stopp oder Stromausfall ist nur begrenzt zulässig",
+            "Laut Hersteller allein nicht für den Personenschutz zugelassen",
+            "Senkrechte Achsen brauchen zusätzliche Sicherungen"
+          ]
+        }
+      ]
+    }
+  }
+}

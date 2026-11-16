@@ -1,0 +1,26 @@
+[
+  {
+    "id": "elektroinstallation",
+    "title": { "de": "Elektroinstallation" },
+    "color": "#1F78C1",
+    "icon": "elektroinstallation.svg"
+  },
+  {
+    "id": "robotik",
+    "title": { "de": "Robotik" },
+    "color": "#6A4C93",
+    "icon": "robotik.svg"
+  },
+  {
+    "id": "antriebstechnik",
+    "title": { "de": "Antriebstechnik" },
+    "color": "#FF7A1A",
+    "icon": "antriebstechnik.svg"
+  },
+  {
+    "id": "maschinensicherheit",
+    "title": { "de": "Maschinensicherheit" },
+    "color": "#E4572E",
+    "icon": "maschinensicherheit.svg"
+  }
+]

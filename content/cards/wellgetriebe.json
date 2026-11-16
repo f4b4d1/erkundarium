@@ -1,0 +1,49 @@
+{
+  "id": "wellgetriebe",
+  "topic": "antriebstechnik",
+  "sources": [
+    "Harmonic Drive LLC: Technology, https://www.harmonicdrive.net/technology",
+    "Wikipedia (en): Strain wave gearing, https://en.wikipedia.org/wiki/Strain_wave_gearing"
+  ],
+  "link": "https://www.harmonicdrive.net/technology",
+  "texts": {
+    "de": {
+      "status": "entwurf",
+      "title": "Wellgetriebe",
+      "front": [
+        {
+          "type": "text",
+          "text": "Das Wellgetriebe hat ein verformbares Zahnrad. Ein ovaler Kern drückt eine dünne, außen verzahnte Stahlbüchse an zwei Stellen in einen festen Zahnring. Dreht sich der Kern, wandern diese Stellen mit, und die Büchse dreht sich langsam weiter."
+        }
+      ],
+      "back": [
+        {
+          "type": "table",
+          "rows": [
+            ["Bauteil", "Aufgabe"],
+            ["Wave Generator", "ovaler Kern mit Kugellager, wird vom Motor gedreht"],
+            ["Flexspline", "dünne Stahlbüchse mit Außenzähnen, gibt die Drehung ab"],
+            ["Circular Spline", "fester Ring mit Innenzähnen"]
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Der Flexspline hat zwei Zähne weniger als der Ring. Pro Umdrehung des Kerns rückt er deshalb nur um zwei Zähne weiter. Bei 200 Zähnen ergibt das eine Untersetzung von 100 zu 1: Der Motor dreht sich hundertmal, der Abtrieb einmal."
+        },
+        {
+          "type": "facts",
+          "items": [
+            "Untersetzung in einer Stufe: etwa 30:1 bis 320:1",
+            "Spielfrei: kein Wackeln, wenn die Drehrichtung wechselt",
+            "Erfunden von C. W. Musser, Patent von 1957"
+          ]
+        },
+        {
+          "type": "funfact",
+          "text": "Wellgetriebe trieben die Räder des Mondautos von Apollo 15 an."
+        }
+      ],
+      "linkLabel": "Funktionsprinzip beim Hersteller"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "not-halt-und-zaun",
+  "topic": "maschinensicherheit",
+  "sources": [
+    "WEKA: Not-Aus oder Not-Halt?, https://www.weka.de/produktsicherheit/not-aus-oder-not-halt/",
+    "industrie-fachwissen.de: Maschinenschutz an Roboterzellen, Schutzzaun nach ISO 14120, https://industrie-fachwissen.de/werkstatt/maschinenschutz-roboterzellen-schutzzaun-iso-14120-vergleich",
+    "Wikipedia: Industrieroboter, Abschnitt Sicherheit, https://de.wikipedia.org/wiki/Industrieroboter"
+  ],
+  "texts": {
+    "de": {
+      "status": "entwurf",
+      "title": "Not-Halt und Zaun",
+      "front": [
+        {
+          "type": "text",
+          "text": "Der Zaun hält Menschen vom Roboter fern. Wird die Schutztür geöffnet, hält der Roboter an. Für den Notfall gibt es den Not-Halt: einen roten Pilztaster auf gelbem Grund, der die gefährliche Bewegung stoppt."
+        }
+      ],
+      "back": [
+        {
+          "type": "text",
+          "text": "Der Not-Halt ergänzt die Schutzeinrichtungen, ersetzt sie aber nie. Er muss in jeder Betriebsart erreichbar sein und funktionieren. Läuft der Roboter nach dem Abschalten noch nach, hält eine Zuhaltung die Tür verschlossen, bis er steht."
+        },
+        {
+          "type": "facts",
+          "items": [
+            "Not-Halt setzt eine Bewegung still, Not-Aus schaltet die Energie ab",
+            "Gestaltung des Not-Halts: DIN EN ISO 13850",
+            "Übliche Zaunhöhe laut Fachartikel: etwa 2,2 Meter",
+            "Größere Maschen im Zaun verlangen mehr Abstand zur Gefahrenstelle"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "steuert",
+    "forward": { "de": "steuert" },
+    "backward": { "de": "wird gesteuert von" }
+  },
+  {
+    "id": "misst",
+    "forward": { "de": "misst" },
+    "backward": { "de": "wird gemessen von" }
+  },
+  {
+    "id": "verwandt",
+    "symmetric": true,
+    "forward": { "de": "verwandt mit" }
+  }
+]

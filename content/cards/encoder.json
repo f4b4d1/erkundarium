@@ -1,0 +1,46 @@
+{
+  "id": "encoder",
+  "topic": "antriebstechnik",
+  "sources": [
+    "Wikipedia: Drehgeber, https://de.wikipedia.org/wiki/Drehgeber",
+    "Harmonic Drive LLC: SHA with Integrated Servo Drive, https://www.harmonicdrive.net/products/rotary-actuators/integrated-actuators/sha-integrated-with-servo-drive"
+  ],
+  "link": "https://de.wikipedia.org/wiki/Drehgeber",
+  "relations": [
+    { "type": "misst", "card": "robotergelenk" }
+  ],
+  "texts": {
+    "de": {
+      "status": "entwurf",
+      "title": "Encoder",
+      "front": [
+        {
+          "type": "text",
+          "text": "Ein Encoder, auf Deutsch Drehgeber, misst, wie weit sich eine Welle gedreht hat. Ohne ihn wüsste die Steuerung nicht, in welcher Stellung der Roboterarm gerade steht."
+        }
+      ],
+      "back": [
+        {
+          "type": "table",
+          "rows": [
+            ["Art", "Eigenschaft"],
+            ["Inkrementalgeber", "zählt Impulse, kennt den Winkel erst nach einer Referenzmarke"],
+            ["Absolutwertgeber", "kennt die Stellung sofort nach dem Einschalten"]
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Ein Absolutwertgeber liest die Stellung von einer Codescheibe ab. Manche zählen zusätzlich die ganzen Umdrehungen, etwa über ein kleines eingebautes Getriebe. Den Wert schicken sie über eine serielle Schnittstelle an die Steuerung."
+        },
+        {
+          "type": "facts",
+          "items": [
+            "Abgetastet wird etwa eine Strichscheibe, ein Magnetrad oder eine Codescheibe",
+            "Ein Motor-Encoder mit 17 Bit unterscheidet 131 072 Stellungen je Umdrehung"
+          ]
+        }
+      ],
+      "linkLabel": "Drehgeber bei Wikipedia"
+    }
+  }
+}

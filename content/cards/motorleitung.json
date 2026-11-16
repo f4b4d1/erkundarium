@@ -1,0 +1,37 @@
+{
+  "id": "motorleitung",
+  "topic": "elektroinstallation",
+  "sources": [
+    "Marcel Diehl: An der Verbindung soll es nicht scheitern. ema 11-12/2022, S. 14–17, nach Unterlagen der Lapp Holding AG, https://www.elektro.net/file/show/120416/626a09/EMA_2022_11-12_Lapp.pdf"
+  ],
+  "texts": {
+    "de": {
+      "status": "entwurf",
+      "title": "Motorleitung",
+      "front": [
+        {
+          "type": "text",
+          "text": "Die Motorleitung bringt die elektrische Leistung vom Umrichter zum Motor. Der Umrichter ist das Gerät, das den Strom für den Motor passend formt. Weil er dabei sehr schnell schaltet, ist die Leitung abgeschirmt, damit sie andere Leitungen nicht stört."
+        }
+      ],
+      "back": [
+        {
+          "type": "list",
+          "items": [
+            "Drei Phasenleiter für den Drehstrom",
+            "Mindestens ein Schutzleiter, der die Gehäuse mit der Erde verbindet",
+            "Ein Schirm um die Adern, der an den Enden großflächig angeschlossen wird"
+          ]
+        },
+        {
+          "type": "text",
+          "text": "Der Umrichter schaltet die Spannung in schnellen Pulsen. Das nennt man Pulsweitenmodulation. Dabei entstehen Störströme von etwa 3 bis 500 Kilohertz. Ohne guten Aufbau fließen sie über Gehäuse, Erdleitungen oder den Schirm von Datenkabeln ab."
+        },
+        {
+          "type": "funfact",
+          "text": "Solche hochfrequenten Ausgleichsströme erreichen laut Kabelhersteller Lapp nicht selten 10 Ampere oder mehr. Dann lösen etwa Fehlerstrom-Schutzschalter scheinbar grundlos aus, und die Fehlersuche wird mühsam."
+        }
+      ]
+    }
+  }
+}
