@@ -167,13 +167,7 @@ Vor der Abgabe jede Zeile prüfen und im Bericht bestätigen:
 
 ## 9 Kartenbilder
 
-Eine Karte kann ein eigenes Bild tragen: eine kleine SVG im selben Stil wie die Szenen.
-
-- Es gelten die Abschnitte 3 und 4 und die Verbote aus Abschnitt 1, Regel 2. Ein Kartenbild enthält also keinen Text: Es muss zu jeder Textfassung passen.
-- Zeichen ohne Sprache sind erlaubt: Schaltzeichen, Pfeile, Plus und Minus.
-- Ein Kartenbild hat keine Hotspots.
-- Das Ding sieht aus wie in den Szenen: gleiche Farben, gleiche Grundform, mehr Details.
-- Format und Größe legt die Musterkarte fest.
+Kartenbilder, Symbole der Themengebiete und alles andere an der Karte regelt `design-guidelines-karte.md`.
 
 ## 10 Vorlage: Stilprofil einer neuen Welt
 
