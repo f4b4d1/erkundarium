@@ -244,6 +244,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   /**
    * Geht zur früheren Ebene `id` zurück und zoomt dabei Stufe für Stufe aus den Hotspots heraus (F4a).
    * Erst werden alle Szenen des Rückwegs geladen; scheitert eine, bleibt die aktuelle Szene stehen.
+   * Bricht später eine Stufe ab, bleibt die zuletzt gezeigte Zwischenebene mit passendem Pfad stehen.
    */
   async function geheZurEbene(id: string): Promise<void> {
     const stufen = rueckweg(pfad, id);
@@ -261,9 +262,9 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
         const letzte = i === gezeigt.length - 1;
         await zeigeStufe(stufe, geladen[i]!, kuerzenBis(pfad, stufe.szene), letzte ? 'ease-out' : 'linear');
       }
-      const hotspot = gezeigt[gezeigt.length - 1]!.hotspot;
-      if (hotspot !== undefined) szeneRef.current?.fokussiere(hotspot);
+      szeneRef.current?.fokussiere(gezeigt[gezeigt.length - 1]!.hotspot);
     } catch {
+      nachDarstellung.current = undefined;
       zoom.current?.cancel();
       zoom.current = undefined;
       setWechselFehler(true);
@@ -274,15 +275,20 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 
   /** Stellt die Szene der Stufe dar, setzt sie sofort in den Endausschnitt des Zooms und zoomt heraus. */
   async function zeigeStufe(stufe: Zoomstufe, geladen: GeladeneSzene, neuerWeg: Pfad, easing: string): Promise<void> {
-    await new Promise<void>((fertig) => {
+    await new Promise<void>((fertig, abbruch) => {
       nachDarstellung.current = () => {
-        const lage = stufe.hotspot === undefined ? undefined : szeneRef.current?.lageVon(stufe.hotspot);
+        const lage = szeneRef.current?.lageVon(stufe.hotspot);
         zoom.current = lage === undefined ? undefined : starteHerauszoom(buehneRef.current, lage, easing);
         fertig();
       };
       stoppeSchliesstimer();
       setOffen(undefined);
-      setLadezustand((bisher) => (bisher.art === 'bereit' ? { ...bisher, szene: geladen, pfad: neuerWeg } : bisher));
+      setLadezustand((bisher) => {
+        if (bisher.art === 'bereit') return { ...bisher, szene: geladen, pfad: neuerWeg };
+        // Es wird nicht gerendert, `nachDarstellung` käme nie: der Wechsel bricht ab.
+        abbruch(new Error('Keine Szene dargestellt.'));
+        return bisher;
+      });
     });
     await zoom.current?.finished;
   }
@@ -384,7 +390,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   }
 
   beiEscape.current = (e) => {
-    // Karte und Hinweis schließen mit Escape selbst; nur sonst geht es eine Ebene zurück.
+    // Bei offener Karte (sie schließt selbst) oder offenem Hinweis bleibt Escape hier wirkungslos.
     if (e.key !== 'Escape' || e.defaultPrevented || offeneKarte !== undefined || offen !== undefined) return;
     const davor = pfad[pfad.length - 2];
     if (davor !== undefined) void geheZurEbene(davor.szene);

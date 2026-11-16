@@ -12,6 +12,10 @@ describe('betreten', () => {
     expect(betreten([{ szene: 'a' }], 'b', 'h1')).toEqual([{ szene: 'a' }, { szene: 'b', ueber: 'h1' }]);
   });
 
+  it('hängt an den neuen Pfad an', () => {
+    expect(betreten(neuerPfad('a'), 'b', 'h1')).toEqual([{ szene: 'a' }, { szene: 'b', ueber: 'h1' }]);
+  });
+
   it('verändert den bisherigen Pfad nicht', () => {
     const pfad = [{ szene: 'a' }];
     betreten(pfad, 'b', 'h1');
@@ -58,5 +62,9 @@ describe('rueckweg', () => {
   it('liefert nichts bei der aktuellen Ebene oder einer Szene abseits des Pfads', () => {
     expect(rueckweg(pfad, 'c')).toEqual([]);
     expect(rueckweg(pfad, 'x')).toEqual([]);
+  });
+
+  it('liefert nichts bei einem Pfad aus nur der Startszene', () => {
+    expect(rueckweg(neuerPfad('a'), 'a')).toEqual([]);
   });
 });

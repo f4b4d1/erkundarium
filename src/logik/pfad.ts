@@ -14,7 +14,7 @@ export type Pfad = readonly Pfadebene[];
 /** Eine Zoomstufe des Rückwegs (F4a): Die Szene zoomt aus dem Hotspot heraus, über den der Weg weiterführte. */
 export interface Zoomstufe {
   szene: string;
-  hotspot?: string;
+  hotspot: string;
 }
 
 /** Der Pfad zu Beginn: nur die Startszene. */
@@ -42,8 +42,9 @@ export function rueckweg(pfad: Pfad, ziel: string): Zoomstufe[] {
   const index = pfad.findIndex((e) => e.szene === ziel);
   const stufen: Zoomstufe[] = [];
   for (let i = pfad.length - 2; i >= 0 && index >= 0 && i >= index; i--) {
-    const hotspot = pfad[i + 1]!.ueber;
-    stufen.push({ szene: pfad[i]!.szene, ...(hotspot === undefined ? {} : { hotspot }) });
+    // Nur die Startszene hat kein `ueber`, und sie ist nie die Folgeebene einer anderen.
+    const { ueber } = pfad[i + 1]!;
+    if (ueber !== undefined) stufen.push({ szene: pfad[i]!.szene, hotspot: ueber });
   }
   return stufen;
 }

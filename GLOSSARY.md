@@ -57,8 +57,12 @@ Der Wechsel von einer Szene in eine tiefere Szene über einen Hotspot. Zoom füh
 _Avoid_: Sprung, Szenenwechsel, Navigation
 
 **Pfad**:
-Der in dieser Sitzung gegangene Weg von der Startszene bis zur aktuellen Szene.
+Der in dieser Sitzung gegangene Weg von der Startszene bis zur aktuellen Szene. Jeder Schritt des Pfads ist eine Ebene: eine Szene samt dem Hotspot, über den man sie betrat. „Ebene“ heißt nur dieser Platz im Pfad, nie die Szene selbst.
 _Avoid_: Breadcrumb, Elternpfad
+
+**Herauszoomen**:
+Der Rückweg über den Pfad in eine frühere Ebene. Jede Ebene auf dem Weg zoomt aus dem Hotspot heraus, über den der Pfad weiterführte. Das Gegenstück zum Zoom, der immer tiefer führt.
+_Avoid_: Zurückspringen, Zoom zurück
 
 **Abgeschlossen**:
 Zustand einer Szene, wenn ihre Eintrittskarte und alle Karten ihrer Hotspots gefunden sind und alle per Zoom erreichbaren Szenen abgeschlossen sind.
