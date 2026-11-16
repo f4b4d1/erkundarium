@@ -2,6 +2,8 @@
 
 Diese Spec beschreibt den ersten lauffähigen Code: drei Szenen, etwa zehn Karten, die ganze Funktionskette einmal.
 
+Umsetzungsstand, offene Entscheidungen und nächste Schritte: `konzeptplan.md`, Abschnitt 6.
+
 Stand: nach der Grilling-Session vom 2026-11-16. Alle Fragen aus Abschnitt 8 sind entschieden; Abschnitt 9 listet, was offen bleibt. Begriffe stehen in `GLOSSARY.md`, Begründungen der großen Entscheidungen in `docs/adr/`, Meilensteine in `konzeptplan.md`.
 
 ## 1 Ziel und Umfang

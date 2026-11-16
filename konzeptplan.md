@@ -138,3 +138,100 @@ Abnahme:
 7. Erster sichtbarer Stand: Die Startszene wird eingebettet, Hotspots zeigen den Hinweis, ein Klick auf einen Hotspot mit Karte markiert sie als gefunden, und der Fund übersteht das Neuladen.
 
 Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige mit Eintrittskarte, Sammlung mit Fundorten und Beziehungen, die zwei neuen Szenen, der Rest des Prüfskripts.
+
+Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
+
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16)
+
+Eine neue Session liest diesen Abschnitt zuerst und macht bei „Nächste Schritte“ weiter.
+
+### Arbeitsweise
+
+Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er sie ändert; in `CLAUDE.md` stehen sie nicht.
+
+- Die Hauptsession orchestriert und schreibt selbst keinen Anwendungscode. Dokumente und kleine Inhaltsänderungen macht sie selbst.
+- Code schreiben Subagenten mit dem Modell Opus auf Stufe medium, nacheinander, je Auftrag ein abgegrenzter Schritt mit Verweis auf Spec, Glossar und ADRs.
+- Einfache oder sich wiederholende Aufgaben gehen an Sonnet auf Stufe medium, um Kontingent zu sparen. Der Nutzer arbeitet nah am 5-Stunden-Limit: nichts Großes ohne Rückfrage starten.
+- Ablauf je Schritt nach dem implement-Skill: testgetrieben an den vereinbarten Nahtstellen (Szenennetz, Fundorte, Fortschritt und Abschluss, Spielstand, Prüfskript; dazu jede weitere reine Logik), Typprüfung und Tests regelmäßig, danach Code-Review auf zwei Achsen (Standards und Spec) mit zwei parallelen Agenten, Befunde in einem eigenen Commit beheben.
+- Die Hauptsession prüft jedes Ergebnis selbst nach (Typprüfung, Tests, Prüfskript, Bildschirmfoto ansehen) und übernimmt keinen Agentenbericht ungeprüft. Was nur der Agent geprüft hat, wird dem Nutzer so gesagt.
+- Nach jedem Schritt auf die Rückmeldung des Nutzers warten.
+- Commits direkt auf `main`, Commit-Nachrichten auf Englisch. Nicht pushen, außer der Nutzer verlangt es. `CLAUDE.md` ist nicht eingecheckt und bleibt es.
+- Änderungen an Design-Guidelines, Stilprofil und Mindmap nur nach Vorschlag und Okay des Nutzers.
+
+### Erledigt in M1
+
+| Schritt | Inhalt |
+| --- | --- |
+| 1 | Projektgerüst: Vite, TypeScript, Preact, Vitest; `src/logik` wird ohne DOM und Preact geprüft |
+| 2 | JSON-Schemas unter `content/schema/`, vorläufige `limits.json`, Einbindung in VS Code |
+| 3 | Elf Karten, vier Themengebiete, drei Beziehungstypen; alle Kartentexte im Prüfstatus `entwurf` |
+| 4 | Startszene `fabrikhalle` aus der Referenzszene, 33 Hotspots, `world.json` |
+| 5 | Prüfskript (`npm run pruefen`), erzeugtes Inhaltsverzeichnis, Vite-Plugin für Entwicklungsserver und Build |
+| 6 | Spiellogik: Szenennetz, Fundorte und Beziehungen, Fortschritt und Abschluss, Spielstand, Schnittstelle der Speicherschicht |
+| 7 | Erster sichtbarer Stand: Szene, Hinweis, Umriss, Auslösen per Maus, Tastatur und Touch, Haken, Speichern in `localStorage`, Erlaubnisliste für eingebettete SVGs |
+| 8 | Kartenansicht: Aufdecken, Wenden, Schließen, fünf Bausteine, Entwurfsstempel, vier Symbole der Themengebiete; Kartentitel im Inhaltsverzeichnis |
+
+Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. **Das Code-Review zu Schritt 8 steht aus.**
+
+Umgesetzte Anforderungen der Spec: F1, F2, F5 bis F10, F17 bis F27, F33 bis F36. Teilweise: F11 (Haken ja; Schalter und Stand im Hinweis fehlen), F20 (siehe unten), F23 (Stand und Kartenknopf im Hinweis fehlen), F26 (Auslösen über das Symbol im Hinweis fehlt).
+
+### Offene Entscheidungen des Nutzers
+
+1. **Obergebiete und Kartenfarben.** Der Nutzer will die Farbe nicht mehr je Themengebiet vergeben, sondern je Obergebiet (Arbeitstitel „Bereich“): wenige große Gruppen tragen die Farbe, das Themengebiet bleibt als Name und Symbol im Schild der Karte. Vorschlag mit acht Obergebieten:
+
+   | Obergebiet | Farbe |
+   | --- | --- |
+   | Technik | Stahlgrau `#6B7785` (Favorit des Nutzers: Grau) |
+   | Pflanzen | Grün `#3FA34D` |
+   | Tiere | Orange `#FF7A1A` |
+   | Mensch und Körper | Rot `#E4572E` |
+   | Erde und Weltall | Violett `#8E6FD8` |
+   | Stoffe und Kräfte | Türkis `#19A7B8` |
+   | Geschichte und Kultur | Ocker `#D9A441` |
+   | Alltag und Gesellschaft | Blau `#1F78C1` |
+
+   Beobachtungen am Vergleichsbild: Bei Grau wirkt das getönte Bildfeld fast farblos; Orange und Rot liegen nah beieinander; Ocker hebt sich im Bildfeld kaum vom Papier ab. Grau darf nicht zugleich „nicht gefunden“ bedeuten: Schattenkarten in der Sammlung als leerer, gestrichelter Umriss; die Ersatzfarbe für ein unbekanntes Themengebiet ist im Code derzeit dasselbe Grau. Für M1 genügt die Entscheidung für Technik. Die Entscheidung ist noch nicht gefallen. Wenn sie fällt: neuer Glossarbegriff, ein ADR, eine Datei für die Obergebiete, in `topics.json` ein Verweis auf das Obergebiet statt `color`; keine Kartendatei ändert sich.
+2. **Kartenvorderseite: Bild und Text je etwa zur Hälfte.** Vom Nutzer verlangt, noch nicht umgesetzt. Sonst gefällt ihm die Karte.
+3. **Längenvorgaben für die Karte.** Vorschlag aus Schritt 8: Rückseite höchstens 3 Bausteine, Text bis 250 Zeichen, „Schon gewusst?“ bis 160, Tabelle höchstens 2 Spalten und 4 Zeilen, höchstens 3 Quellen. Erst eintragen, wenn das Kartendesign steht.
+4. **Startszene angleichen.** Offen ist, ob beim Zeichnen des Zauns auch Farben und Strichstärken der Startszene an die Guidelines angeglichen werden (reines Weiß, etwa zehn Farben außerhalb der Paletten, krumme Strichstärken). Empfehlung: ja.
+
+### Schon entschieden, noch nicht umgesetzt
+
+- Die Halle bekommt einen niedrigen Schutzzaun um den Roboter, der wenig verdeckt; in der Roboterzelle ist er nur im Hintergrund zu sehen.
+- Die Karte `servomotor` kommt in M1 dazu (zwölf Karten) und hängt an einem gewöhnlichen Hotspot im Robotergelenk. Damit werden „Encoder misst Servomotor“ und, mit einem neuen Typ `versorgt`, „Motorleitung versorgt Servomotor“ möglich. Bisher gibt es nur die Beziehung „Encoder misst Robotergelenk“.
+- Über dünne Linien legt die Anwendung eine unsichtbare, breitere Klickfläche (F37). Die Kabel der Startszene sind bisher kaum zu treffen.
+
+### Nächste Schritte in M1
+
+Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
+
+1. Kartenansicht abschließen: Bild und Text je zur Hälfte, Obergebiete nach Entscheidung 1, dann das Code-Review zu Schritt 8.
+2. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11).
+3. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
+4. Karte `servomotor` und Beziehungen.
+5. Sammlung mit Fundorten und Beziehungen an der geöffneten Karte (F14 bis F16), Fortschrittsanzeige (F13).
+6. Abzeichen, Hilfe-Schalter, Schalter für die Haken, Auslösen über das Symbol im Hinweis, breitere Klickfläche (F26 bis F29, F37, F11), Zurücksetzen des Spielstands (F19 in der Oberfläche).
+7. Rest des Prüfskripts (F20): Längenvorgaben und Bausteinzahl, Karten ohne Hotspot, Kreise und Erreichbarkeit im Szenennetz (die Funktionen liegen in `src/logik/szenennetz.ts`), symmetrische Beziehungen an beiden Karten, Kreise bei `acyclic`, `linkLabel` ohne `link`, fehlende Bild- und Symboldateien, Prüfung von Kartenbildern und Symbolen auf verbotene Inhalte, Hotspot-Dichte.
+8. Abnahme nach Spec Abschnitt 10.
+
+### Bekannte Mängel und Ungeprüftes
+
+- `npm run build` bricht ab, bis die Szene `roboterzelle` existiert: Der Hotspot `roboter` zeigt auf sie. `npm run pruefen` meldet deshalb 1 Fehler und 11 Entwurfs-Warnungen; das ist der erwartete Stand. Ein erfolgreicher Build ist seit dem Umbau des Prüfskripts ungeprüft.
+- `npm test` scheitert, wenn das Terminal im Pfad ein kleines `c:` zeigt (`Cannot read properties of undefined (reading 'config')`). Abhilfe: mit großem `C:\` ins Verzeichnis wechseln. Die Ursache ist nicht geklärt.
+- Manche Haken sitzen neben der Form, weil sie an der Ecke der Begrenzungsbox hängen (Hallenleuchten, Roboter, Schaltschrank).
+- Der Hinweis lässt Klicks durch. Nach dem Schließen einer Karte mit der Maus bleibt er offen, bis die Maus sich bewegt.
+- Auf schmalen Bildschirmen ist die Kartenschrift klein (etwa 12 px vorne, 11 px hinten, Quellen unter 9 px). Die Rückseite von `wellgetriebe` hat nur 21 px Luft.
+- Schema-Fehler erscheinen teils englisch. Das Prüfskript sieht nur `.json` und `.svg`.
+- Die Migration zwischen Spielstand-Versionen ist ungetestet, weil es nur Version 1 gibt.
+- Nie geprüft: Firefox, echte Touch-Geräte, Screenreader, Handy im Hochformat, eine Karte mit eigenem Bild, eine zweite Textfassung. Alle Prüfungen am laufenden Spiel liefen in ferngesteuertem Edge.
+- Kein Kartentext und kein Hotspot-Text ist gegen seine Quelle gegengelesen. Schwache Stellen laut Autor: `hallenleuchte` (dünne Quellen, keine Lux-Werte), `not-halt-und-zaun` und `roboterzelle` (Zaunhöhe und Normen aus zweiter Hand), `haltebremse` und `motorleitung` (je ein Hersteller), Zahlen bei `robotergelenk`, `encoder`, `kabelkanal` (je ein Produkt). Hotspot-Texte haben keinen Prüfstatus.
+- Die Robotik-Farbe `#6A4C93` steht in keiner Palette; sie entfällt mit den Obergebieten.
+
+### Anhaltspunkte im Code
+
+- `src/logik/`: reine Logik und geteilte Typen (`inhaltsverzeichnis.ts`, `szenennetz.ts`, `wissensnetz.ts`, `fortschritt.ts`, `spielstand.ts`, `hinweis.ts`, `kartendatei.ts`, `erlaubte-svg.ts`).
+- `src/szene/`: Szenenmodul ohne Preact (`szene.ts`, `eingabe.ts`, `haken.ts`).
+- `src/oberflaeche/`: Preact (`anwendung.tsx`, `szenenansicht.tsx`, `hinweis.tsx`, `kartenansicht.tsx`, `kartenseiten.tsx`); das Aussehen der Karte mit allen Maßen und Farben als Variablen in `karte.css`.
+- `src/inhalte/laden.ts`, `src/speicher/lokaler-speicher.ts`: Anbindung an Netz und `localStorage`.
+- `tools/`: Prüfskript (`pruefung.ts`), Einlesen, Kommandozeile, Vite-Plugin.
+- Starten: `npm run dev`. Prüfen: `npm run typecheck`, `npm test`, `npm run pruefen`.
