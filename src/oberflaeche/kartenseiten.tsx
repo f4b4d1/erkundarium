@@ -47,11 +47,12 @@ export function Rueckseite({ datei, text, gebiet }: Seiteneigenschaften) {
       <header class="kartenkopf">
         <span class="kartenschild">
           <Symbol pfad={gebiet.symbol} />
-          <span class="kartenschild-text">{text.title}</span>
+          <span class="kartenschild-text">{gebiet.name}</span>
         </span>
         {text.status === 'entwurf' && <Entwurf />}
       </header>
       <div class="kartenblatt kartenblatt-rueckseite">
+        <h2 class="kartentitel-hinten">{text.title}</h2>
         {text.back.length > 0 && <Bausteine liste={text.back} />}
         <footer class="kartenfuss">
           {datei.link !== undefined && (

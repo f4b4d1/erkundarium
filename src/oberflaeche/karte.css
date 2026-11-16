@@ -50,6 +50,9 @@
   --karte-anteil-bild: 1;
   --karte-anteil-text: 1;
   --karte-schattenversatz: 0.32em;
+  /* Schriftgrößen: Bausteine der Vorderseite (Kurztext) und Titel der Rückseite */
+  --karte-schrift-vorne: 1.045em;
+  --karte-titel-hinten: 1.15em;
 
   /* Schrift: nur Schriften des Systems, nichts von außen */
   --karte-schrift: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
@@ -399,13 +402,6 @@
   height: 1.55em;
 }
 
-.kartenseite-hinten .kartenschild-text {
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: var(--karte-schrift-titel);
-  font-size: 1.12em;
-}
-
 .entwurf {
   flex: none;
   padding: 0.22em 0.6em;
@@ -445,6 +441,18 @@
   font-weight: 800;
   line-height: 1.08;
   letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+/* Rückseite: der Titel als kleine Überschrift vor den Bausteinen */
+.kartentitel-hinten {
+  flex: none;
+  margin: 0;
+  font-family: var(--karte-schrift-titel);
+  font-size: var(--karte-titel-hinten);
+  font-weight: 800;
+  line-height: 1.15;
   text-wrap: balance;
   overflow-wrap: break-word;
 }
@@ -504,6 +512,10 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   font-size: 0.95em;
+}
+
+.kartenseite-vorne .bausteine {
+  font-size: var(--karte-schrift-vorne);
 }
 
 .kartenblatt-rueckseite .bausteine {
