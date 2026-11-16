@@ -3,22 +3,63 @@
   "title": "Vorgaben für Kartentexte",
   "description": "limits.json. Längen in Zeichen je Textfassung, geprüft vom Prüfskript.",
   "type": "object",
-  "required": ["maxTitleLength", "maxTextLength", "maxItemLength", "maxBlocksPerSide"],
+  "required": [
+    "maxTitleLength",
+    "frontText",
+    "maxBackTextLength",
+    "maxFunfactLength",
+    "maxItemLength",
+    "maxBlocksFront",
+    "maxBlocksBack",
+    "maxTableColumns",
+    "maxTableRows",
+    "maxSources"
+  ],
   "properties": {
     "maxTitleLength": {
       "description": "Höchstlänge von title und linkLabel.",
       "$ref": "#/$defs/anzahl"
     },
-    "maxTextLength": {
-      "description": "Höchstlänge des Felds text in den Bausteinen text und funfact.",
+    "frontText": {
+      "description": "Länge des Texts des einen Bausteins text auf der Vorderseite. Unter min ist eine Warnung, über max ein Fehler.",
+      "type": "object",
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "$ref": "#/$defs/anzahl" },
+        "max": { "$ref": "#/$defs/anzahl" }
+      },
+      "additionalProperties": false
+    },
+    "maxBackTextLength": {
+      "description": "Höchstlänge des Felds text im Baustein text auf der Rückseite.",
+      "$ref": "#/$defs/anzahl"
+    },
+    "maxFunfactLength": {
+      "description": "Höchstlänge des Felds text im Baustein funfact.",
       "$ref": "#/$defs/anzahl"
     },
     "maxItemLength": {
       "description": "Höchstlänge eines Eintrags in list und facts und einer Zelle in table.",
       "$ref": "#/$defs/anzahl"
     },
-    "maxBlocksPerSide": {
-      "description": "Höchstzahl an Bausteinen je Kartenseite.",
+    "maxBlocksFront": {
+      "description": "Höchstzahl an Bausteinen auf der Vorderseite.",
+      "$ref": "#/$defs/anzahl"
+    },
+    "maxBlocksBack": {
+      "description": "Höchstzahl an Bausteinen auf der Rückseite.",
+      "$ref": "#/$defs/anzahl"
+    },
+    "maxTableColumns": {
+      "description": "Höchstzahl an Spalten einer Tabelle.",
+      "$ref": "#/$defs/anzahl"
+    },
+    "maxTableRows": {
+      "description": "Höchstzahl an Zeilen einer Tabelle, die Kopfzeile mitgezählt.",
+      "$ref": "#/$defs/anzahl"
+    },
+    "maxSources": {
+      "description": "Höchstzahl an Einträgen in sources einer Karte.",
       "$ref": "#/$defs/anzahl"
     }
   },

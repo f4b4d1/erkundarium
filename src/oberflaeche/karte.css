@@ -52,6 +52,8 @@
   --karte-schattenversatz: 0.32em;
   /* Schriftgrößen: Bausteine der Vorderseite (Kurztext) und Titel der Rückseite */
   --karte-schrift-vorne: 1.045em;
+  /* Quellen im Fuß der Rückseite, relativ zur Fußschrift (0.68em): ergibt etwa 0.6em der Kartenschrift */
+  --karte-schrift-quellen: 0.88em;
   --karte-titel-hinten: 1.15em;
 
   /* Schrift: nur Schriften des Systems, nichts von außen */
@@ -728,7 +730,7 @@
 
 .quellen-titel {
   margin: 0 0 0.15em;
-  font-size: 1em;
+  font-size: var(--karte-schrift-quellen);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -736,7 +738,9 @@
 
 .quellen {
   margin: 0;
-  padding-left: 1.3em;
+  padding: 0;
+  list-style: none;
+  font-size: var(--karte-schrift-quellen);
   overflow-wrap: anywhere;
 }
 

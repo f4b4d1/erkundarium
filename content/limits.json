@@ -1,6 +1,12 @@
 {
   "maxTitleLength": 40,
-  "maxTextLength": 300,
+  "frontText": { "min": 300, "max": 400 },
+  "maxBackTextLength": 250,
+  "maxFunfactLength": 160,
   "maxItemLength": 100,
-  "maxBlocksPerSide": 4
+  "maxBlocksFront": 1,
+  "maxBlocksBack": 3,
+  "maxTableColumns": 2,
+  "maxTableRows": 4,
+  "maxSources": 3
 }

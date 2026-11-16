@@ -41,7 +41,7 @@ Stand: nach der Grilling-Session vom 2026-11-16. Alle Fragen aus Abschnitt 8 sin
 | E9 | Jede Karte braucht mindestens eine Quelle. Jede Textfassung einer Karte hat einen Prüfstatus. |
 | E10 | Das Wissensnetz hat zwei Schichten: berechnete Fundorte und von Hand gesetzte Beziehungen (ADR 0003). |
 | E11 | Sichtbare Texte liegen in Textfassungen, getrennt von Struktur und Layout. Zum Start nur `de` (ADR 0002). |
-| E12 | Kartentexte halten Längenvorgaben und eine Höchstzahl an Bausteinen je Seite ein. Die Werte stehen in einer Inhaltsdatei; M1 nutzt vorläufige Werte, die endgültigen kommen aus der Musterkarte. |
+| E12 | Kartentexte halten Längenvorgaben und eine Höchstzahl an Bausteinen je Seite ein. Die Werte stehen in einer Inhaltsdatei und wurden in M1 am Kartendesign festgelegt. |
 | E13 | Karten und Themengebiete liegen in einem gemeinsamen Kartenvorrat mit global eindeutiger ID. Eine Welt besteht nur aus Szenen (ADR 0001). |
 | E14 | Beliebig viele Hotspots dürfen auf dieselbe Karte zeigen. Gefunden ist eine Eigenschaft der Karte (ADR 0001). |
 | E15 | Eine Szene kann eine Eintrittskarte tragen, die beim ersten Betreten gefunden wird. Jeder Hotspot hat genau eine Aktion (ADR 0001). |
@@ -235,7 +235,7 @@ Welche Szenen zur Welt gehören, ergibt sich aus dem Ordner; welche Karten, aus 
 
 - `image`, `link`, `relations` und `linkLabel` sind freiwillig. `linkLabel` ohne `link` meldet das Prüfskript als Fehler.
 - `image` nennt eine SVG-Datei in `cards/`, ohne Pfad. Der Name besteht wie eine ID aus Kleinbuchstaben, Ziffern und Bindestrichen und endet auf `.svg`; er muss nicht der Karten-ID gleichen. Das Prüfskript prüft, dass die Datei existiert.
-- `sources` sind beliebige Texte (auch Bücher), mindestens einer. `link` beginnt mit `http://` oder `https://`.
+- `sources` sind Texte, mindestens einer. Eine Quelle im Netz steht als bloße URL da, ohne Titel und Beschreibung; andere Quellen (etwa Bücher) als kurze Angabe mit Autor, Titel und Jahr. Die Rückseite zeigt die Quellen klein und ohne Nummern, in der Reihenfolge der Datei. `link` beginnt mit `http://` oder `https://`.
 - `status` ist `entwurf` oder `geprueft`. `geprueft` setzt nur ein Mensch, der den Text gegen die Quelle gelesen hat.
 - Jede Textfassung einer Karte ist vollständig: `status`, `title`, `front` und `back` sind Pflicht. `front` hat mindestens einen Baustein, `back` darf leer sein. Die Rückfallregel auf `de` greift, wenn einer Karte die ganze Fassung fehlt.
 - Wo ein Text je Textfassung vorhanden ist (auch `label`, `hint`, `title` der Szene), ist `de` Pflicht.
@@ -250,21 +250,30 @@ Welche Szenen zur Welt gehören, ergibt sich aus dem Ordner; welche Karten, aus 
 | `facts` | `{ "type": "facts", "items": ["...", "..."] }` |
 | `table` | `{ "type": "table", "rows": [["Kopf A", "Kopf B"], ["a", "b"]] }`; die erste Zeile ist die Kopfzeile |
 
-**limits.json** (vorläufige Werte, gezählt in Zeichen)
+**limits.json** (Werte gezählt in Zeichen; festgelegt am Kartendesign aus M1)
 
 ```json
 {
   "maxTitleLength": 40,
-  "maxTextLength": 300,
+  "frontText": { "min": 300, "max": 400 },
+  "maxBackTextLength": 250,
+  "maxFunfactLength": 160,
   "maxItemLength": 100,
-  "maxBlocksPerSide": 4
+  "maxBlocksFront": 1,
+  "maxBlocksBack": 3,
+  "maxTableColumns": 2,
+  "maxTableRows": 4,
+  "maxSources": 3
 }
 ```
 
 - `maxTitleLength` gilt für `title` und `linkLabel`.
-- `maxTextLength` gilt für den Text in `text` und `funfact`.
+- `frontText` gilt für den Text des einen Bausteins `text` auf der Vorderseite. Unter `min` ist eine Warnung, über `max` ein Fehler.
+- `maxBackTextLength` gilt für `text` auf der Rückseite, `maxFunfactLength` für `funfact`.
 - `maxItemLength` gilt für Einträge in `list` und `facts` und für Tabellenzellen.
-- `maxBlocksPerSide` gilt je Kartenseite.
+- `maxBlocksFront` und `maxBlocksBack` gelten je Kartenseite.
+- `maxTableRows` zählt die Kopfzeile mit.
+- `maxSources` gilt für `sources` einer Karte.
 
 **relations.json**
 

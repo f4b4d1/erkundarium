@@ -81,9 +81,15 @@ const wissensgebiete: Daten[] = [{ id: 'technik', title: { de: 'Technik' }, colo
 
 const vorgaben: Daten = {
   maxTitleLength: 40,
-  maxTextLength: 300,
+  frontText: { min: 300, max: 400 },
+  maxBackTextLength: 250,
+  maxFunfactLength: 160,
   maxItemLength: 100,
-  maxBlocksPerSide: 4,
+  maxBlocksFront: 1,
+  maxBlocksBack: 3,
+  maxTableColumns: 2,
+  maxTableRows: 4,
+  maxSources: 3,
 };
 
 describe('IDs', () => {
@@ -424,4 +430,13 @@ describe('limits.json', () => {
   });
 
   it('verbietet unbekannte Felder', () => erwarteUngueltig('limits', { ...vorgaben, maxTitelLength: 40 }));
+
+  it.each(['min', 'max'])('verlangt frontText.%s', (feld) => {
+    const v = kopie(vorgaben);
+    delete v.frontText[feld];
+    erwarteUngueltig('limits', v);
+  });
+
+  it('verbietet unbekannte Felder in frontText', () =>
+    erwarteUngueltig('limits', { ...vorgaben, frontText: { min: 300, max: 400, mittel: 350 } }));
 });

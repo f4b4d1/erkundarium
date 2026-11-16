@@ -63,11 +63,11 @@ export function Rueckseite({ datei, text, gebiet }: Seiteneigenschaften) {
             </a>
           )}
           <h3 class="quellen-titel">{TEXTE.karte.quellen}</h3>
-          <ol class="quellen">
+          <ul class="quellen">
             {datei.sources.map((quelle, i) => (
               <li key={i}>{quelle}</li>
             ))}
-          </ol>
+          </ul>
         </footer>
       </div>
     </>
