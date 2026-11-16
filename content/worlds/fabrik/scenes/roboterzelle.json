@@ -1,0 +1,15 @@
+{
+  "id": "roboterzelle",
+  "type": "ansicht",
+  "title": { "de": "Roboterzelle" },
+  "card": "roboterzelle",
+  "hotspots": [
+    { "id": "greifer", "action": "card", "target": "greifer",
+      "label": { "de": "Greifer" } },
+    { "id": "motorleitung", "action": "card", "target": "motorleitung",
+      "label": { "de": "Motorleitung" } },
+    { "id": "karton", "action": "info",
+      "label": { "de": "Karton" },
+      "hint": { "de": "Wird vom Greifer gepackt und vom Förderband genommen." } }
+  ]
+}

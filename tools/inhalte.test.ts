@@ -6,14 +6,7 @@ import { INHALTSORDNER } from './pfade.ts';
 it('das Prüfskript meldet auf den echten Inhalten nur die bekannten Meldungen', () => {
   const bericht = pruefeInhaltsordner(INHALTSORDNER, 'entwickeln');
 
-  // Die Szene roboterzelle wird im nächsten Schritt gezeichnet.
-  expect(bericht.fehler).toEqual([
-    {
-      datei: 'worlds/fabrik/scenes/fabrikhalle.json',
-      regel: 'hotspot-ziel',
-      text: 'Der Hotspot „roboter“ zeigt auf die Szene „roboterzelle“, die es nicht gibt.',
-    },
-  ]);
+  expect(bericht.fehler).toEqual([]);
 
   // Warnungen kommen nur von Karten, die noch Entwürfe sind.
   expect(bericht.warnungen.filter((m) => m.regel !== 'pruefstatus')).toEqual([]);

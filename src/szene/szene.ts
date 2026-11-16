@@ -39,6 +39,8 @@ export interface Szene {
   lageVon(hotspot: string): Rechteck | undefined;
   /** Legt den Tastaturfokus auf den Hotspot, etwa wenn eine darüber geöffnete Ansicht schließt. */
   fokussiere(hotspot: string): void;
+  /** Legt den Fokus auf die Szene selbst, ohne einen Hotspot hervorzuheben; Tab führt dann zum ersten Hotspot. */
+  fokussiereSzene(): void;
   abbauen(): void;
 }
 
@@ -158,6 +160,9 @@ export function baueSzene(
     lageVon,
     fokussiere(hotspot) {
       elemente.get(hotspot)?.focus({ preventScroll: true });
+    },
+    fokussiereSzene() {
+      svg.focus({ preventScroll: true });
     },
     abbauen() {
       svg.remove();

@@ -8,6 +8,8 @@ export const TEXTE = {
   keineWelt: 'In den Inhalten ist keine Welt eingetragen.',
   startszeneFehlt: 'Die Startszene der Welt fehlt in den Inhalten.',
   szeneNichtDarstellbar: 'Die Szene konnte nicht dargestellt werden.',
+  szeneNichtGeladen: 'Diese Szene konnte nicht geladen werden. Du bleibst, wo du bist.',
+  pfad: 'Pfad',
   neuereVersion: 'Dieser Spielstand stammt von einer neueren Version. In dieser Sitzung wird nichts gespeichert.',
   speichernFehlgeschlagen:
     'Der Spielstand konnte nicht gespeichert werden. Was du in dieser Sitzung findest, geht beim Schließen verloren.',

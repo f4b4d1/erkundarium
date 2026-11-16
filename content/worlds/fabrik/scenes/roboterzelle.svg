@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<rect width="1600" height="900" fill="#FFE9C7" />
+<rect x="0" y="700" width="1600" height="200" fill="#F7D9A8" />
+<path d="M0,700H1600" fill="none" stroke="#26262E" stroke-width="3" stroke-linecap="round" />
+<rect x="150" y="610" width="900" height="50" rx="4" fill="#6B7785" stroke="#26262E" stroke-width="3" stroke-linejoin="round" />
+<g id="karton" data-hotspot="karton">
+<rect x="780" y="530" width="130" height="80" rx="3" fill="#D9A55B" stroke="#26262E" stroke-width="3" stroke-linejoin="round" />
+<path d="M780,555H910" fill="none" stroke="#26262E" stroke-width="2" stroke-linecap="round" />
+</g>
+<rect x="1130" y="640" width="260" height="60" rx="4" fill="#6B7785" stroke="#26262E" stroke-width="3" stroke-linejoin="round" />
+<path d="M1260,640L1230,500" fill="none" stroke="#26262E" stroke-width="64" stroke-linecap="round" />
+<path d="M1260,640L1230,500" fill="none" stroke="#FF7A1A" stroke-width="58" stroke-linecap="round" />
+<path d="M1230,500L1000,330" fill="none" stroke="#26262E" stroke-width="54" stroke-linecap="round" />
+<path d="M1230,500L1000,330" fill="none" stroke="#FF7A1A" stroke-width="48" stroke-linecap="round" />
+<path d="M1000,330L850,430" fill="none" stroke="#26262E" stroke-width="44" stroke-linecap="round" />
+<path d="M1000,330L850,430" fill="none" stroke="#FF7A1A" stroke-width="38" stroke-linecap="round" />
+<circle cx="1230" cy="500" r="30" fill="#6B7785" stroke="#26262E" stroke-width="3" />
+<circle cx="1000" cy="330" r="26" fill="#6B7785" stroke="#26262E" stroke-width="3" />
+<g id="greifer" data-hotspot="greifer">
+<rect x="810" y="425" width="80" height="30" rx="4" fill="#6B7785" stroke="#26262E" stroke-width="3" stroke-linejoin="round" />
+<path d="M820,455V520M880,455V520" fill="none" stroke="#26262E" stroke-width="12" stroke-linecap="round" />
+<path d="M820,455V520M880,455V520" fill="none" stroke="#6B7785" stroke-width="6" stroke-linecap="round" />
+</g>
+<g id="motorleitung" data-hotspot="motorleitung">
+<path d="M1300,700C1340,760 1480,780 1530,700C1560,640 1560,560 1560,480" fill="none" stroke="#26262E" stroke-width="14" stroke-linecap="round" />
+<path d="M1300,700C1340,760 1480,780 1530,700C1560,640 1560,560 1560,480" fill="none" stroke="#F6C945" stroke-width="8" stroke-linecap="round" />
+</g>
+</svg>
