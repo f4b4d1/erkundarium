@@ -189,6 +189,7 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 - Nach jedem Schritt auf die Rückmeldung des Nutzers warten.
 - Commits direkt auf `main`, Commit-Nachrichten auf Englisch. Nicht pushen, außer der Nutzer verlangt es. `CLAUDE.md` ist nicht eingecheckt und bleibt es.
 - Änderungen an Design-Guidelines, Stilprofil und Mindmap nur nach Vorschlag und Okay des Nutzers.
+- Nach jedem Commit prüft die Hauptsession Abschnitt 6 auf Stand-Commit, Einstieg und neue Werkzeuge und zieht ihn nach.
 
 ### Erledigt in M1
 
