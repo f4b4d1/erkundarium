@@ -509,13 +509,20 @@ describe('Inhaltsverzeichnis (F35)', () => {
     ]);
   });
 
-  it('enthält alle Karten mit Themengebiet und Beziehungen, aber ohne Kartentexte', () => {
+  it('enthält alle Karten mit Titel, Themengebiet und Beziehungen, aber ohne weitere Kartentexte', () => {
     const inhalt = grundinhalt();
     (inhalt['cards/karte-a.json'] as Daten).relations = [{ type: 'typ-a', card: 'karte-b' }];
     expect(pruefe(inhalt).verzeichnis.cards).toEqual([
-      { id: 'karte-a', topic: 'gebiet-a', relations: [{ type: 'typ-a', card: 'karte-b' }] },
-      { id: 'karte-b', topic: 'gebiet-a', relations: [] },
+      { id: 'karte-a', title: { de: 'Titel karte-a' }, topic: 'gebiet-a', relations: [{ type: 'typ-a', card: 'karte-b' }] },
+      { id: 'karte-b', title: { de: 'Titel karte-b' }, topic: 'gebiet-a', relations: [] },
     ]);
+  });
+
+  it('enthält den Titel einer Karte je Textfassung', () => {
+    const inhalt = grundinhalt();
+    const texte = (inhalt['cards/karte-a.json'] as Daten).texts;
+    texte.en = { ...texte.de, title: 'Title karte-a' };
+    expect(pruefe(inhalt).verzeichnis.cards[0]!.title).toEqual({ de: 'Titel karte-a', en: 'Title karte-a' });
   });
 
   it('enthält Themengebiete und Beziehungstypen mit ausgeschriebenem symmetric, aber ohne acyclic', () => {

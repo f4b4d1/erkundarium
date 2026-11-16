@@ -32,7 +32,7 @@ interface Karte {
   id: string;
   topic: string;
   relations?: Beziehung[];
-  texts: Record<string, { status: 'entwurf' | 'geprueft' }>;
+  texts: Record<string, { status: 'entwurf' | 'geprueft'; title: string }>;
 }
 
 interface Welt {
@@ -320,7 +320,12 @@ export function pruefeInhalte(
         ...(h.target === undefined ? {} : { target: h.target }),
       })),
     })),
-    cards: karten.map(({ daten: k }) => ({ id: k.id, topic: k.topic, relations: k.relations ?? [] })),
+    cards: karten.map(({ daten: k }) => ({
+      id: k.id,
+      title: Object.fromEntries(Object.entries(k.texts).map(([fassung, text]) => [fassung, text.title])),
+      topic: k.topic,
+      relations: k.relations ?? [],
+    })),
     topics: themengebiete,
     relations: beziehungstypen.map(({ acyclic: _, ...t }) => ({ ...t, symmetric: t.symmetric ?? false })),
   };

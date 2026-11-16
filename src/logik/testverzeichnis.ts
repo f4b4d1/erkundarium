@@ -50,6 +50,7 @@ export function testverzeichnis(b: Verzeichnisbeschreibung): Inhaltsverzeichnis 
     }),
     cards: (b.karten ?? []).map((id) => ({
       id,
+      title: { de: id },
       topic: 'gebiet-a',
       relations: beziehungen.filter(([von]) => von === id).map(([, type, card]) => ({ type, card })),
     })),

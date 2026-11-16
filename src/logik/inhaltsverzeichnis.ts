@@ -41,6 +41,8 @@ export interface Hotspoteintrag {
 
 export interface Karteneintrag {
   id: string;
+  /** Titel der Karte je Textfassung; die übrigen Kartentexte lädt die Engine erst mit der Karte. */
+  title: Texte;
   topic: string;
   /** Beziehungen dieser Karte als Ausgangskarte, leer, wenn sie keine hat. */
   relations: Beziehung[];
