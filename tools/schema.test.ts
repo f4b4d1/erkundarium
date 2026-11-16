@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { pruefe, type SchemaName } from './schema';
+import { pruefe, type SchemaName } from './schema.ts';
 
 type Daten = Record<string, any>;
 
