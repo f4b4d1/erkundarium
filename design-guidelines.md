@@ -4,7 +4,7 @@ Stil: B+ „Kontur fein“ – dunkle Kontur, satte einfarbige Flächen, Formen 
 
 Diese Datei regelt, **wie** gezeichnet wird. **Was** in einer Themenwelt vorkommt (Bedeutungsfarben, Materialien,
 Maßstab, typische Details), steht im Stilprofil der Welt, z. B. `stilprofil-fabrik.md`.
-Vor jeder Szene beide Dateien lesen. Fehlt das Profil einer neuen Welt, zuerst das Profil nach Abschnitt 9 anlegen.
+Vor jeder Szene beide Dateien lesen. Fehlt das Profil einer neuen Welt, zuerst das Profil nach Abschnitt 10 anlegen.
 
 Stilreferenz für Strich und Anmutung: `erkundarium-referenzszene-b-plus-v3.svg`. Sie ist ein Beispiel, kein Layout-Muster:
 Bildaufbau und Motive einer neuen Szene folgen dem Thema, nicht der Referenz.
@@ -14,7 +14,7 @@ Bildaufbau und Motive einer neuen Szene folgen dem Thema, nicht der Referenz.
 1. Format: eine SVG-Datei, `viewBox="0 0 1600 900"`, kein `width`/`height`.
 2. Verboten in Szenen: `<script>`, `<style>`, `<text>`, `<title>` in Gruppen, `<image>`, Filter, Verläufe, externe Verweise.
    (Die Referenzdatei enthält `<style>` und Labels nur zur Hover-Demo. Im Spiel zeichnet die Anwendung Hinweise und Haken.)
-3. Jedes benennbare Ding ist ein Hotspot: `<g id="…" data-hotspot="…" aria-label="…">`.
+3. Jedes benennbare Ding ist ein Hotspot: `<g id="…" data-hotspot="…">`. Namen stehen nie in der SVG, auch nicht als `aria-label`.
 4. Nichts endet in der Luft: Jede Verbindung (Kabel, Rohr, Ast, Wurzel, Ader, Weg, Bach) beginnt und endet sichtbar an etwas oder hinter etwas.
 5. Fachlich korrekt vor hübsch: Aufbau, Anzahl, Lage und Größenverhältnisse müssen stimmen. Unsicheres weglassen und im Bericht nennen, nicht raten.
 6. Nur Farben aus Abschnitt 4 und aus dem Stilprofil der Welt.
@@ -22,17 +22,18 @@ Bildaufbau und Motive einer neuen Szene folgen dem Thema, nicht der Referenz.
 ## 2 Hotspots
 
 - `id` und `data-hotspot` sind identisch, eindeutig, kebab-case, deutsch ohne Umlaute: `kabel-leistung`, `gelenk-3`, `eichenblatt`.
-- `aria-label` trägt den Kurznamen. Hinweis- und Kartentexte stehen in der Szenendatei (`label`, `hint`), nie in der SVG.
+- Texte stehen nie in der SVG. Name und Erklärung eines Hotspots stehen in der Szenendatei (`label`, `hint`), Kartentexte in der Kartendatei. Die Anwendung setzt `aria-label` zur Laufzeit aus `label`.
+- `hint` erklärt das Ding und enthält nie eine Bedienanweisung („Klicken, um …“). Was ein Klick bewirkt, zeigt die Anwendung über ein Symbol.
 - Hotspots dürfen verschachtelt sein. Das innere Element liegt im Quelltext nach den Flächen des äußeren.
 - Mehrere gleiche Dinge: Suffix mit Zahl (`fenster-1`, `fenster-2`).
 - Kleinste Klickfläche 24 × 24. Dünne Linien erfüllen das über ihre Kontur-Unterlage.
-- Die obere rechte Ecke jedes Hotspots bleibt für den Fundmarker frei (Kreis r 9, Bereichsmarker r 13,5).
+- Die obere rechte Ecke jedes Hotspots bleibt für sein Abzeichen frei, das die Anwendung zeichnet: Fundmarker, verdeckte Karte, Lupe oder Info (Kreis r 9, Bereichsmarker r 13,5). Das gilt für alle Hotspots, auch ohne Karte.
 - Reine Dekoration ohne Lernwert (Fugen, Kiesel, Schatten, Grashalme) bekommt keinen Hotspot.
 
 Vorlage:
 
 ```svg
-<g id="not-halt" data-hotspot="not-halt" aria-label="Not-Halt-Taster">
+<g id="not-halt" data-hotspot="not-halt">
   <rect x="638" y="468" width="30" height="40" rx="4" fill="#F6C945"
         stroke="#26262E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
   <circle cx="653" cy="485" r="9" fill="#E4572E" stroke="#26262E" stroke-width="3"/>
@@ -155,16 +156,26 @@ Vor der Abgabe jede Zeile prüfen und im Bericht bestätigen:
 
 - [ ] XML ist gültig; `viewBox` stimmt
 - [ ] Keine verbotenen Elemente aus Regel 2
-- [ ] Jeder Hotspot hat `id` = `data-hotspot` und `aria-label`; alle IDs eindeutig
+- [ ] Jeder Hotspot hat `id` = `data-hotspot`; alle IDs eindeutig; kein `aria-label` und kein anderer Text in der SVG
 - [ ] Jeder Hotspot der Szenendatei existiert in der SVG und umgekehrt
 - [ ] Jede Verbindung hat sichtbaren Start und sichtbares Ziel
 - [ ] Nur Farben aus Abschnitt 4 und dem Stilprofil; Abstufungen sind berechnet; Hintergrund nutzt das Ortsfarben-Paar des Orts
 - [ ] Szenentyp eingehalten; Maßstab stimmt mit dem Stilprofil
 - [ ] Gesichter folgen Abschnitt 6
 - [ ] Szene als PNG gerendert und angesehen: nichts überlappt falsch, nichts schwebt
-- [ ] Bericht nennt: Hotspots mit Vorschlag für `label` und `hint`, fachliche Unsicherheiten, neu eingeführte Farben oder Formen
+- [ ] Bericht nennt: Hotspots mit Vorschlag für Aktion (`card`, `scene`, `info`), `label` und `hint`; fachliche Unsicherheiten; neu eingeführte Farben oder Formen
 
-## 9 Vorlage: Stilprofil einer neuen Welt
+## 9 Kartenbilder
+
+Eine Karte kann ein eigenes Bild tragen: eine kleine SVG im selben Stil wie die Szenen.
+
+- Es gelten die Abschnitte 3 und 4 und die Verbote aus Abschnitt 1, Regel 2. Ein Kartenbild enthält also keinen Text: Es muss zu jeder Textfassung passen.
+- Zeichen ohne Sprache sind erlaubt: Schaltzeichen, Pfeile, Plus und Minus.
+- Ein Kartenbild hat keine Hotspots.
+- Das Ding sieht aus wie in den Szenen: gleiche Farben, gleiche Grundform, mehr Details.
+- Format und Größe legt die Musterkarte fest.
+
+## 10 Vorlage: Stilprofil einer neuen Welt
 
 Datei `stilprofil-<welt>.md`, höchstens eine Seite. Neue Einträge nur hier ergänzen, nie stillschweigend in einer Szene.
 

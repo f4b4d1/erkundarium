@@ -1,6 +1,8 @@
 # Erkundarium – Spec v0.1: der Durchstich
 
-Diese Spec beschreibt den ersten lauffähigen Code: drei Szenen, etwa zehn Karten, die ganze Funktionskette einmal. Abschnitt 8 listet, was die Grill-Session noch klären muss.
+Diese Spec beschreibt den ersten lauffähigen Code: drei Szenen, etwa zehn Karten, die ganze Funktionskette einmal.
+
+Stand: nach der Grilling-Session vom 2026-11-16. Alle Fragen aus Abschnitt 8 sind entschieden; Abschnitt 9 listet, was offen bleibt. Begriffe stehen in `GLOSSARY.md`, Begründungen der großen Entscheidungen in `docs/adr/`, Meilensteine in `konzeptplan.md`.
 
 ## 1 Ziel und Umfang
 
@@ -9,153 +11,243 @@ Diese Spec beschreibt den ersten lauffähigen Code: drei Szenen, etwa zehn Karte
 **Im Umfang**
 
 - Eine Welt `fabrik` mit den Szenen Fabrikhalle, Roboterzelle und Robotergelenk
-- Etwa 10 Karten, davon mindestens 2 mit Beziehungen zueinander
-- Klick, Zoom, Pfadanzeige, Karte aufdecken, Sammlung, Fortschritt, Speichern
-- Prüfskript für Inhalte
+- Etwa 10 Karten, davon eine an Hotspots in zwei Szenen, mindestens 2 mit Beziehungen zueinander, 2 bis 3 mit Kartenbild
+- Klick, Zoom, Pfadanzeige, Hinweis, Karte aufdecken, Eintrittskarte, Sammlung, Fundorte, Fortschritt, Speichern
+- Prüfskript für Inhalte, das auch das Inhaltsverzeichnis erzeugt
+- Genau eine Textfassung: `de`
 
 **Nicht im Umfang**
 
-- Verschiebbare Szenen, bewegte Elemente, Easter Eggs, Sammelgegenstände
+- Verschiebbare Szenen, bewegte Elemente, Easter Eggs, Sammelobjekte
 - Kartensets, Quiz, Startbildschirm
 - Profil-Oberfläche, Export und Import des Spielstands
-- App-Verpackung mit Tauri, zweite Sprache, Vorlesen
+- Hosting, Abnahme auf dem Handy, zweite Textfassung, Vorlesen
+- Seitwärtswechsel zwischen Szenen (Tür in den Nachbarraum)
 
 ## 2 Feste Entscheidungen
 
 | Nr. | Entscheidung |
 | --- | --- |
 | E1 | Web-Technik: TypeScript, SVG, HTML/CSS. Kein Rust im Anwendungscode. |
-| E2 | Statische Web-App, beim Entwickeln über einen lokalen Entwicklungsserver. |
-| E3 | Szenen sind SVG-Dateien. Der Zeichenstil wird aus den Stilproben A, B, C gewählt. |
+| E2 | Statische Web-App. Entwicklungsserver und Build mit Vite. |
+| E3 | Szenen sind SVG-Dateien im Stil B+ „Kontur fein“ nach `design-guidelines.md`. |
 | E4 | Daten statt Code: Inhalte liegen als Dateien unter `content/`, die Engine unter `src/`. |
-| E5 | Die Engine kennt nur allgemeine Begriffe, keine Fachbegriffe wie Fabrik oder Roboter. |
+| E5 | Die Engine kennt nur allgemeine Begriffe, keine Fachbegriffe wie Fabrik oder Roboter, auch keine Namen von Beziehungstypen. |
 | E6 | Keine feste Tiefe und kein eigener Begriff für Oberebenen: Eine Stadt ist eine Szene. |
-| E7 | Der Spielstand speichert nur IDs gefundener Karten. Prozentwerte werden berechnet. |
+| E7 | Der Spielstand speichert nur IDs gefundener Karten und Einstellungen. Prozentwerte, Abschluss und betretene Szenen werden berechnet. |
 | E8 | IDs sind nach Veröffentlichung unveränderlich. |
-| E9 | Jede Karte braucht mindestens eine Quelle und einen Prüfstatus. |
-| E10 | Kartenbeziehungen sind ein Netz: mehrere Beziehungen je Karte, in beide Richtungen lesbar. |
-| E11 | Sprache der Inhalte: Deutsch. Texte bleiben vom Layout getrennt. |
-| E12 | Kartentexte halten Längenvorgaben ein; die Werte kommen aus der Musterkarte. |
+| E9 | Jede Karte braucht mindestens eine Quelle. Jede Textfassung einer Karte hat einen Prüfstatus. |
+| E10 | Das Wissensnetz hat zwei Schichten: berechnete Fundorte und von Hand gesetzte Beziehungen (ADR 0003). |
+| E11 | Sichtbare Texte liegen in Textfassungen, getrennt von Struktur und Layout. Zum Start nur `de` (ADR 0002). |
+| E12 | Kartentexte halten Längenvorgaben und eine Höchstzahl an Bausteinen je Seite ein. Die Werte stehen in einer Inhaltsdatei; M1 nutzt vorläufige Werte, die endgültigen kommen aus der Musterkarte. |
+| E13 | Karten und Themengebiete liegen in einem gemeinsamen Kartenvorrat mit global eindeutiger ID. Eine Welt besteht nur aus Szenen (ADR 0001). |
+| E14 | Beliebig viele Hotspots dürfen auf dieselbe Karte zeigen. Gefunden ist eine Eigenschaft der Karte (ADR 0001). |
+| E15 | Eine Szene kann eine Eintrittskarte tragen, die beim ersten Betreten gefunden wird. Jeder Hotspot hat genau eine Aktion (ADR 0001). |
+| E16 | Die Zoom-Hotspots allein definieren das Szenennetz. Es ist gerichtet und ohne Kreise; eine Szene kann von mehreren aus erreichbar sein. Ein Feld `parent` gibt es nicht. |
+| E17 | Weitergabe und Handy über eine gehostete Website, keine native Verpackung (ADR 0004). Keine Funktion hängt allein am Überfahren mit der Maus. |
+| E18 | Oberfläche mit Preact. Die Szene liegt in einem eigenen Modul außerhalb des Frameworks. Die Logik ist reines TypeScript ohne Framework und ohne DOM. Tests mit Vitest. |
+| E19 | Inhalte sind JSON-Dateien mit JSON-Schema. Das Inhaltsverzeichnis wird vom Prüfskript erzeugt, nie von Hand gepflegt. |
 
 ## 3 Begriffe
 
-| Begriff | Bedeutung |
+Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
+
+| Feld | Begriff |
 | --- | --- |
-| world | Ein Inhaltspaket als Ordner, zum Beispiel `fabrik`. Kein Ort in der Spielwelt. |
-| scene | Eine gezeichnete Ansicht. Kann von mehreren Hotspots aus erreichbar sein. |
-| hotspot | Ein klickbares SVG-Element mit genau einer Aktion. |
-| card | Eine Wissenskarte mit Vorder- und Rückseite, Quelle und Beziehungen. |
-| topic | Ein Themengebiet mit Farbe und Kartendesign, zum Beispiel Antriebstechnik. |
-| relation | Eine gerichtete, typisierte Verbindung zwischen zwei Karten. |
-| save | Der Spielstand mit Profilen und gefundenen Karten. |
+| world | Welt |
+| scene | Szene |
+| hotspot | Hotspot |
+| action | Aktion: `card`, `scene` oder `info` |
+| card | Karte |
+| topic | Themengebiet |
+| relation | Beziehung |
+| texts | Textfassungen |
+| save | Spielstand |
 
 ## 4 Funktionale Anforderungen
 
 **Navigation**
 
-- F1: Beim Start lädt die Anwendung das Inhaltsverzeichnis und zeigt die Startszene der Welt.
-- F2: Die Szenen-SVG wird in die Seite eingebettet. Jedes Element mit `data-hotspot` und passendem Eintrag in der Szenendatei ist klickbar und per Tastatur erreichbar.
-- F3: Ein Hotspot mit Aktion `scene` zoomt auf das angeklickte Element und wechselt dann in die Zielszene.
-- F4: Die Pfadanzeige zeigt alle Ebenen bis zur aktuellen Szene. Ein Klick auf eine Ebene springt direkt dorthin.
+- F1: Beim Start lädt die Anwendung das erzeugte Inhaltsverzeichnis und zeigt die Startszene der Welt. Sie startet immer dort.
+- F2: Die Szenen-SVG wird in die Seite eingebettet. Jedes Element mit `data-hotspot` und passendem Eintrag in der Szenendatei ist klickbar, antippbar und per Tastatur erreichbar. Die Anwendung setzt `aria-label` aus `label`.
+- F3: Ein Hotspot mit Aktion `scene` zoomt auf das angeklickte Element und wechselt dann in die Zielszene. Der Klick auf das Ding ist immer der Zoom.
+- F4: Die Pfadanzeige zeigt den gegangenen Weg von der Startszene bis zur aktuellen Szene. Ein Klick auf eine Ebene kürzt den Weg bis dorthin.
 - F5: Jede Szene wird erst beim Betreten geladen.
+- F25: Die Szene skaliert mit festem Seitenverhältnis 16:9 auf die verfügbare Fläche; bei anderen Bildschirmen bleiben Ränder.
 
-**Hinweistexte**
+**Hinweis und Hervorhebung**
 
-- F21: Jedes Element mit Hotspot zeigt beim Überfahren mit der Maus und bei Tastaturfokus einen Hinweistext, zum Beispiel „Motorleitung: versorgt den Servomotor mit Leistung“.
-- F22: Der Hinweistext kommt aus den Feldern `label` und `hint` der Szenendatei, nicht aus der SVG. Er ist damit ohne Zeichenprogramm editierbar und später übersetzbar.
-- F23: Die Anwendung zeichnet den Hinweis selbst im Stil der Oberfläche. Der Browser-Tooltip aus dem `<title>` der SVG ist in Szenen verboten, damit kein zweiter Hinweis des Browsers erscheint. Den Kurznamen trägt stattdessen das Attribut aria-label.
-- F24: Ein Hotspot mit Aktion `info` hat nur einen Hinweistext und weder Karte noch Zoom, etwa ein einzelnes Kabel.
+- F21: Jeder Hotspot zeigt einen Hinweis: beim Überfahren mit der Maus, bei Tastaturfokus und beim ersten Tippen auf Touch.
+- F22: Der Hinweis kommt aus den Feldern `label` und `hint` der Szenendatei. `label` erscheint immer. `hint` erscheint bei `info` und `scene` immer, bei `card` erst, wenn die Karte gefunden ist. `hint` ist bei `info` Pflicht, sonst freiwillig, und enthält nie eine Bedienanweisung.
+- F23: Die Anwendung zeichnet den Hinweis selbst. Er enthält Name, gegebenenfalls Erklärung, Stand und das Symbol der Aktion (Karte, Lupe, Info). `<title>` und `aria-label` sind in Szenen-SVGs verboten.
+- F24: Ein Hotspot mit Aktion `info` hat nur einen Hinweis und weder Karte noch Zoom, etwa ein einzelnes Kabel.
+- F26: Auslösen je Eingabegerät. Maus: Klick löst sofort aus. Tastatur: Eingabetaste löst aus. Touch: Das erste Tippen zeigt Hinweis und Hervorhebung; ein zweites Tippen auf denselben Hotspot oder auf das Symbol im Hinweis löst aus; Tippen daneben schließt den Hinweis.
+- F27: Im Ruhezustand ist kein Hotspot hervorgehoben; sichtbar sind nur die Haken gefundener Karten. Beim Überfahren, bei Fokus und nach dem ersten Tippen bekommt der Hotspot einen hellen Umriss entlang seiner Form und ein Abzeichen in der oberen rechten Ecke.
+- F28: Das Abzeichen zeigt Aktion und Zustand über ein Symbol, nicht über Farbe: verdeckte Karte (Karte nicht gefunden), Haken (Karte gefunden), Lupe (Zoom), Lupe mit Haken (Zielszene abgeschlossen), „i“ (Info).
+- F29: Ein Hilfe-Schalter blendet die Abzeichen aller Hotspots der Szene ein, bis er wieder ausgeschaltet wird.
 
 **Karten**
 
-- F6: Ein Hotspot mit Aktion `card` deckt beim ersten Klick die Karte mit Animation auf, markiert sie als gefunden und erhöht den Zähler.
-- F7: Jeder weitere Klick öffnet die Karte ohne Aufdeck-Animation.
-- F8: Eine Karte lässt sich wenden. Die Vorderseite zeigt Titel, Bild und Kurztext; die Rückseite Vertiefung, Quellen und Link.
+- F6: Ein Hotspot mit Aktion `card` deckt beim ersten Auslösen die Karte mit Animation auf, markiert sie als gefunden und erhöht den Zähler.
+- F7: Jedes weitere Auslösen öffnet die Karte ohne Aufdeck-Animation. Das gilt für jeden Hotspot derselben Karte in jeder Szene.
+- F8: Eine Karte lässt sich wenden. Die Vorderseite zeigt Titel, Bild und Kurztext; die Rückseite Vertiefung, Quellen und Link. Rahmen und Farbe kommen vom Themengebiet. Fehlt das Bild, zeigt die Karte das Symbol des Themengebiets.
 - F9: Das Infofeld rendert die Bausteine `text`, `list`, `facts`, `table` und `funfact`.
 - F10: Der Link öffnet in einem neuen Tab.
+- F30: Beim ersten Betreten einer Szene mit Eintrittskarte läuft erst der Zoom, dann deckt sich die Karte in der neuen Szene von selbst auf und gilt als gefunden.
+- F31: In jeder Szene mit Eintrittskarte steht am Szenentitel in der Pfadanzeige ein Kartenknopf, der die Eintrittskarte öffnet.
+- F32: Der Hinweis eines Zoom-Hotspots trägt einen Kartenknopf, sobald die Eintrittskarte der Zielszene gefunden ist. Der Hinweis bleibt offen, während die Maus vom Hotspot hinein fährt.
 
 **Markierung und Fortschritt**
 
-- F11: Hotspots gefundener Karten tragen in der Szene einen kleinen Haken, der sich über einen Schalter ausblenden lässt. Der Hinweis beim Überfahren nennt zusätzlich den Stand, etwa „3 von 5 Karten“.
-- F12: Eine Szene gilt als abgeschlossen, wenn alle ihre Karten gefunden und alle von ihr erreichbaren Szenen abgeschlossen sind. Abgeschlossene Szenen sind am Hotspot und in der Pfadanzeige markiert.
-- F13: Der Gesamtfortschritt ist gefundene Karten geteilt durch vorhandene Karten, bei jedem Start neu berechnet.
+- F11: Hotspots gefundener Karten tragen in der Szene einen Haken, der sich über einen Schalter ausblenden lässt. Der Hinweis eines Zoom-Hotspots nennt den Stand, etwa „3 von 5 Karten“; gezählt wird die Zielszene samt allen tieferen Szenen, jede Karte einmal.
+- F12: Eine Szene gilt als abgeschlossen, wenn ihre Eintrittskarte und alle Karten ihrer Hotspots gefunden sind und alle per Zoom erreichbaren Szenen abgeschlossen sind. Abgeschlossene Szenen sind am Hotspot und in der Pfadanzeige markiert.
+- F13: Der Fortschritt einer Welt ist gefundene Karten geteilt durch die Karten, auf die ihre Szenen verweisen. Der Gesamtfortschritt zählt alle Karten im Kartenvorrat. Beides wird bei jedem Start neu berechnet.
 
 **Sammlung**
 
 - F14: Die Sammlung zeigt alle Karten nach Themengebiet. Nicht gefundene Karten erscheinen als Schatten ohne Inhalt.
 - F15: Gefundene Karten lassen sich in der Sammlung öffnen und wenden.
-- F16: Eine geöffnete Karte listet ihre Nachbarn: was sie enthält und worin sie enthalten ist.
+- F16: Eine geöffnete Karte zeigt zwei Blöcke: „Zu finden in“ mit ihren Fundorten (berechnet) und ihre Beziehungen, gruppiert nach Typ und Richtung mit den Bezeichnungen aus `relations.json`. Nicht gefundene Nachbarkarten erscheinen als Schatten.
 
 **Speichern**
 
-- F17: Nach jedem Fund wird automatisch gespeichert.
+- F17: Nach jedem Fund und jeder Änderung einer Einstellung wird automatisch gespeichert.
 - F18: Der Spielstand trägt eine Schema-Version. Unbekannte Karten-IDs im Spielstand bleiben erhalten und zählen nicht mit.
 - F19: Es gibt eine Funktion zum Zurücksetzen des Spielstands.
+- F33: Der Spielstand liegt in `localStorage` hinter einer Speicherschicht mit den Operationen Laden und Speichern.
 
 **Inhaltsprüfung**
 
-- F20: Ein Prüfskript meldet fehlende Quellen, Status `entwurf`, zu lange Texte, Hotspots ohne Ziel, SVG-Kennungen ohne Eintrag, doppelte IDs und Kreise in `enthaelt`-Beziehungen.
+- F20: Das Prüfskript prüft alle Inhalte gegen das JSON-Schema und meldet außerdem:
+  - fehlende Quellen, zu lange Texte, zu viele Bausteine je Seite
+  - doppelte IDs im Kartenvorrat und unter den Szenen
+  - Hotspots ohne Ziel, SVG-Kennungen ohne Eintrag und Einträge ohne SVG-Kennung
+  - Karten, auf die kein Hotspot und keine Szene verweist
+  - Kreise im Szenennetz und Szenen, die von der Startszene nicht erreichbar sind
+  - Beziehungen mit unbekanntem Typ oder Ziel, symmetrische Beziehungen an beiden Karten, Kreise bei Typen mit `acyclic`
+  - `info`-Hotspots ohne `hint`
+  - verbotene Elemente in Szenen-SVGs und Kartenbildern nach `design-guidelines.md` Abschnitt 1 Regel 2, dazu `aria-label`, Ereignis-Attribute wie `onclick` und Verweise nach außen
+  - Hotspot-Dichte außerhalb der Vorgabe für den Szenentyp (Warnung)
+- F34: Das Prüfskript hat zwei Stufen. Beim Entwickeln ist der Prüfstatus `entwurf` eine Warnung, und die Karte ist im Spiel als Entwurf gekennzeichnet. Beim Veröffentlichen ist `entwurf` ein Fehler, und der Build bricht ab.
+- F35: Das Prüfskript erzeugt das Inhaltsverzeichnis: alle Welten, Szenen und Karten, je Karte ID, Themengebiet und Beziehungen. Der Entwicklungsserver erzeugt es bei jeder Inhaltsänderung neu.
 
 ## 5 Qualitätsanforderungen
 
-- Q1: Eine neue Szene mit Karten kommt ohne Änderung unter `src/` dazu.
+- Q1: Eine neue Szene, Karte oder ein neuer Beziehungstyp kommt ohne Änderung unter `src/` dazu. Eine neue Karte ist genau eine neue Datei.
 - Q2: In `src/` steht kein Fachbegriff aus den Inhalten.
-- Q3: Läuft in aktuellem Firefox und Chrome auf dem Desktop ab 1280 × 720.
-- Q4: Die reine Logik für Fortschritt, Abschluss und Spielstand ist ohne Browser testbar.
+- Q3: Abnahmeziel für v0.1: aktueller Firefox und Chrome auf dem Desktop ab 1280 × 720. Das Handy wird nicht abgenommen, aber nicht verbaut: Die Oberfläche setzt keine feste Fenstergröße voraus.
+- Q4: Die Logik für Szenennetz, Fundorte, Fortschritt, Abschluss und Spielstand ist ohne Browser testbar und kennt weder Preact noch das DOM.
+- Q5: Alle Pfade zu Inhalten sind relativ; die gebaute Seite läuft in einem Unterverzeichnis.
+- Q6: Tests zuerst für: Fortschritt, Abschluss-Regel F12, Fundorte, Szenennetz ohne Kreise, Spielstand-Migration, Prüfskript.
 
 ## 6 Datenformate
 
-IDs bestehen aus Kleinbuchstaben, Ziffern und Bindestrichen. Weltübergreifend wird eine Karte als `welt/karte` angesprochen.
+IDs bestehen aus Kleinbuchstaben, Ziffern und Bindestrichen. Karten-IDs sind über den ganzen Kartenvorrat eindeutig, Szenen-IDs über alle Welten. Karten und Szenen haben getrennte ID-Räume: Die Karte `servomotor` und die Szene `servomotor` dürfen nebeneinander bestehen.
+
+**Ordner**
+
+```text
+content/
+  topics.json
+  relations.json
+  limits.json
+  cards/<id>.json
+  cards/<id>.svg
+  worlds/<welt>/world.json
+  worlds/<welt>/scenes/<id>.json
+  worlds/<welt>/scenes/<id>.svg
+```
 
 **world.json**
 
 ```json
 {
   "id": "fabrik",
-  "title": "Fabrik",
-  "start": "fabrikhalle",
-  "scenes": ["fabrikhalle", "roboterzelle", "robotergelenk"],
-  "cards": ["industrieroboter", "servomotor", "sps"]
+  "title": { "de": "Fabrik" },
+  "start": "fabrikhalle"
 }
 ```
+
+Welche Szenen zur Welt gehören, ergibt sich aus dem Ordner; welche Karten, aus den Szenen.
 
 **Szene**
 
 ```json
 {
   "id": "roboterzelle",
-  "parent": "fabrikhalle",
-  "title": "Roboterzelle",
-  "svg": "roboterzelle.svg",
+  "type": "ansicht",
+  "title": { "de": "Roboterzelle" },
+  "card": "roboterzelle",
   "hotspots": [
     { "id": "roboter", "action": "card", "target": "industrieroboter",
-      "label": "6-Achs-Industrieroboter" },
+      "label": { "de": "6-Achs-Industrieroboter" } },
     { "id": "gelenk-3", "action": "scene", "target": "robotergelenk",
-      "label": "Achse 3", "hint": "Klicken, um ins Gelenk zu zoomen" },
-    { "id": "kabel-leistung", "action": "info",
-      "label": "Motorleitung", "hint": "Versorgt den Servomotor mit Leistung" }
+      "label": { "de": "Achse 3" } },
+    { "id": "kabel-leistung", "action": "card", "target": "motorleitung",
+      "label": { "de": "Motorleitung" },
+      "hint": { "de": "Versorgt den Servomotor mit Leistung" } },
+    { "id": "bodenmarkierung", "action": "info",
+      "label": { "de": "Bodenmarkierung" },
+      "hint": { "de": "Trennt Fahrweg und Arbeitsbereich" } }
   ]
 }
 ```
+
+- `card` ist die Eintrittskarte und freiwillig.
+- `type` ist `ansicht`, `objekt` oder `schema` und wird nur vom Prüfskript gelesen.
+- Die SVG heißt wie die Szene und liegt daneben.
 
 **Karte**
 
 ```json
 {
-  "id": "industrieroboter",
-  "topic": "robotik",
-  "title": "Industrieroboter",
-  "image": "industrieroboter.svg",
-  "front": [{ "type": "text", "text": "..." }],
-  "back": [{ "type": "facts", "items": ["..."] }],
-  "link": { "label": "...", "url": "https://..." },
+  "id": "servomotor",
+  "topic": "antriebstechnik",
+  "image": "servomotor.svg",
   "sources": ["https://..."],
+  "link": "https://...",
   "relations": [
-    { "type": "enthaelt", "card": "robotergelenk" },
-    { "type": "enthaelt", "card": "servomotor" }
+    { "type": "verwandt", "card": "asynchronmotor" }
   ],
-  "status": "geprueft"
+  "texts": {
+    "de": {
+      "status": "geprueft",
+      "title": "Servomotor",
+      "front": [{ "type": "text", "text": "..." }],
+      "back": [{ "type": "facts", "items": ["..."] }],
+      "linkLabel": "..."
+    }
+  }
 }
+```
+
+- `image`, `link` und `relations` sind freiwillig.
+- `status` ist `entwurf` oder `geprueft`. `geprueft` setzt nur ein Mensch, der den Text gegen die Quelle gelesen hat.
+
+**relations.json**
+
+```json
+[
+  { "id": "steuert",
+    "forward": { "de": "steuert" },
+    "backward": { "de": "wird gesteuert von" } },
+  { "id": "misst",
+    "forward": { "de": "misst" },
+    "backward": { "de": "wird gemessen von" } },
+  { "id": "verwandt", "symmetric": true,
+    "forward": { "de": "verwandt mit" } }
+]
+```
+
+Schalter je Typ: `symmetric` (gilt in beide Richtungen) und `acyclic` (darf keinen Kreis bilden). Beide sind freiwillig und sonst falsch.
+
+**topics.json**
+
+```json
+[
+  { "id": "antriebstechnik", "title": { "de": "Antriebstechnik" },
+    "color": "#FF7A1A", "icon": "antriebstechnik.svg" }
+]
 ```
 
 **Spielstand**
@@ -166,44 +258,70 @@ IDs bestehen aus Kleinbuchstaben, Ziffern und Bindestrichen. Weltübergreifend w
   "active": "standard",
   "profiles": {
     "standard": {
-      "cards": { "fabrik/servomotor": "2026-11-20T19:12:00Z" }
+      "cards": { "servomotor": "2026-11-20T19:12:00Z" },
+      "settings": { "showMarkers": true }
     }
   }
 }
 ```
 
-## 7 Regeln für Beziehungen
+v0.1 kennt nur das Profil `standard` und hat keine Oberfläche für Profile.
 
-- Eine Beziehung steht nur an der Ausgangskarte. Die Gegenrichtung berechnet die Engine: Der Servomotor weiß so, dass er Teil von Roboter und Förderband ist.
+## 7 Regeln für Fundorte und Beziehungen
+
+- Der Fundort einer Karte ist jede Szene, in der sie Eintrittskarte ist oder an einem Hotspot hängt. Fundorte werden berechnet und stehen in keiner Datei.
+- Eine Beziehung ist eine Fachaussage, die keine Szene zeigt. Sie steht nur an der Ausgangskarte; die Gegenrichtung berechnet die Engine.
+- Aus der Lage eines Hotspots in einer Szene entsteht nie eine Beziehung.
 - Eine Karte darf beliebig viele Beziehungen haben und beliebig oft Ziel sein.
-- `enthaelt` ist gerichtet und darf keinen Kreis bilden.
-- `verwandt` gilt in beide Richtungen und darf Kreise bilden.
+- Eine symmetrische Beziehung steht an genau einer der beiden Karten.
+- Starttypen: `steuert`, `misst`, `verwandt`. Einen Typ `enthaelt` gibt es zum Start nicht. `verwandt` ist Auffangtyp und wird sparsam benutzt.
 - Zeigt eine Beziehung auf eine nicht gefundene Karte, erscheint diese als Schatten.
 
-## 8 Zum Grillen
+## 8 Entschiedene Fragen
 
-Diese Punkte sind bewusst offen. Zu jedem steht meine Tendenz als Startpunkt.
-
-| Nr. | Frage | Tendenz |
+| Nr. | Frage | Entscheidung |
 | --- | --- | --- |
-| O1 | UI-Framework oder reines TypeScript? | Ein leichtes Komponenten-Framework für Karten und Sammlung; die Szene bleibt reines SVG. |
-| O2 | Kartentexte in JSON, YAML oder Markdown? | JSON zum Start, weil es ohne Zusatzwerkzeug prüfbar ist. |
-| O3 | Pfadanzeige: fester Elternpfad oder gegangener Weg? | Gegangener Weg, weil dieselbe Szene mehrere Eltern haben kann. `parent` bleibt der Standardweg für Direktsprünge. |
-| O4 | Darf ein Hotspot zoomen und zugleich eine Karte geben? | Nein. Stattdessen optional eine Karte beim ersten Betreten einer Szene. |
-| O5 | Sind Hotspots sichtbar hervorgehoben oder muss man suchen? | Hervorhebung erst beim Überfahren; ein Hilfe-Knopf zeigt alle. |
-| O6 | Beschriftungen in der Szene: immer sichtbar oder erst nach dem Fund? | Entschieden: Beschriftungen stehen nie fest in der Szene. Sie erscheinen nur beim Überfahren, siehe F21 bis F23. |
-| O7 | Wo wird gespeichert? | `localStorage` reicht für IDs; Wechsel später möglich, wenn die Speicherschicht gekapselt ist. |
-| O8 | Kartenbild: eigene SVG oder Ausschnitt der Szene? | Eigene kleine SVG je Karte im selben Stil. |
-| O9 | Welche Beziehungstypen zum Start? | Nur `enthaelt` und `verwandt`. |
-| O10 | Festes Seitenverhältnis der Szenen? | 16:9 mit `viewBox` 1600 × 900; Ränder bei anderen Bildschirmen. |
-| O11 | Welche Tests zuerst? | Fortschritt, Abschluss-Regel F12, Spielstand-Migration, Prüfskript. |
-| O12 | Wie werden Szenen-SVGs gegen fehlerhafte Inhalte abgesichert? | Nur eigene Dateien laden; Skripte in SVGs verbietet das Prüfskript. |
-| O13 | Hinweistext: Was zeigt er vor dem Fund, und wie erscheint er auf Touch-Geräten ohne Maus? | Vor dem Fund nur der Name, die Erklärung erst danach, damit Karten nichts vorwegnehmen. Auf Touch erscheint der Hinweis beim ersten Tippen, die Aktion beim zweiten. |
+| O1 | UI-Framework oder reines TypeScript? | Entschieden: Vite, Preact für die Oberfläche, Szene als eigenes Modul, Logik in reinem TypeScript (E18). |
+| O2 | Kartentexte in JSON, YAML oder Markdown? | Entschieden: JSON mit JSON-Schema, eine Datei je Karte, Textfassungen als Block in der Karte und je Feld am Hotspot (E19, Abschnitt 6). |
+| O3 | Pfadanzeige: fester Elternpfad oder gegangener Weg? | Entschieden: gegangener Weg. `parent` entfällt (E16, F4). |
+| O4 | Darf ein Hotspot zoomen und zugleich eine Karte geben? | Entschieden: nein. Die Szene trägt eine Eintrittskarte (E15, F30 bis F32). |
+| O5 | Sind Hotspots sichtbar hervorgehoben oder muss man suchen? | Entschieden: Umriss und Abzeichen erst bei Überfahren, Fokus oder erstem Tippen; Hilfe-Schalter zeigt alle (F27 bis F29). |
+| O6 | Beschriftungen in der Szene? | Entschieden: nie fest in der Szene, nur im Hinweis (F21 bis F23). |
+| O7 | Wo wird gespeichert? | Entschieden: `localStorage` hinter einer Speicherschicht; Einstellungen je Profil (F33). Export und Import sind Bedingung für die Weitergabe. |
+| O8 | Kartenbild: eigene SVG oder Ausschnitt der Szene? | Entschieden: eigene SVG ohne Text, freiwillig; sonst Symbol des Themengebiets (F8). |
+| O9 | Welche Beziehungstypen zum Start? | Entschieden: `steuert`, `misst`, `verwandt` als Daten; kein `enthaelt`, dafür berechnete Fundorte (Abschnitt 7). |
+| O10 | Festes Seitenverhältnis der Szenen? | Entschieden: 16:9 mit `viewBox` 1600 × 900, Ränder bei anderen Bildschirmen (F25). |
+| O11 | Welche Tests zuerst? | Entschieden: siehe Q6. |
+| O12 | Wie werden SVGs abgesichert? | Entschieden: nur eigene Dateien; das Prüfskript prüft die ganze Verbotsliste (F20). |
+| O13 | Hinweis vor dem Fund und auf Touch? | Entschieden: siehe F22 und F26. |
 
-## 9 Abnahme
+Weitere Entscheidungen der Session ohne eigene O-Nummer: gemeinsamer Kartenvorrat (E13), Karte an mehreren Hotspots (E14), Textfassungen (E11), Weitergabe als Website (E17), Prüfstatus in zwei Stufen (F34), „Unter dem Boden“ und „Halle und Tor“ als Bereiche der Startszene (Mindmap).
 
-- [ ] Alle Anforderungen F1 bis F24 sind an der Fabrik-Welt vorführbar
+## 9 Offene Fragen
+
+Keine davon blockiert M1.
+
+| Nr. | Frage | Fällig |
+| --- | --- | --- |
+| N1 | Wie sieht die Musterkarte aus, und welche Längenvorgaben und Bausteinzahlen ergeben sich? Welches Format haben Kartenbilder? | M2 |
+| N2 | Welche Themengebiete hat die Fabrik, mit welcher Farbe und welchem Symbol? | M1 für die Durchstich-Karten, M2 vollständig |
+| N3 | Welche Beziehungen bekommen die Karten der Fabrik? Braucht es weitere Typen? | M1 für mindestens 2, M2 vollständig |
+| N4 | Wo wird gehostet, und darf die Seite öffentlich erreichbar sein? | M3 |
+| N5 | Wie verhält sich die Szene auf dem Handy im Hochformat? | M3 |
+| N6 | Wie sehen Umriss und Abzeichen genau aus? | M1 einfach, M4 verfeinert |
+| N7 | Datenmodell für Sammelobjekte und Kartensets: Was kommt in den Spielstand, wie hängt die Belohnungskarte ohne Fundort im Netz? Mitglieder der Sets? | M5 |
+| N8 | Zeigt die einfache Textfassung externe Links? Wie heißt und wie wählt man Textfassungen im Startbildschirm? | M6 |
+| N9 | Wie wählt man bei mehreren Welten die Welt, und darf ein Zoom über Weltgrenzen führen? | M7 |
+| N10 | Braucht es Seitwärtswechsel zwischen Szenen als eigene Aktion? | bei Bedarf |
+
+## 10 Abnahme
+
+- [ ] Alle Anforderungen F1 bis F35 sind an der Fabrik-Welt vorführbar
+- [ ] Die Karte `motorleitung` wird in der Halle gefunden und ist danach in der Roboterzelle abgehakt
+- [ ] Das Robotergelenk gibt beim ersten Betreten seine Eintrittskarte; danach ist sie über den Kartenknopf in der Szene und im Hinweis des Zoom-Hotspots zu öffnen
 - [ ] Eine vierte Szene mit zwei Karten kommt nur über Dateien in `content/` dazu
 - [ ] Nach dem Hinzufügen sinkt der Prozentwert, die gefundenen Karten bleiben gefunden
-- [ ] Das Prüfskript läuft ohne Meldung
+- [ ] Ein neuer Beziehungstyp kommt nur über `relations.json` dazu
+- [ ] Das Prüfskript läuft ohne Fehler; in der Stufe Veröffentlichen bricht es bei einer Karte im Status `entwurf` ab
 - [ ] Seite neu laden: Spielstand, Haken und Zähler sind unverändert
+- [ ] Alle Funktionen sind ohne Maus nur mit der Tastatur bedienbar
