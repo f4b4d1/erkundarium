@@ -1,0 +1,132 @@
+/* Vorläufiges, schlichtes Aussehen. Farben nach design-guidelines.md Abschnitt 4, Stufe 1. */
+
+:root {
+  --kontur: #26262e;
+  --weiss: #f7f9fb;
+  --gelb: #f6c945;
+  --rand: #3a3a44;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--rand);
+  color: var(--kontur);
+  font-family: system-ui, sans-serif;
+  font-size: 16px;
+}
+
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fläche für die Szene; die Szene selbst hält 16:9 und lässt Ränder (F25). */
+.buehne {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  container-type: size;
+}
+
+.szene {
+  width: min(100cqw, 100cqh * 16 / 9);
+  aspect-ratio: 16 / 9;
+}
+
+.szene > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hotspot {
+  cursor: pointer;
+  outline: none;
+}
+
+/* Heller Umriss entlang der Form (F27, einfache Form). */
+.hotspot.hervorgehoben {
+  filter: drop-shadow(2.5px 0 0 var(--weiss)) drop-shadow(-2.5px 0 0 var(--weiss)) drop-shadow(0 2.5px 0 var(--weiss))
+    drop-shadow(0 -2.5px 0 var(--weiss)) drop-shadow(0 0 1.5px var(--kontur));
+}
+
+/* Tastaturfokus bleibt sichtbar, auch wenn der Hinweis schon zu ist. */
+.hotspot:focus-visible {
+  outline: 3px dashed var(--kontur);
+  outline-offset: 2px;
+}
+
+.hinweis {
+  position: fixed;
+  z-index: 10;
+  box-sizing: border-box;
+  max-width: min(320px, calc(100vw - 16px));
+  padding: 8px 12px;
+  background: var(--weiss);
+  border: 2px solid var(--kontur);
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.25);
+  pointer-events: none;
+}
+
+.hinweis-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hinweis-name {
+  font-weight: 700;
+}
+
+.hinweis-aktion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.hinweis-erklaerung {
+  margin: 6px 0 0;
+  line-height: 1.35;
+}
+
+.symbol {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
+.meldungen {
+  background: var(--gelb);
+  border-bottom: 2px solid var(--kontur);
+  padding: 6px 16px;
+}
+
+.meldungen p {
+  margin: 0;
+}
+
+.laedt,
+.fehler {
+  margin: auto;
+  max-width: 36em;
+  padding: 16px;
+  color: var(--weiss);
+}
+
+.fehler-detail {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  opacity: 0.8;
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,173 @@
+// Die Anwendung hält den Zustand zusammen: geladene Szene, Spielstand, offener Hinweis und
+// Meldungen. Sie startet immer in der Startszene der ersten Welt (F1).
+
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { abgehakteHotspots, hinweisinhalt } from '../logik/hinweis.ts';
+import type { Speicherschicht } from '../logik/speicherschicht.ts';
+import { einlesen, gefundeneKarten, markiereGefunden, type Spielstand } from '../logik/spielstand.ts';
+import type { Hotspot } from '../logik/szenendatei.ts';
+import { STANDARDFASSUNG, text } from '../logik/textfassung.ts';
+import { ladeInhaltsverzeichnis, ladeSzene, type GeladeneSzene } from '../inhalte/laden.ts';
+import type { Rechteck, Szene, Szenenereignis } from '../szene/szene.ts';
+import { Hinweis } from './hinweis.tsx';
+import { Szenenansicht } from './szenenansicht.tsx';
+import { TEXTE } from './texte.ts';
+
+/** Die Textfassung. Die Auswahl durch den Spieler kommt mit dem Startbildschirm hierher. */
+const FASSUNG = STANDARDFASSUNG;
+
+type Ladezustand =
+  | { art: 'laedt' }
+  | { art: 'fehler'; meldung: string; detail?: string }
+  | { art: 'bereit'; szene: GeladeneSzene };
+
+interface OffenerHinweis {
+  hotspot: string;
+  lage: Rechteck;
+}
+
+export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
+  const [ladezustand, setLadezustand] = useState<Ladezustand>({ art: 'laedt' });
+  const [start] = useState(() => einlesen(speicher.laden()));
+  const [spielstand, setSpielstand] = useState<Spielstand>(start.spielstand);
+  const speichernErlaubt = start.art !== 'neuere-version';
+  const [speichernFehlgeschlagen, setSpeichernFehlgeschlagen] = useState(false);
+  const [offen, setOffen] = useState<OffenerHinweis | undefined>(undefined);
+  const szeneRef = useRef<Szene | undefined>(undefined);
+
+  useEffect(() => {
+    starte().then(
+      (szene) => setLadezustand({ art: 'bereit', szene }),
+      (fehler: unknown) => setLadezustand(alsFehlerzustand(fehler)),
+    );
+  }, []);
+
+  const gefunden = useMemo(() => gefundeneKarten(spielstand), [spielstand]);
+  const szene = ladezustand.art === 'bereit' ? ladezustand.szene : undefined;
+  const hotspots = szene?.datei.hotspots;
+  const hotspotsDerSzene = useMemo(
+    () => (hotspots ?? []).map((h) => ({ id: h.id, name: text(h.label, FASSUNG) })),
+    [hotspots],
+  );
+  const darstellung = useMemo(
+    () => ({
+      abgehakt: abgehakteHotspots(hotspots ?? [], gefunden, spielstand.profiles[spielstand.active]!.settings),
+      hervorgehoben: offen?.hotspot,
+    }),
+    [hotspots, gefunden, spielstand, offen?.hotspot],
+  );
+
+  if (ladezustand.art === 'laedt') return <p class="laedt">{TEXTE.laedt}</p>;
+  if (ladezustand.art === 'fehler') {
+    return (
+      <div class="fehler" role="alert">
+        <h1>{TEXTE.startFehlgeschlagen}</h1>
+        <p>{ladezustand.meldung}</p>
+        {ladezustand.detail !== undefined && <p class="fehler-detail">{ladezustand.detail}</p>}
+      </div>
+    );
+  }
+
+  const { datei, svg } = ladezustand.szene;
+  const finde = (id: string): Hotspot | undefined => datei.hotspots.find((h) => h.id === id);
+
+  function loeseAus(hotspot: Hotspot): void {
+    // `scene` zoomt erst im nächsten Schritt; `info` hat nur den Hinweis (F24).
+    if (hotspot.action !== 'card' || hotspot.target === undefined || gefunden.has(hotspot.target)) return;
+    const neu = markiereGefunden(spielstand, hotspot.target, new Date().toISOString());
+    setSpielstand(neu);
+    if (!speichernErlaubt) return;
+    try {
+      speicher.speichern(neu);
+      setSpeichernFehlgeschlagen(false);
+    } catch {
+      setSpeichernFehlgeschlagen(true);
+    }
+  }
+
+  function beimEreignis(ereignis: Szenenereignis): void {
+    switch (ereignis.art) {
+      case 'betreten':
+        setOffen({ hotspot: ereignis.hotspot, lage: ereignis.lage });
+        break;
+      case 'verlassen':
+        setOffen((bisher) => (bisher?.hotspot === ereignis.hotspot ? undefined : bisher));
+        break;
+      case 'daneben':
+        setOffen(undefined);
+        break;
+      case 'ausgeloest': {
+        setOffen({ hotspot: ereignis.hotspot, lage: ereignis.lage });
+        const hotspot = finde(ereignis.hotspot);
+        if (hotspot !== undefined) loeseAus(hotspot);
+        break;
+      }
+    }
+  }
+
+  function beiGroesse(): void {
+    setOffen((bisher) => {
+      const lage = bisher && szeneRef.current?.lageVon(bisher.hotspot);
+      return bisher && lage ? { ...bisher, lage } : bisher;
+    });
+  }
+
+  const offenerHotspot = offen && finde(offen.hotspot);
+  const meldungen = [
+    ...(speichernErlaubt ? [] : [TEXTE.neuereVersion]),
+    ...(speichernFehlgeschlagen ? [TEXTE.speichernFehlgeschlagen] : []),
+  ];
+
+  return (
+    <>
+      {meldungen.length > 0 && (
+        <div class="meldungen" role="status">
+          {meldungen.map((m) => (
+            <p key={m}>{m}</p>
+          ))}
+        </div>
+      )}
+      <main
+        class="buehne"
+        onClick={(e) => {
+          // Tippen auf den Rand neben der Szene schließt den Hinweis wie Tippen daneben.
+          if (!(e.target instanceof Element) || e.target.closest('.szene') === null) setOffen(undefined);
+        }}
+      >
+        <Szenenansicht
+          svg={svg}
+          hotspots={hotspotsDerSzene}
+          darstellung={darstellung}
+          onEreignis={beimEreignis}
+          onGroesse={beiGroesse}
+          onFehler={(fehler) =>
+            setLadezustand({ art: 'fehler', meldung: TEXTE.szeneNichtDarstellbar, detail: fehlertext(fehler) })
+          }
+          szeneRef={szeneRef}
+        />
+      </main>
+      {offen && offenerHotspot && <Hinweis inhalt={hinweisinhalt(offenerHotspot, gefunden, FASSUNG)} ziel={offen.lage} />}
+    </>
+  );
+}
+
+class Startfehler extends Error {}
+
+/** Lädt das Inhaltsverzeichnis und die Startszene der ersten Welt. */
+async function starte(): Promise<GeladeneSzene> {
+  const verzeichnis = await ladeInhaltsverzeichnis();
+  const welt = verzeichnis.worlds[0];
+  if (welt === undefined) throw new Startfehler(TEXTE.keineWelt);
+  const eintrag = verzeichnis.scenes.find((s) => s.id === welt.start);
+  if (eintrag === undefined) throw new Startfehler(TEXTE.startszeneFehlt);
+  return ladeSzene(eintrag);
+}
+
+function alsFehlerzustand(fehler: unknown): Ladezustand {
+  if (fehler instanceof Startfehler) return { art: 'fehler', meldung: fehler.message };
+  return { art: 'fehler', meldung: TEXTE.inhalteNichtGeladen, detail: fehlertext(fehler) };
+}
+
+function fehlertext(fehler: unknown): string | undefined {
+  return fehler instanceof Error ? fehler.message : undefined;
+}
