@@ -186,7 +186,7 @@ Umgesetzte Anforderungen der Spec: F1, F2, F5, F7 bis F10, F17, F18, F21, F22, F
 
 Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
-1. Kartenansicht abschließen: die fünf Karten `haltebremse`, `robotergelenk`, `motorleitung`, `hallenleuchte`, `wellgetriebe` nach `design-guidelines-karte.md` Abschnitt 5 neu fassen (ihre Kurztexte enthielten Herstellerangaben); die übrigen sechs Karten bei Gelegenheit gegen Abschnitt 8 prüfen.
+1. Kartentexte nachbessern: Die fünf Karten mit Herstellerangaben sind nach `design-guidelines-karte.md` neu gefasst. Offen: Die Rückseite von `haltebremse` beginnt mit „Das nennt man …“ und bezieht sich damit auf die Vorderseite; `motorleitung` nennt „beidseitig großflächig aufgelegt“ ohne Erklärung. Die übrigen sechs Karten sind noch nicht gegen Abschnitt 8 geprüft.
 2. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11).
 3. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
 4. Karte `servomotor` und Beziehungen.
