@@ -141,22 +141,17 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `745e30c`)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `f860462`)
 
 Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
 
 ### Einstieg für die nächste Session
 
-Zoom (F3) und Pfadanzeige (F4) sind fertig, mit einer vorläufigen Szene `roboterzelle` als Zoom-Ziel (Entscheidung des Nutzers: Platzhalter zuerst, Zeichnen in Schritt 2). Der Nutzer hat den Zoom-Schritt in zwei Aufträge geteilt; Auftrag 1 ist erledigt und reviewt. Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
+Zoom (F3), Pfadanzeige (F4) und Auftrag 2a (F30, F31, Stand im Hinweis F11) sind fertig und reviewt, mit einer vorläufigen Szene `roboterzelle` als Zoom-Ziel (Entscheidung des Nutzers: Platzhalter zuerst, Zeichnen in Schritt 2). Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
 
-Als Nächstes Auftrag 2 des Zoom-Schritts (Spec F11, F30 bis F32; Begriffe Eintrittskarte, Abgeschlossen im Glossar):
+Als Nächstes Auftrag 2b (siehe „Nächste Schritte in M1“, Punkt 1): Hinweis bedienbar machen, Lage am Zeiger, Kartenknopf im Hinweis (F32). Anknüpfungspunkte: `Hinweis` in `src/oberflaeche/hinweis.tsx` (heute `role="tooltip"`, lässt Klicks durch), `platziereHinweis` in `src/oberflaeche/platzierung.ts` (reine Rechnung, an der Begrenzungsbox), Ereignisse `betreten`/`verlassen` in `beimEreignis` in `src/oberflaeche/anwendung.tsx` und `src/szene/eingabe.ts` (liefern bisher keine Zeigerposition), `SymbolKarte` in `src/oberflaeche/symbole.tsx`, `zeigeKarte` mit `Fokusziel` in `anwendung.tsx`. Die Eintrittskarte der Zielszene für den Knopf liefert `hinweisinhalt` noch nicht.
 
-- F30: Beim ersten Betreten einer Szene mit Eintrittskarte erst Zoom, dann deckt sich die Karte von selbst auf und gilt als gefunden (wie F6 und F7, also `oeffneKarte`). Der Szenenwechsel liegt in `wechsleSzene` in `src/oberflaeche/anwendung.tsx`; `roboterzelle` trägt die Eintrittskarte `roboterzelle`.
-- F31: Kartenknopf am Szenentitel in der Pfadanzeige (`src/oberflaeche/pfadanzeige.tsx`) öffnet die Eintrittskarte.
-- F32 und F11: Der Hinweis eines Zoom-Hotspots nennt den Stand („3 von 5 Karten“, Zielszene samt tieferen Szenen) und trägt einen Kartenknopf, sobald die Eintrittskarte der Zielszene gefunden ist.
-- Vorhandene Logik zum Wiederverwenden: `zoomZiele`, `tiefereSzenen` in `src/logik/szenennetz.ts`; `kartenDerSzene`, `standDerSzene`, `istAbgeschlossen` in `src/logik/fortschritt.ts`; `hinweisinhalt` in `src/logik/hinweis.ts`. Neue reine Logik testgetrieben unter `src/logik/`.
-
-Ablauf wie unter „Arbeitsweise“. Auftrag 2 bringt neue Logik und Abläufe, bekommt also ein Review.
+Ablauf wie unter „Arbeitsweise“. Auftrag 2b bringt neue Abläufe, bekommt also ein Review.
 
 ### Arbeitsweise
 
@@ -191,10 +186,11 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 | 8a | Wissensgebiete (ADR 0005): `content/domains.json` mit Technik in Stahlgrau `#6B7785`, `topics.json` verweist mit `domain` darauf, keine Ersatzfarbe; Kartenvorderseite mit Bild und Text je zur Hälfte |
 | 8b | Kartendesign abgeschlossen: Schild auf beiden Seiten mit Themengebiet, Titel hinten als kleine Überschrift, Schrift vorne +10 %, Quellen als bloße URL ohne Nummern, Bedienregeln in der Spec (F8a), endgültige `limits.json` (Kurztext 300 bis 400 Zeichen), alle elf Kurztexte verlängert, `design-guidelines-karte.md` mit Regeln für Kartentexte (Allgemeingültigkeit, Belege, Verständlichkeit) |
 | 9a | Zoom (F3) und Pfadanzeige (F4): vorläufige Szene `roboterzelle`, `src/logik/pfad.ts` mit Tests, Zoom per Web Animations mit `prefers-reduced-motion`, Ladefehler und nicht darstellbare Zielszene lassen die aktuelle Szene stehen, Szene als `role="group"` mit Titel benannt; reviewt, Befunde behoben (Commits `f3831ae`, `745e30c`) |
+| 9b | Auftrag 2a: Eintrittskarte deckt sich beim ersten Betreten nach dem Zoom auf (F30, auch für die Startszene; `aufzudeckendeEintrittskarte` in `src/logik/karte-oeffnen.ts`), Kartenknopf an der aktuellen Szene in der Pfadanzeige (F31), Stand im Hinweis eines Zoom-Hotspots (F11); Fokus nach dem Schließen über `Fokusziel` (Hotspot, Kartenknopf, Szene); reviewt, Befunde behoben (Commits `e893b5d`, `f860462`). Nur in Logiktests geprüft: Startszene mit Eintrittskarte |
 
 Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt und die Befunde behoben (Commit `aabd984`). Ungeprüft im Browser: der Name des Dialogs im Fehlerzustand und die Ansage „Neue Karte gefunden“ im Screenreader. Offen, gleiches Muster: `.karte-laedt` ist eine bedingt gerenderte `role="status"`-Region.
 
-Umgesetzte Anforderungen der Spec: F1 bis F5, F7 bis F10, F17, F18, F21, F22, F24, F25, F33 bis F36. Teilweise: F6 (der Zähler fehlt), F11 (Haken ja; Schalter und Stand im Hinweis fehlen), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe unten), F23 (Stand und Kartenknopf im Hinweis fehlen), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
+Umgesetzte Anforderungen der Spec: F1 bis F5, F7 bis F10, F17, F18, F21, F22, F24, F25, F30, F31, F33 bis F36. Teilweise: F6 (der Zähler fehlt), F11 (Haken und Stand im Hinweis ja; Schalter fehlt), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe unten), F23 (Kartenknopf im Hinweis fehlt), F32 (fehlt, Auftrag 2b), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
 
 ### Offene Entscheidungen des Nutzers
 
@@ -205,7 +201,10 @@ Umgesetzte Anforderungen der Spec: F1 bis F5, F7 bis F10, F17, F18, F21, F22, F2
 
 Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
-1. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11).
+1. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11). Auftrag 2 ist geteilt (Entscheidung des Nutzers vom 2026-11-16):
+   - 2a: F30, F31, Stand im Hinweis (F11).
+   - 2b: Hinweis bedienbar: lässt keine Klicks mehr durch, bleibt offen, solange der Zeiger darin ist, trägt den Kartenknopf (F32); schließt nach dem Schließen einer Karte. Dazu sitzt der Hinweis am Zeiger statt an der Begrenzungsbox: Anker ist der Eintrittspunkt der Maus (bei Touch der Tippunkt), etwa 12 px versetzt, im Fenster gehalten, darf den Hotspot verdecken; er läuft nicht mit, setzt sich aber neu an den Zeiger, wenn dieser sich im Hotspot mehr als etwa 120 px vom Anker entfernt. Bei Tastaturfokus bleibt die Lage an der Begrenzungsbox.
+1a. Tastaturbedienung des Hinweises: den Kartenknopf im Hinweis (F32) ohne Maus erreichen. Vom Nutzer zurückgestellt (2026-11-16), bleibt aber Teil der M1-Abnahme „Alles ist ohne Maus bedienbar“ und muss vor Schritt 7 erledigt sein. Vorschlag: Der Hinweis hängt im DOM direkt hinter dem fokussierten Hotspot, der Knopf ist per Tab erreichbar.
 2. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
 3. Karte `servomotor` und Beziehungen.
 4. Sammlung mit Fundorten und Beziehungen an der geöffneten Karte (F14 bis F16), Fortschrittsanzeige (F13).
