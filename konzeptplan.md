@@ -172,47 +172,25 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 | 8 | Kartenansicht: Aufdecken, Wenden, Schließen, fünf Bausteine, Entwurfsstempel, vier Symbole der Themengebiete; Kartentitel im Inhaltsverzeichnis |
 | 8a | Wissensgebiete (ADR 0005): `content/domains.json` mit Technik in Stahlgrau `#6B7785`, `topics.json` verweist mit `domain` darauf, keine Ersatzfarbe; Kartenvorderseite mit Bild und Text je zur Hälfte |
 
-Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt; **die Befunde sind noch nicht behoben** (Liste unter „Offene Befunde aus dem Review zu Schritt 8“).
+Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt und die Befunde behoben (Commit `aabd984`). Ungeprüft im Browser: der Name des Dialogs im Fehlerzustand und die Ansage „Neue Karte gefunden“ im Screenreader. Offen, gleiches Muster: `.karte-laedt` ist eine bedingt gerenderte `role="status"`-Region.
 
 Umgesetzte Anforderungen der Spec: F1, F2, F5, F7 bis F10, F17, F18, F21, F22, F24, F25, F33 bis F36. Teilweise: F6 (der Zähler fehlt), F11 (Haken ja; Schalter und Stand im Hinweis fehlen), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe unten), F23 (Stand und Kartenknopf im Hinweis fehlen), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
 
 ### Offene Entscheidungen des Nutzers
 
-1. **Leere Fläche auf der Vorderseite.** Seit Bild und Text je die Hälfte bekommen, füllen die Kurztexte höchstens etwa 45 % ihrer Hälfte. Möglich: längere Kurztexte oder größere Schrift auf der Vorderseite. Hängt mit den Längenvorgaben zusammen.
-2. **Schild der Rückseite.** Es zeigt den Kartentitel, nicht das Themengebiet. F8 und das Glossar sagen „Name und Symbol im Schild vom Themengebiet“, ohne die Seite zu nennen. Entweder F8 auf die Vorderseite einschränken oder den Code ändern.
+1. **Vorderseite: längere Texte und größere Schrift.** Entschieden: etwas längere Kurztexte mit mehr Inhalt und leicht größere Schrift. Offen sind die Zahlen. Vorschlag: Kurztext 250 bis 350 Zeichen, Schrift vorne etwa 10 % größer, zwei Stufen als Bildschirmfoto zur Auswahl; offen, ob die Rückseite mitwächst (`wellgetriebe` ist dort schon knapp). Neue Aussagen brauchen eine Quelle.
+2. **Schild der Rückseite.** Entschieden: Das Schild zeigt auf beiden Seiten das Themengebiet. Offen, wo der Kartentitel hinten steht. Vorschlag: als kleine Überschrift oben auf dem Blatt, weil Themengebiet und Titel zusammen im Schild auf dem Handy nicht passen. Danach F8 entsprechend schärfen.
 3. **Längenvorgaben für die Karte.** Vorschlag aus Schritt 8: Rückseite höchstens 3 Bausteine, Text bis 250 Zeichen, „Schon gewusst?“ bis 160, Tabelle höchstens 2 Spalten und 4 Zeilen, höchstens 3 Quellen. Erst eintragen, wenn das Kartendesign steht.
 4. **Startszene angleichen.** Offen ist, ob beim Zeichnen des Zauns auch Farben und Strichstärken der Startszene an die Guidelines angeglichen werden (reines Weiß, etwa zehn Farben außerhalb der Paletten, krumme Strichstärken). Empfehlung: ja.
-5. **Bedienung der Karte, die kein Dokument regelt.** Klick auf die Karte wendet sie, Klick daneben schließt sie, Wenden während des Aufdeckens überspringt die Animation; scheitert das Laden beim ersten Fund, gilt die Karte als gefunden und das Aufdecken entfällt für immer. Entweder in die Spec aufnehmen oder ändern.
-6. **Widersprüche in den Dokumenten.** ADR 0002 sagt, ein fehlender Text falle einzeln auf `de` zurück; Spec und Code lassen die ganze Karte zurückfallen, wenn die Fassung fehlt oder unvollständig ist. Die Spec nennt den Namen des Kartenbilds „frei“; Schema und Code verlangen Kleinbuchstaben, Ziffern und Bindestriche.
-7. **Geltung der Design-Guidelines für Karte und Symbole.** Die Symbole der Themengebiete weichen von Abschnitt 3 ab (Konturen 2,5 und 2 statt 3 und 2,2), und die Kartenoberfläche nutzt zwei Farben außerhalb der Paletten (`#f4f1ea` für die Rückseite, `#181820` für die Abdunklung). Die Guidelines sagen nicht, ob sie dafür gelten.
-8. **Farben weiterer Wissensgebiete.** Der Vorschlag in ADR 0005 stößt sich mit festen Bedeutungen: Rot heißt in jeder Welt Gefahr, Orange in der Fabrik Roboter. Erst zu klären, wenn es Karten außerhalb der Technik gibt.
-
-### Offene Befunde aus dem Review zu Schritt 8
-
-Alle in `src/oberflaeche/`, wenn nicht anders genannt. Beheben in einem eigenen Commit.
-
-1. Mittel: Wer Text auf der Karte markiert und die Maus neben der Karte loslässt, schließt die Karte (`kartenansicht.tsx`, Klick-Behandlung). Schließen nur, wenn auch `pointerdown` außerhalb lag.
-2. Mittel: Der Knopf „Wenden“ hat als zugänglichen Namen „Rückseite zeigen“ oder „Vorderseite zeigen“; der sichtbare Text ist `aria-hidden` (WCAG 2.5.3).
-3. Der Dialog heißt im Fehlerzustand weiter „Karte wird geladen …“.
-4. Die Meldung „Neue Karte gefunden“ entsteht zusammen mit ihrer `role="status"`-Region und wird vermutlich nicht vorgelesen (ungeprüft).
-5. Ohne `--gebietsfarbe` werden die `color-mix`-Hintergründe ungültig und die Karte unlesbar. Vorschlag: Vorgabewert `var(--karte-papier)` in `karte.css`.
-6. `SVG_DATEI` ist in `src/inhalte/laden.ts` und `src/logik/kartendatei.ts` doppelt definiert.
-7. Farben im TSX (`kartenseiten.tsx`, Symbol von „Schon gewusst?“) und abgeleitete Konturfarben direkt in Regeln von `karte.css` statt als Variablen.
-8. Das Auffüllen der Tabellenzeilen in `Tabelle` (`kartenseiten.tsx`) ist reine Logik ohne Test.
-
-Kein Befund: `Karteneintrag.title` wird noch nirgends gelesen; F35 verlangt es, und die Sammlung braucht es.
-
-### Schon entschieden, noch nicht umgesetzt
-
-- Die Halle bekommt einen niedrigen Schutzzaun um den Roboter, der wenig verdeckt; in der Roboterzelle ist er nur im Hintergrund zu sehen.
-- Die Karte `servomotor` kommt in M1 dazu (zwölf Karten) und hängt an einem gewöhnlichen Hotspot im Robotergelenk. Damit werden „Encoder misst Servomotor“ und, mit einem neuen Typ `versorgt`, „Motorleitung versorgt Servomotor“ möglich. Bisher gibt es nur die Beziehung „Encoder misst Robotergelenk“.
-- Über dünne Linien legt die Anwendung eine unsichtbare, breitere Klickfläche (F37). Die Kabel der Startszene sind bisher kaum zu treffen.
+5. **Bedienung der Karte, die kein Dokument regelt.** Klick auf die Karte wendet sie, Klick daneben schließt sie, Wenden während des Aufdeckens überspringt die Animation; scheitert das Laden beim ersten Fund, gilt die Karte als gefunden und das Aufdecken entfällt für immer. Vorschlag: so lassen und in die Spec aufnehmen. Dem Nutzer erklärt, noch nicht entschieden.
+6. **Eigene Guidelines für die Karte.** Vom Nutzer gewünscht, angelehnt an die Szenen-Guidelines. Vorschlag: `design-guidelines-karte.md`, verweist für Paletten und Konturstil auf `design-guidelines.md` und regelt Seitenaufbau, Schriftgrößen, Farben der Kartenoberfläche (heute `#f4f1ea` und `#181820` außerhalb der Paletten), Symbole der Themengebiete (Konturen 2,5 und 2 statt 3 und 2,2) und Kartenbilder (Abschnitt 9 zieht um). Erst schreiben, wenn Schild, Schrift und Textlänge stehen; zusammen mit den Längenvorgaben beantwortet das N1.
+7. **Farben weiterer Wissensgebiete.** Der Vorschlag in ADR 0005 stößt sich mit festen Bedeutungen: Rot heißt in jeder Welt Gefahr, Orange in der Fabrik Roboter. Erst zu klären, wenn es Karten außerhalb der Technik gibt.
 
 ### Nächste Schritte in M1
 
 Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
-1. Kartenansicht abschließen: die offenen Befunde aus dem Review zu Schritt 8 beheben, danach die Entscheidungen 1, 2 und 5 umsetzen.
+1. Kartenansicht abschließen: Bedienregeln in die Spec (Entscheidung 5), Schild der Rückseite und Schriftgröße (Entscheidungen 1 und 2), Kurztexte verlängern und Längenvorgaben eintragen (Entscheidung 3), dann die Karten-Guidelines (Entscheidung 6).
 2. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11).
 3. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
 4. Karte `servomotor` und Beziehungen.
