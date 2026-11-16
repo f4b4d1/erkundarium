@@ -1,39 +1,62 @@
 import { describe, expect, it } from 'vitest';
-import { betreten, kuerzenBis, neuerPfad } from './pfad.ts';
+import { betreten, kuerzenBis, neuerPfad, rueckweg } from './pfad.ts';
 
 describe('neuerPfad', () => {
-  it('beginnt mit der Startszene', () => {
-    expect(neuerPfad('fabrikhalle')).toEqual(['fabrikhalle']);
+  it('beginnt mit der Startszene ohne Hotspot', () => {
+    expect(neuerPfad('fabrikhalle')).toEqual([{ szene: 'fabrikhalle' }]);
   });
 });
 
 describe('betreten', () => {
-  it('hängt die Szene hinten an', () => {
-    expect(betreten(['a'], 'b')).toEqual(['a', 'b']);
+  it('hängt die Szene mit dem Hotspot hinten an, über den sie betreten wurde', () => {
+    expect(betreten([{ szene: 'a' }], 'b', 'h1')).toEqual([{ szene: 'a' }, { szene: 'b', ueber: 'h1' }]);
   });
 
   it('verändert den bisherigen Pfad nicht', () => {
-    const pfad = ['a'];
-    betreten(pfad, 'b');
-    expect(pfad).toEqual(['a']);
+    const pfad = [{ szene: 'a' }];
+    betreten(pfad, 'b', 'h1');
+    expect(pfad).toEqual([{ szene: 'a' }]);
   });
 
   it('hängt eine Szene nicht doppelt an, die schon die aktuelle ist', () => {
-    expect(betreten(['a', 'b'], 'b')).toEqual(['a', 'b']);
+    const pfad = [{ szene: 'a' }, { szene: 'b', ueber: 'h1' }];
+    expect(betreten(pfad, 'b', 'h2')).toEqual(pfad);
   });
 });
 
 describe('kuerzenBis', () => {
-  it('kürzt den Pfad bis zur Ebene und behält sie', () => {
-    expect(kuerzenBis(['a', 'b', 'c'], 'a')).toEqual(['a']);
-    expect(kuerzenBis(['a', 'b', 'c'], 'b')).toEqual(['a', 'b']);
+  const pfad = [{ szene: 'a' }, { szene: 'b', ueber: 'h1' }, { szene: 'c', ueber: 'h2' }];
+
+  it('kürzt den Pfad bis zur Ebene und behält sie samt ihrem Hotspot', () => {
+    expect(kuerzenBis(pfad, 'a')).toEqual([{ szene: 'a' }]);
+    expect(kuerzenBis(pfad, 'b')).toEqual([{ szene: 'a' }, { szene: 'b', ueber: 'h1' }]);
   });
 
   it('lässt den Pfad bei der aktuellen Ebene unverändert', () => {
-    expect(kuerzenBis(['a', 'b'], 'b')).toEqual(['a', 'b']);
+    expect(kuerzenBis(pfad, 'c')).toEqual(pfad);
   });
 
   it('lässt den Pfad unverändert, wenn die Szene nicht darauf liegt', () => {
-    expect(kuerzenBis(['a', 'b'], 'x')).toEqual(['a', 'b']);
+    expect(kuerzenBis(pfad, 'x')).toEqual(pfad);
+  });
+});
+
+describe('rueckweg', () => {
+  const pfad = [{ szene: 'a' }, { szene: 'b', ueber: 'h1' }, { szene: 'c', ueber: 'h2' }];
+
+  it('liefert eine Stufe für die Ebene davor: die Szene und der Hotspot, über den sie verlassen wurde', () => {
+    expect(rueckweg(pfad, 'b')).toEqual([{ szene: 'b', hotspot: 'h2' }]);
+  });
+
+  it('liefert die Stufen vom Innersten zum Ziel in Abspielreihenfolge', () => {
+    expect(rueckweg(pfad, 'a')).toEqual([
+      { szene: 'b', hotspot: 'h2' },
+      { szene: 'a', hotspot: 'h1' },
+    ]);
+  });
+
+  it('liefert nichts bei der aktuellen Ebene oder einer Szene abseits des Pfads', () => {
+    expect(rueckweg(pfad, 'c')).toEqual([]);
+    expect(rueckweg(pfad, 'x')).toEqual([]);
   });
 });

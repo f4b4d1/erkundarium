@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/ho
 import { abgehakteHotspots, hinweisinhalt } from '../logik/hinweis.ts';
 import type { Inhaltsverzeichnis, Szeneneintrag, Themengebiet, Wissensgebiet } from '../logik/inhaltsverzeichnis.ts';
 import { aufzudeckendeEintrittskarte, oeffneKarte } from '../logik/karte-oeffnen.ts';
-import { betreten, kuerzenBis, neuerPfad, type Pfad } from '../logik/pfad.ts';
+import { betreten, kuerzenBis, neuerPfad, rueckweg, type Pfad, type Zoomstufe } from '../logik/pfad.ts';
 import type { Speicherschicht } from '../logik/speicherschicht.ts';
 import { aktiveEinstellungen, einlesen, gefundeneKarten, type Spielstand } from '../logik/spielstand.ts';
 import type { Hotspot } from '../logik/szenendatei.ts';
@@ -76,6 +76,10 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   /** Solange ein Wechsel läuft, löst nichts weiteres aus. */
   const wechselt = useRef(false);
   const zoom = useRef<Animation | undefined>(undefined);
+  /** Läuft, sobald die nächste Szene gebaut ist und noch bevor sie gezeichnet wird (Herauszoomen). */
+  const nachDarstellung = useRef<(() => void) | undefined>(undefined);
+  /** Escape geht eine Ebene zurück; der Handler sieht immer den aktuellen Zustand. */
+  const beiEscape = useRef<(e: KeyboardEvent) => void>(() => {});
   const fokusAufSzene = useRef(false);
   const schliesstimer = useRef<number | undefined>(undefined);
   const [wechselFehler, setWechselFehler] = useState(false);
@@ -85,11 +89,17 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       (geladen) => {
         setLadezustand({ art: 'bereit', ...geladen });
         // Trägt die Startszene eine Eintrittskarte, deckt sie sich nach dem Start auf (F30).
-        const karte = aufzudeckendeEintrittskarte(geladen.verzeichnis, geladen.pfad[0]!, gefundeneKarten(start.spielstand));
+        const karte = aufzudeckendeEintrittskarte(geladen.verzeichnis, geladen.pfad[0]!.szene, gefundeneKarten(start.spielstand));
         if (karte !== undefined) zeigeKarte(karte, { art: 'szene' });
       },
       (fehler: unknown) => setLadezustand(alsFehlerzustand(fehler)),
     );
+  }, []);
+
+  useEffect(() => {
+    const beiTaste = (e: KeyboardEvent) => beiEscape.current(e);
+    window.addEventListener('keydown', beiTaste);
+    return () => window.removeEventListener('keydown', beiTaste);
   }, []);
 
   // Ein ausstehendes Schließen darf nach dem Abbau nichts mehr setzen.
@@ -107,6 +117,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   useLayoutEffect(() => {
     zoom.current?.cancel();
     zoom.current = undefined;
+    nachDarstellung.current?.();
+    nachDarstellung.current = undefined;
     if (!fokusAufSzene.current) return;
     fokusAufSzene.current = false;
     // Öffnet sich mit dem Wechsel eine Karte (F30), gehört der Fokus ihr.
@@ -142,7 +154,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const { datei, svg } = ladezustand.szene;
   const { themengebiete, wissensgebiete, verzeichnis, pfad } = ladezustand;
   const szeneEintrag = (id: string): Szeneneintrag | undefined => verzeichnis.scenes.find((s) => s.id === id);
-  const ebenen: Ebene[] = pfad.map((id) => {
+  const ebenen: Ebene[] = pfad.map(({ szene: id }) => {
     const eintrag = szeneEintrag(id);
     return {
       id,
@@ -150,7 +162,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       ...(eintrag?.card === undefined ? {} : { eintrittskarte: { gefunden: gefunden.has(eintrag.card) } }),
     };
   });
-  const eintrittskarte = szeneEintrag(pfad[pfad.length - 1]!)?.card;
+  const eintrittskarte = szeneEintrag(pfad[pfad.length - 1]!.szene)?.card;
   const finde = (id: string): Hotspot | undefined => datei.hotspots.find((h) => h.id === id);
 
   function loeseAus(hotspot: Hotspot): void {
@@ -160,7 +172,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       const lage = szeneRef.current?.lageVon(hotspot.id);
       setOffen(undefined);
       if (eintrag === undefined) setWechselFehler(true);
-      else void wechsleSzene(eintrag, betreten(pfad, ziel), lage);
+      else void wechsleSzene(eintrag, betreten(pfad, ziel, hotspot.id), lage);
       return;
     }
     // `info` hat nur den Hinweis (F24).
@@ -229,10 +241,50 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     }
   }
 
-  function geheZurEbene(id: string): void {
-    const eintrag = szeneEintrag(id);
-    if (eintrag === undefined) setWechselFehler(true);
-    else void wechsleSzene(eintrag, kuerzenBis(pfad, id));
+  /**
+   * Geht zur früheren Ebene `id` zurück und zoomt dabei Stufe für Stufe aus den Hotspots heraus (F4a).
+   * Erst werden alle Szenen des Rückwegs geladen; scheitert eine, bleibt die aktuelle Szene stehen.
+   */
+  async function geheZurEbene(id: string): Promise<void> {
+    const stufen = rueckweg(pfad, id);
+    if (wechselt.current || stufen.length === 0) return;
+    wechselt.current = true;
+    setWechselFehler(false);
+    try {
+      // Bei weniger Bewegung gibt es nur den Wechsel zur Zielebene.
+      const gezeigt = wenigerBewegung() ? stufen.slice(-1) : stufen;
+      const eintraege = gezeigt.map((stufe) => szeneEintrag(stufe.szene));
+      if (eintraege.some((e) => e === undefined)) throw new Error('Szene fehlt im Inhaltsverzeichnis.');
+      const geladen = await Promise.all(eintraege.map((e) => ladeSzene(e!)));
+      for (const g of geladen) pruefeSvg(g.svg);
+      for (const [i, stufe] of gezeigt.entries()) {
+        const letzte = i === gezeigt.length - 1;
+        await zeigeStufe(stufe, geladen[i]!, kuerzenBis(pfad, stufe.szene), letzte ? 'ease-out' : 'linear');
+      }
+      const hotspot = gezeigt[gezeigt.length - 1]!.hotspot;
+      if (hotspot !== undefined) szeneRef.current?.fokussiere(hotspot);
+    } catch {
+      zoom.current?.cancel();
+      zoom.current = undefined;
+      setWechselFehler(true);
+    } finally {
+      wechselt.current = false;
+    }
+  }
+
+  /** Stellt die Szene der Stufe dar, setzt sie sofort in den Endausschnitt des Zooms und zoomt heraus. */
+  async function zeigeStufe(stufe: Zoomstufe, geladen: GeladeneSzene, neuerWeg: Pfad, easing: string): Promise<void> {
+    await new Promise<void>((fertig) => {
+      nachDarstellung.current = () => {
+        const lage = stufe.hotspot === undefined ? undefined : szeneRef.current?.lageVon(stufe.hotspot);
+        zoom.current = lage === undefined ? undefined : starteHerauszoom(buehneRef.current, lage, easing);
+        fertig();
+      };
+      stoppeSchliesstimer();
+      setOffen(undefined);
+      setLadezustand((bisher) => (bisher.art === 'bereit' ? { ...bisher, szene: geladen, pfad: neuerWeg } : bisher));
+    });
+    await zoom.current?.finished;
   }
 
   function speichere(neu: Spielstand): void {
@@ -331,6 +383,13 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     });
   }
 
+  beiEscape.current = (e) => {
+    // Karte und Hinweis schließen mit Escape selbst; nur sonst geht es eine Ebene zurück.
+    if (e.key !== 'Escape' || e.defaultPrevented || offeneKarte !== undefined || offen !== undefined) return;
+    const davor = pfad[pfad.length - 2];
+    if (davor !== undefined) void geheZurEbene(davor.szene);
+  };
+
   const offenerHotspot = offen && finde(offen.hotspot);
   const meldungen = [
     ...(speichernErlaubt ? [] : [TEXTE.neuereVersion]),
@@ -349,7 +408,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
       )}
       <Pfadanzeige
         ebenen={ebenen}
-        onWaehle={geheZurEbene}
+        onWaehle={(id) => void geheZurEbene(id)}
         kartenknopfRef={kartenknopfRef}
         onOeffneEintrittskarte={() => {
           if (!wechselt.current && eintrittskarte !== undefined) zeigeKarte(eintrittskarte, { art: 'kartenknopf' });
@@ -441,14 +500,12 @@ const ZOOM_DAUER_MS = 450;
 const ZOOM_FUELLUNG = 0.8;
 const ZOOM_MAXIMUM = 6;
 
-/**
- * Zoomt die Szene auf die Begrenzungsbox des Hotspots (`lage`, in Bildschirmpixeln) und hält sie
- * dort, bis die Animation abgebrochen wird. `undefined`, wenn nicht animiert wird: bei
- * `prefers-reduced-motion: reduce` gibt es nur den Wechsel.
- */
-function starteZoom(buehne: HTMLElement | null, lage: Rechteck): Animation | undefined {
-  const szene = buehne?.querySelector('.szene');
-  if (!(szene instanceof HTMLElement) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+function wenigerBewegung(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/** Der Endzustand des Zooms auf die Begrenzungsbox `lage` (in Bildschirmpixeln), als `transform` der Szene. */
+function zoomEndzustand(szene: HTMLElement, lage: Rechteck): string {
   const flaeche = szene.getBoundingClientRect();
   // Der Zoom verkleinert nie, auch nicht bei einem Hotspot, der größer ist als die Szene.
   const massstab = Math.max(
@@ -462,8 +519,34 @@ function starteZoom(buehne: HTMLElement | null, lage: Rechteck): Animation | und
   // Der Mittelpunkt des Hotspots wandert in die Mitte der Szene.
   const dx = lage.links + lage.breite / 2 - (flaeche.left + flaeche.width / 2);
   const dy = lage.oben + lage.hoehe / 2 - (flaeche.top + flaeche.height / 2);
-  return szene.animate(
-    [{ transform: 'none' }, { transform: `translate(${-dx * massstab}px, ${-dy * massstab}px) scale(${massstab})` }],
-    { duration: ZOOM_DAUER_MS, easing: 'ease-in', fill: 'forwards' },
-  );
+  return `translate(${-dx * massstab}px, ${-dy * massstab}px) scale(${massstab})`;
+}
+
+/**
+ * Zoomt die Szene auf die Begrenzungsbox des Hotspots (`lage`, in Bildschirmpixeln) und hält sie
+ * dort, bis die Animation abgebrochen wird. `undefined`, wenn nicht animiert wird: bei
+ * `prefers-reduced-motion: reduce` gibt es nur den Wechsel.
+ */
+function starteZoom(buehne: HTMLElement | null, lage: Rechteck): Animation | undefined {
+  const szene = buehne?.querySelector('.szene');
+  if (!(szene instanceof HTMLElement) || wenigerBewegung()) return undefined;
+  return szene.animate([{ transform: 'none' }, { transform: zoomEndzustand(szene, lage) }], {
+    duration: ZOOM_DAUER_MS,
+    easing: 'ease-in',
+    fill: 'forwards',
+  });
+}
+
+/**
+ * Die Umkehrung von `starteZoom` (F4a): Die Szene steht sofort im Endzustand des Zooms auf `lage`
+ * und zoomt auf die volle Ansicht heraus. Gemessen wird mit abgebrochener Animation, also an der
+ * vollen Ansicht. `undefined`, wenn nicht animiert wird.
+ */
+function starteHerauszoom(buehne: HTMLElement | null, lage: Rechteck, easing: string): Animation | undefined {
+  const szene = buehne?.querySelector('.szene');
+  if (!(szene instanceof HTMLElement) || wenigerBewegung()) return undefined;
+  return szene.animate([{ transform: zoomEndzustand(szene, lage) }, { transform: 'none' }], {
+    duration: ZOOM_DAUER_MS,
+    easing,
+  });
 }
