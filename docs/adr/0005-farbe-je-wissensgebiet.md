@@ -9,6 +9,6 @@ Technik bekommt Stahlgrau `#6B7785`. Das ist bewusst unauffällig: Farbe kommt s
 ## Folgen
 
 - Festgelegt ist nur Technik. Weitere Wissensgebiete und ihre Farben werden entschieden, wenn es Karten dazu gibt. Vorschlag: Pflanzen Grün `#3FA34D`, Tiere Orange `#FF7A1A`, Mensch und Körper Rot `#E4572E`, Erde und Weltall Violett `#8E6FD8`, Stoffe und Kräfte Türkis `#19A7B8`, Geschichte und Kultur Ocker `#D9A441`, Alltag und Gesellschaft Blau `#1F78C1`. Am Vergleichsbild lagen Orange und Rot nah beieinander, und Ocker hob sich im Bildfeld kaum vom Papier ab.
-- Solange die Fabrik die einzige Welt ist, haben alle Karten dieselbe Farbe.
+- Wissensgebiete gehören wie Themengebiete keiner Welt. Solange alle Themengebiete zur Technik gehören, haben alle Karten dieselbe Farbe.
 - Grau darf nicht zugleich „nicht gefunden“ bedeuten: Schattenkarten in der Sammlung werden ein leerer, gestrichelter Umriss.
 - Die Anwendung hat keine Ersatzfarbe. Ein Themengebiet ohne bekanntes Wissensgebiet und eine Karte ohne bekanntes Themengebiet sind Fehler des Prüfskripts.

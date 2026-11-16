@@ -17,7 +17,7 @@ Ein Fachgebiet, dem jede Karte genau einmal zugeordnet ist und das Name und Symb
 _Avoid_: Kategorie, Thema, Fach
 
 **Wissensgebiet**:
-Eine große Gruppe von Themengebieten, die die Farbe der Karte bestimmt, zum Beispiel Technik. Es gibt nur wenige. In Daten: `domain`.
+Eine große Gruppe von Themengebieten, die die Farbe der Karte bestimmt, zum Beispiel Technik. Es gibt nur wenige. Wissensgebiete gehören keiner Welt. In Daten: `domain`.
 _Avoid_: Bereich (das ist ein Teil einer Szene), Obergebiet, Kategorie
 
 **Gefunden**:

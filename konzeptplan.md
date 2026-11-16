@@ -170,30 +170,37 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 | 6 | Spiellogik: Szenennetz, Fundorte und Beziehungen, Fortschritt und Abschluss, Spielstand, Schnittstelle der Speicherschicht |
 | 7 | Erster sichtbarer Stand: Szene, Hinweis, Umriss, Auslösen per Maus, Tastatur und Touch, Haken, Speichern in `localStorage`, Erlaubnisliste für eingebettete SVGs |
 | 8 | Kartenansicht: Aufdecken, Wenden, Schließen, fünf Bausteine, Entwurfsstempel, vier Symbole der Themengebiete; Kartentitel im Inhaltsverzeichnis |
+| 8a | Wissensgebiete (ADR 0005): `content/domains.json` mit Technik in Stahlgrau `#6B7785`, `topics.json` verweist mit `domain` darauf, keine Ersatzfarbe; Kartenvorderseite mit Bild und Text je zur Hälfte |
 
-Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. **Das Code-Review zu Schritt 8 steht aus.**
+Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt; **die Befunde sind noch nicht behoben** (Liste unter „Offene Befunde aus dem Review zu Schritt 8“).
 
-Umgesetzte Anforderungen der Spec: F1, F2, F5 bis F10, F17 bis F27, F33 bis F36. Teilweise: F11 (Haken ja; Schalter und Stand im Hinweis fehlen), F20 (siehe unten), F23 (Stand und Kartenknopf im Hinweis fehlen), F26 (Auslösen über das Symbol im Hinweis fehlt).
+Umgesetzte Anforderungen der Spec: F1, F2, F5, F7 bis F10, F17, F18, F21, F22, F24, F25, F33 bis F36. Teilweise: F6 (der Zähler fehlt), F11 (Haken ja; Schalter und Stand im Hinweis fehlen), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe unten), F23 (Stand und Kartenknopf im Hinweis fehlen), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
 
 ### Offene Entscheidungen des Nutzers
 
-1. **Obergebiete und Kartenfarben.** Der Nutzer will die Farbe nicht mehr je Themengebiet vergeben, sondern je Obergebiet (Arbeitstitel „Bereich“): wenige große Gruppen tragen die Farbe, das Themengebiet bleibt als Name und Symbol im Schild der Karte. Vorschlag mit acht Obergebieten:
-
-   | Obergebiet | Farbe |
-   | --- | --- |
-   | Technik | Stahlgrau `#6B7785` (Favorit des Nutzers: Grau) |
-   | Pflanzen | Grün `#3FA34D` |
-   | Tiere | Orange `#FF7A1A` |
-   | Mensch und Körper | Rot `#E4572E` |
-   | Erde und Weltall | Violett `#8E6FD8` |
-   | Stoffe und Kräfte | Türkis `#19A7B8` |
-   | Geschichte und Kultur | Ocker `#D9A441` |
-   | Alltag und Gesellschaft | Blau `#1F78C1` |
-
-   Beobachtungen am Vergleichsbild: Bei Grau wirkt das getönte Bildfeld fast farblos; Orange und Rot liegen nah beieinander; Ocker hebt sich im Bildfeld kaum vom Papier ab. Grau darf nicht zugleich „nicht gefunden“ bedeuten: Schattenkarten in der Sammlung als leerer, gestrichelter Umriss; die Ersatzfarbe für ein unbekanntes Themengebiet ist im Code derzeit dasselbe Grau. Für M1 genügt die Entscheidung für Technik. Die Entscheidung ist noch nicht gefallen. Wenn sie fällt: neuer Glossarbegriff, ein ADR, eine Datei für die Obergebiete, in `topics.json` ein Verweis auf das Obergebiet statt `color`; keine Kartendatei ändert sich.
-2. **Kartenvorderseite: Bild und Text je etwa zur Hälfte.** Vom Nutzer verlangt, noch nicht umgesetzt. Sonst gefällt ihm die Karte.
+1. **Leere Fläche auf der Vorderseite.** Seit Bild und Text je die Hälfte bekommen, füllen die Kurztexte höchstens etwa 45 % ihrer Hälfte. Möglich: längere Kurztexte oder größere Schrift auf der Vorderseite. Hängt mit den Längenvorgaben zusammen.
+2. **Schild der Rückseite.** Es zeigt den Kartentitel, nicht das Themengebiet. F8 und das Glossar sagen „Name und Symbol im Schild vom Themengebiet“, ohne die Seite zu nennen. Entweder F8 auf die Vorderseite einschränken oder den Code ändern.
 3. **Längenvorgaben für die Karte.** Vorschlag aus Schritt 8: Rückseite höchstens 3 Bausteine, Text bis 250 Zeichen, „Schon gewusst?“ bis 160, Tabelle höchstens 2 Spalten und 4 Zeilen, höchstens 3 Quellen. Erst eintragen, wenn das Kartendesign steht.
 4. **Startszene angleichen.** Offen ist, ob beim Zeichnen des Zauns auch Farben und Strichstärken der Startszene an die Guidelines angeglichen werden (reines Weiß, etwa zehn Farben außerhalb der Paletten, krumme Strichstärken). Empfehlung: ja.
+5. **Bedienung der Karte, die kein Dokument regelt.** Klick auf die Karte wendet sie, Klick daneben schließt sie, Wenden während des Aufdeckens überspringt die Animation; scheitert das Laden beim ersten Fund, gilt die Karte als gefunden und das Aufdecken entfällt für immer. Entweder in die Spec aufnehmen oder ändern.
+6. **Widersprüche in den Dokumenten.** ADR 0002 sagt, ein fehlender Text falle einzeln auf `de` zurück; Spec und Code lassen die ganze Karte zurückfallen, wenn die Fassung fehlt oder unvollständig ist. Die Spec nennt den Namen des Kartenbilds „frei“; Schema und Code verlangen Kleinbuchstaben, Ziffern und Bindestriche.
+7. **Geltung der Design-Guidelines für Karte und Symbole.** Die Symbole der Themengebiete weichen von Abschnitt 3 ab (Konturen 2,5 und 2 statt 3 und 2,2), und die Kartenoberfläche nutzt zwei Farben außerhalb der Paletten (`#f4f1ea` für die Rückseite, `#181820` für die Abdunklung). Die Guidelines sagen nicht, ob sie dafür gelten.
+8. **Farben weiterer Wissensgebiete.** Der Vorschlag in ADR 0005 stößt sich mit festen Bedeutungen: Rot heißt in jeder Welt Gefahr, Orange in der Fabrik Roboter. Erst zu klären, wenn es Karten außerhalb der Technik gibt.
+
+### Offene Befunde aus dem Review zu Schritt 8
+
+Alle in `src/oberflaeche/`, wenn nicht anders genannt. Beheben in einem eigenen Commit.
+
+1. Mittel: Wer Text auf der Karte markiert und die Maus neben der Karte loslässt, schließt die Karte (`kartenansicht.tsx`, Klick-Behandlung). Schließen nur, wenn auch `pointerdown` außerhalb lag.
+2. Mittel: Der Knopf „Wenden“ hat als zugänglichen Namen „Rückseite zeigen“ oder „Vorderseite zeigen“; der sichtbare Text ist `aria-hidden` (WCAG 2.5.3).
+3. Der Dialog heißt im Fehlerzustand weiter „Karte wird geladen …“.
+4. Die Meldung „Neue Karte gefunden“ entsteht zusammen mit ihrer `role="status"`-Region und wird vermutlich nicht vorgelesen (ungeprüft).
+5. Ohne `--gebietsfarbe` werden die `color-mix`-Hintergründe ungültig und die Karte unlesbar. Vorschlag: Vorgabewert `var(--karte-papier)` in `karte.css`.
+6. `SVG_DATEI` ist in `src/inhalte/laden.ts` und `src/logik/kartendatei.ts` doppelt definiert.
+7. Farben im TSX (`kartenseiten.tsx`, Symbol von „Schon gewusst?“) und abgeleitete Konturfarben direkt in Regeln von `karte.css` statt als Variablen.
+8. Das Auffüllen der Tabellenzeilen in `Tabelle` (`kartenseiten.tsx`) ist reine Logik ohne Test.
+
+Kein Befund: `Karteneintrag.title` wird noch nirgends gelesen; F35 verlangt es, und die Sammlung braucht es.
 
 ### Schon entschieden, noch nicht umgesetzt
 
@@ -205,7 +212,7 @@ Umgesetzte Anforderungen der Spec: F1, F2, F5 bis F10, F17 bis F27, F33 bis F36.
 
 Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
-1. Kartenansicht abschließen: Bild und Text je zur Hälfte, Obergebiete nach Entscheidung 1, dann das Code-Review zu Schritt 8.
+1. Kartenansicht abschließen: die offenen Befunde aus dem Review zu Schritt 8 beheben, danach die Entscheidungen 1, 2 und 5 umsetzen.
 2. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11).
 3. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
 4. Karte `servomotor` und Beziehungen.
@@ -220,16 +227,15 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 - `npm test` scheitert, wenn das Terminal im Pfad ein kleines `c:` zeigt (`Cannot read properties of undefined (reading 'config')`). Abhilfe: mit großem `C:\` ins Verzeichnis wechseln. Die Ursache ist nicht geklärt.
 - Manche Haken sitzen neben der Form, weil sie an der Ecke der Begrenzungsbox hängen (Hallenleuchten, Roboter, Schaltschrank).
 - Der Hinweis lässt Klicks durch. Nach dem Schließen einer Karte mit der Maus bleibt er offen, bis die Maus sich bewegt.
-- Auf schmalen Bildschirmen ist die Kartenschrift klein (etwa 12 px vorne, 11 px hinten, Quellen unter 9 px). Die Rückseite von `wellgetriebe` hat nur 21 px Luft.
+- Auf schmalen Bildschirmen ist die Kartenschrift klein (etwa 12 px vorne, 11 px hinten, Quellen unter 9 px). Die Rückseite von `wellgetriebe` hat nur 21 px Luft und läuft laut Agent bei 430, 390 und 360 px Breite über und scrollt (nicht nachgeprüft).
 - Schema-Fehler erscheinen teils englisch. Das Prüfskript sieht nur `.json` und `.svg`.
 - Die Migration zwischen Spielstand-Versionen ist ungetestet, weil es nur Version 1 gibt.
 - Nie geprüft: Firefox, echte Touch-Geräte, Screenreader, Handy im Hochformat, eine Karte mit eigenem Bild, eine zweite Textfassung. Alle Prüfungen am laufenden Spiel liefen in ferngesteuertem Edge.
 - Kein Kartentext und kein Hotspot-Text ist gegen seine Quelle gegengelesen. Schwache Stellen laut Autor: `hallenleuchte` (dünne Quellen, keine Lux-Werte), `not-halt-und-zaun` und `roboterzelle` (Zaunhöhe und Normen aus zweiter Hand), `haltebremse` und `motorleitung` (je ein Hersteller), Zahlen bei `robotergelenk`, `encoder`, `kabelkanal` (je ein Produkt). Hotspot-Texte haben keinen Prüfstatus.
-- Die Robotik-Farbe `#6A4C93` steht in keiner Palette; sie entfällt mit den Obergebieten.
 
 ### Anhaltspunkte im Code
 
-- `src/logik/`: reine Logik und geteilte Typen (`inhaltsverzeichnis.ts`, `szenennetz.ts`, `wissensnetz.ts`, `fortschritt.ts`, `spielstand.ts`, `hinweis.ts`, `kartendatei.ts`, `erlaubte-svg.ts`).
+- `src/logik/`: reine Logik und geteilte Typen (`inhaltsverzeichnis.ts`, `szenennetz.ts`, `wissensnetz.ts`, `fortschritt.ts`, `spielstand.ts`, `hinweis.ts`, `kartendatei.ts`, `erlaubte-svg.ts`, `gebietsfarbe.ts`).
 - `src/szene/`: Szenenmodul ohne Preact (`szene.ts`, `eingabe.ts`, `haken.ts`).
 - `src/oberflaeche/`: Preact (`anwendung.tsx`, `szenenansicht.tsx`, `hinweis.tsx`, `kartenansicht.tsx`, `kartenseiten.tsx`); das Aussehen der Karte mit allen Maßen und Farben als Variablen in `karte.css`.
 - `src/inhalte/laden.ts`, `src/speicher/lokaler-speicher.ts`: Anbindung an Netz und `localStorage`.
