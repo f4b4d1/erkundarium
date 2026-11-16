@@ -52,8 +52,8 @@
   --karte-schattenversatz: 0.32em;
   /* Schriftgrößen: Bausteine der Vorderseite (Kurztext) und Titel der Rückseite */
   --karte-schrift-vorne: 1.045em;
-  /* Quellen im Fuß der Rückseite, relativ zur Fußschrift (0.68em): ergibt etwa 0.6em der Kartenschrift */
-  --karte-schrift-quellen: 0.88em;
+  /* Quellen im Fuß der Rückseite, relativ zur Fußschrift (0.68em): 1em = gleich groß wie die Fußschrift */
+  --karte-schrift-quellen: 1em;
   --karte-titel-hinten: 1.15em;
 
   /* Schrift: nur Schriften des Systems, nichts von außen */
