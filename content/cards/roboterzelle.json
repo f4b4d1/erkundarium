@@ -3,7 +3,7 @@
   "topic": "robotik",
   "sources": [
     "https://de.wikipedia.org/wiki/Industrieroboter",
-    "https://industrie-fachwissen.de/werkstatt/maschinenschutz-roboterzellen-schutzzaun-iso-14120-vergleich"
+    "https://www.dguv.de/fb-holzundmetall/sg/sg_maf/robotik/faq/index.jsp"
   ],
   "texts": {
     "de": {
@@ -12,21 +12,20 @@
       "front": [
         {
           "type": "text",
-          "text": "Eine Roboterzelle ist ein abgegrenzter Arbeitsplatz für Industrieroboter. Ein Schutzzaun trennt den Bereich, in dem sich der Roboter bewegt, von dem Bereich, in dem Menschen arbeiten. Meist ist der Zaun ein Stahlgitter. Bei Schweiß-, Schleif- und Laserzellen schützt Blech vor Funken und Splittern. Zugänge sind Personentür, Materialtür und Notausgangstür."
+          "text": "Eine Roboterzelle ist ein abgegrenzter Arbeitsplatz, an dem ein Industrieroboter arbeitet. Ein Schutzzaun oder eine Kabine trennt den Bereich, in dem sich der Roboter bewegt, von dem Bereich, in dem Menschen arbeiten. Der Zugang führt durch eine Schutztür. Sie ist mit dem Roboter verriegelt: Öffnet jemand die Tür, bleibt der Roboter stehen."
         }
       ],
       "back": [
         {
           "type": "text",
-          "text": "Wie eine Zelle gesichert wird, ergibt sich aus einer Risikobeurteilung. Sie klärt, welche Gefahren auftreten und wo ein fester Schutz wie ein Zaun nötig ist. Für Robotersysteme gilt EN ISO 10218-2, für den Zaun diese Normen:"
+          "text": "Wie eine Zelle gesichert wird, ergibt sich aus einer Risikobeurteilung: Man prüft, welche Gefahren vom Roboter ausgehen, und mindert sie mit Schutzeinrichtungen. Dafür gelten unter anderem diese Normen:"
         },
         {
           "type": "table",
           "rows": [
             ["Norm", "Regelt"],
-            ["EN ISO 13857", "Höhe des Zauns und Abstand zur Gefahrenstelle"],
-            ["EN ISO 14120", "Bauart und Festigkeit des Zauns"],
-            ["EN ISO 14119", "Verriegelung der Schutztür"]
+            ["EN ISO 10218-2", "Sicherheitsanforderungen an Roboteranlagen"],
+            ["EN ISO 13857", "Sicherheitsabstände von Schutzeinrichtungen zur Gefahrenstelle"]
           ]
         }
       ]

@@ -18,7 +18,7 @@
       "back": [
         {
           "type": "text",
-          "text": "Das nennt man Ruhestromprinzip: Ohne Strom ist die Bremse geschlossen. Reißt ein Kabel oder fällt der Strom aus, bleibt die Welle gehalten. Man sagt dazu ausfallsicher, englisch fail-safe."
+          "text": "Das Prinzip heißt Ruhestromprinzip: Die Bremse braucht Strom zum Lösen, nicht zum Bremsen. Sie gilt als ausfallsicher, englisch fail-safe: Die Bremswirkung bleibt auch bei Störungen erhalten."
         },
         {
           "type": "facts",

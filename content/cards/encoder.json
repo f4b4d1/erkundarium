@@ -2,8 +2,7 @@
   "id": "encoder",
   "topic": "antriebstechnik",
   "sources": [
-    "https://de.wikipedia.org/wiki/Drehgeber",
-    "https://www.harmonicdrive.net/products/rotary-actuators/integrated-actuators/sha-integrated-with-servo-drive"
+    "https://de.wikipedia.org/wiki/Drehgeber"
   ],
   "link": "https://de.wikipedia.org/wiki/Drehgeber",
   "relations": [
@@ -16,7 +15,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Ein Encoder, auf Deutsch Drehgeber, misst, wie weit sich eine Welle gedreht hat. Ohne ihn wüsste die Steuerung nicht, in welcher Stellung der Roboterarm gerade steht. Aus den Impulsen lässt sich auch die Drehzahl berechnen. Bei Drehstrommotoren liefern zusätzliche Signale die Läuferstellung, damit die Steuerung den Motor richtig ansteuert."
+          "text": "Ein Encoder, auf Deutsch Drehgeber, misst, wie weit sich eine Welle gedreht hat. Ohne ihn wüsste die Steuerung nicht, in welcher Stellung der Roboterarm gerade steht. Aus den Impulsen lässt sich auch die Drehzahl berechnen. Bei Drehstrommotoren melden zusätzliche Signale, wie der drehende Teil des Motors steht, damit die Steuerung den Motor richtig ansteuert."
         }
       ],
       "back": [
@@ -36,7 +35,7 @@
           "type": "facts",
           "items": [
             "Abgetastet wird etwa eine Strichscheibe, ein Magnetrad oder eine Codescheibe",
-            "Ein Motor-Encoder mit 17 Bit unterscheidet 131 072 Stellungen je Umdrehung"
+            "Ein Inkrementalgeber gibt einmal je Umdrehung einen Nullimpuls ab, der als Referenzmarke dient"
           ]
         }
       ],

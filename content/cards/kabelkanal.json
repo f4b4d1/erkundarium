@@ -12,28 +12,27 @@
       "front": [
         {
           "type": "text",
-          "text": "Unter dem Hallenboden liegen die Kabel nicht lose im Beton. Sie laufen in flachen Kanälen aus Metall oder Kunststoff. So bleiben sie geschützt, und neue Leitungen lassen sich später nachziehen. Solche Kanalböden sind eine Alternative zu Doppel- und Hohlraumböden. Über den Kanälen muss eine Mindestschicht Estrich bleiben, sonst reißt der Boden."
+          "text": "In Büro- und Produktionsgebäuden müssen Kabel oft waagerecht durch den Boden laufen. Dafür gibt es flache Kanäle aus Metall oder Kunststoff, die auf der Rohdecke befestigt und vom Estrich, der obersten Bodenschicht, überdeckt werden. Solche Kanalböden sind eine Alternative zu Doppel- und Hohlraumböden. Über den Kanälen muss eine Mindestschicht Estrich bleiben, damit der Boden tragfähig bleibt."
         }
       ],
       "back": [
         {
           "type": "list",
           "items": [
-            "Estrichüberdeckt: liegt unsichtbar unter dem Estrich, der obersten Bodenschicht",
+            "Estrichüberdeckt: liegt unsichtbar unter dem Estrich",
             "Estrichbündig: schließt mit dem Boden ab, der Deckel lässt sich abnehmen",
-            "Schwerlastkanal: estrichbündig und für hohe Lasten in Industriehallen gebaut"
+            "Schwerlastkanal: estrichbündig und für hohe Lasten gebaut"
           ]
         },
         {
           "type": "text",
-          "text": "Die Kanäle werden vor dem Estrich auf die Rohdecke oder Bodenplatte gedübelt. Mehrzügige Kanäle haben zwei oder drei getrennte Kammern. So laufen Daten- und Stromleitungen getrennt nebeneinander."
+          "text": "Die Kanäle werden vor dem Estrich auf die Rohdecke oder Bodenplatte gedübelt. Querkanäle und Dosen verbinden die einzelnen Kanäle."
         },
         {
           "type": "facts",
           "items": [
             "Dosen im Kanal dienen als Anschlussstelle und als Öffnung zur Kontrolle",
-            "Schwerlastkanäle tragen laut einem Hersteller bis zu 2,5 Tonnen",
-            "Prüfnorm für Kanalsysteme: DIN EN 50085"
+            "Ist der Kanal fest in den Estrich eingebunden, muss man mit Rissen über dem Kanal rechnen"
           ]
         }
       ]
