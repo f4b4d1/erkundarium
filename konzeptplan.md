@@ -141,7 +141,7 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `d323dbf`)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `535a6b5`)
 
 Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
 
@@ -149,7 +149,7 @@ Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für
 
 Schritt 1 der nächsten Schritte ist fertig und reviewt: Zoom (F3), Pfadanzeige (F4), Eintrittskarte (F30, F31), Stand im Hinweis (F11), bedienbarer Hinweis am Zeiger mit Kartenknopf (F32). `roboterzelle` ist weiterhin ein Platzhalter (Entscheidung des Nutzers: Platzhalter zuerst, Zeichnen in Schritt 2). Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
 
-Offen beim Nutzer: Kartenknopf und Aktionssymbol (Lupe „Hineinzoomen“) stehen im Hinweis nebeneinander und sehen gleich aus; nur der Kartenknopf ist ein Knopf. Jetzt angleichen oder mit dem endgültigen Aussehen (M4)?
+Kartenknopf und Aktionssymbol (Lupe „Hineinzoomen“) stehen im Hinweis nebeneinander und sehen gleich aus; nur der Kartenknopf ist ein Knopf. Der Nutzer lässt das vorerst so (2026-11-16).
 
 Als Nächstes entscheidet der Nutzer zwischen Schritt 2 (Zeichnen) und den anderen Punkten unter „Nächste Schritte in M1“.
 
@@ -187,7 +187,7 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 | 8b | Kartendesign abgeschlossen: Schild auf beiden Seiten mit Themengebiet, Titel hinten als kleine Überschrift, Schrift vorne +10 %, Quellen als bloße URL ohne Nummern, Bedienregeln in der Spec (F8a), endgültige `limits.json` (Kurztext 300 bis 400 Zeichen), alle elf Kurztexte verlängert, `design-guidelines-karte.md` mit Regeln für Kartentexte (Allgemeingültigkeit, Belege, Verständlichkeit) |
 | 9a | Zoom (F3) und Pfadanzeige (F4): vorläufige Szene `roboterzelle`, `src/logik/pfad.ts` mit Tests, Zoom per Web Animations mit `prefers-reduced-motion`, Ladefehler und nicht darstellbare Zielszene lassen die aktuelle Szene stehen, Szene als `role="group"` mit Titel benannt; reviewt, Befunde behoben (Commits `f3831ae`, `745e30c`) |
 | 9b | Auftrag 2a: Eintrittskarte deckt sich beim ersten Betreten nach dem Zoom auf (F30, auch für die Startszene; `aufzudeckendeEintrittskarte` in `src/logik/karte-oeffnen.ts`), Kartenknopf an der aktuellen Szene in der Pfadanzeige (F31), Stand im Hinweis eines Zoom-Hotspots (F11); Fokus nach dem Schließen über `Fokusziel` (Hotspot, Kartenknopf, Szene); reviewt, Befunde behoben (Commits `e893b5d`, `f860462`). Nur in Logiktests geprüft: Startszene mit Eintrittskarte |
-| 9c | Auftrag 2b: Hinweis als `role="group"`, lässt keine Klicks durch, bleibt beim Fahren in den Hinweis offen, schließt 150 ms nach Verlassen und nach dem Schließen einer Karte; Lage am Zeiger (`platziereAmAnker`, `sollNeuAnkern` in `src/oberflaeche/platzierung.ts`; 12 px Versatz, neu ankern ab 120 px), bei Tastaturfokus an der Box; Ereignis `bewegt` und `zeiger` im Szenenmodul; Kartenknopf im Hinweis eines Zoom-Hotspots (F32, `eintrittskarte` in `hinweisinhalt`); `mausNach`, `klickeBei` in `tools/browser.ts`; reviewt, Befunde behoben (Commits `43e7f1c`, `d323dbf`) |
+| 9c | Auftrag 2b: Hinweis als `role="group"`, lässt keine Klicks durch, bleibt beim Fahren in den Hinweis offen, schließt 150 ms nach Verlassen und nach dem Schließen einer Karte; Lage am Zeiger (`platziereAmAnker`, `sollNeuAnkern` in `src/oberflaeche/platzierung.ts`; seit `535a6b5` über dem Zeiger mit 12 px Abstand, waagerecht mittig, nur ohne Platz oben darunter mit 32 px Abstand, damit die Hand ihn nicht verdeckt; neu ankern ab 120 px), bei Tastaturfokus an der Box; Ereignis `bewegt` und `zeiger` im Szenenmodul; Kartenknopf im Hinweis eines Zoom-Hotspots (F32, `eintrittskarte` in `hinweisinhalt`); `mausNach`, `klickeBei` in `tools/browser.ts`; reviewt, Befunde behoben (Commits `43e7f1c`, `d323dbf`) |
 
 Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt und die Befunde behoben (Commit `aabd984`). Ungeprüft im Browser: der Name des Dialogs im Fehlerzustand und die Ansage „Neue Karte gefunden“ im Screenreader. Offen, gleiches Muster: `.karte-laedt` ist eine bedingt gerenderte `role="status"`-Region.
 
