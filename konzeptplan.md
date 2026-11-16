@@ -171,6 +171,7 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 | 7 | Erster sichtbarer Stand: Szene, Hinweis, Umriss, Auslösen per Maus, Tastatur und Touch, Haken, Speichern in `localStorage`, Erlaubnisliste für eingebettete SVGs |
 | 8 | Kartenansicht: Aufdecken, Wenden, Schließen, fünf Bausteine, Entwurfsstempel, vier Symbole der Themengebiete; Kartentitel im Inhaltsverzeichnis |
 | 8a | Wissensgebiete (ADR 0005): `content/domains.json` mit Technik in Stahlgrau `#6B7785`, `topics.json` verweist mit `domain` darauf, keine Ersatzfarbe; Kartenvorderseite mit Bild und Text je zur Hälfte |
+| 8b | Kartendesign abgeschlossen: Schild auf beiden Seiten mit Themengebiet, Titel hinten als kleine Überschrift, Schrift vorne +10 %, Quellen als bloße URL ohne Nummern, Bedienregeln in der Spec (F8a), endgültige `limits.json` (Kurztext 300 bis 400 Zeichen), alle elf Kurztexte verlängert, `design-guidelines-karte.md` mit Regeln für Kartentexte (Allgemeingültigkeit, Belege, Verständlichkeit) |
 
 Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt und die Befunde behoben (Commit `aabd984`). Ungeprüft im Browser: der Name des Dialogs im Fehlerzustand und die Ansage „Neue Karte gefunden“ im Screenreader. Offen, gleiches Muster: `.karte-laedt` ist eine bedingt gerenderte `role="status"`-Region.
 
@@ -178,19 +179,14 @@ Umgesetzte Anforderungen der Spec: F1, F2, F5, F7 bis F10, F17, F18, F21, F22, F
 
 ### Offene Entscheidungen des Nutzers
 
-1. **Vorderseite: längere Texte und größere Schrift.** Entschieden: etwas längere Kurztexte mit mehr Inhalt und leicht größere Schrift. Offen sind die Zahlen. Vorschlag: Kurztext 250 bis 350 Zeichen, Schrift vorne etwa 10 % größer, zwei Stufen als Bildschirmfoto zur Auswahl; offen, ob die Rückseite mitwächst (`wellgetriebe` ist dort schon knapp). Neue Aussagen brauchen eine Quelle.
-2. **Schild der Rückseite.** Entschieden: Das Schild zeigt auf beiden Seiten das Themengebiet. Offen, wo der Kartentitel hinten steht. Vorschlag: als kleine Überschrift oben auf dem Blatt, weil Themengebiet und Titel zusammen im Schild auf dem Handy nicht passen. Danach F8 entsprechend schärfen.
-3. **Längenvorgaben für die Karte.** Vorschlag aus Schritt 8: Rückseite höchstens 3 Bausteine, Text bis 250 Zeichen, „Schon gewusst?“ bis 160, Tabelle höchstens 2 Spalten und 4 Zeilen, höchstens 3 Quellen. Erst eintragen, wenn das Kartendesign steht.
-4. **Startszene angleichen.** Offen ist, ob beim Zeichnen des Zauns auch Farben und Strichstärken der Startszene an die Guidelines angeglichen werden (reines Weiß, etwa zehn Farben außerhalb der Paletten, krumme Strichstärken). Empfehlung: ja.
-5. **Bedienung der Karte, die kein Dokument regelt.** Klick auf die Karte wendet sie, Klick daneben schließt sie, Wenden während des Aufdeckens überspringt die Animation; scheitert das Laden beim ersten Fund, gilt die Karte als gefunden und das Aufdecken entfällt für immer. Vorschlag: so lassen und in die Spec aufnehmen. Dem Nutzer erklärt, noch nicht entschieden.
-6. **Eigene Guidelines für die Karte.** Vom Nutzer gewünscht, angelehnt an die Szenen-Guidelines. Vorschlag: `design-guidelines-karte.md`, verweist für Paletten und Konturstil auf `design-guidelines.md` und regelt Seitenaufbau, Schriftgrößen, Farben der Kartenoberfläche (heute `#f4f1ea` und `#181820` außerhalb der Paletten), Symbole der Themengebiete (Konturen 2,5 und 2 statt 3 und 2,2) und Kartenbilder (Abschnitt 9 zieht um). Erst schreiben, wenn Schild, Schrift und Textlänge stehen; zusammen mit den Längenvorgaben beantwortet das N1.
-7. **Farben weiterer Wissensgebiete.** Der Vorschlag in ADR 0005 stößt sich mit festen Bedeutungen: Rot heißt in jeder Welt Gefahr, Orange in der Fabrik Roboter. Erst zu klären, wenn es Karten außerhalb der Technik gibt.
+1. **Startszene angleichen.** Offen ist, ob beim Zeichnen des Zauns auch Farben und Strichstärken der Startszene an die Guidelines angeglichen werden (reines Weiß, etwa zehn Farben außerhalb der Paletten, krumme Strichstärken). Empfehlung: ja.
+2. **Farben weiterer Wissensgebiete.** Der Vorschlag in ADR 0005 stößt sich mit festen Bedeutungen: Rot heißt in jeder Welt Gefahr, Orange in der Fabrik Roboter. Erst zu klären, wenn es Karten außerhalb der Technik gibt.
 
 ### Nächste Schritte in M1
 
 Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
-1. Kartenansicht abschließen: Bedienregeln in die Spec (Entscheidung 5), Schild der Rückseite und Schriftgröße (Entscheidungen 1 und 2), Kurztexte verlängern und Längenvorgaben eintragen (Entscheidung 3), dann die Karten-Guidelines (Entscheidung 6).
+1. Kartenansicht abschließen: die fünf Karten `haltebremse`, `robotergelenk`, `motorleitung`, `hallenleuchte`, `wellgetriebe` nach `design-guidelines-karte.md` Abschnitt 5 neu fassen (ihre Kurztexte enthielten Herstellerangaben); die übrigen sechs Karten bei Gelegenheit gegen Abschnitt 8 prüfen.
 2. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11).
 3. Zeichnen: Zaun und gegebenenfalls Angleichen der Startszene; Szenen `roboterzelle` und `robotergelenk` nach den Design-Guidelines; Szenendateien dazu. Die Motorleitung hängt auch in der Roboterzelle.
 4. Karte `servomotor` und Beziehungen.
@@ -205,11 +201,11 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 - `npm test` scheitert, wenn das Terminal im Pfad ein kleines `c:` zeigt (`Cannot read properties of undefined (reading 'config')`). Abhilfe: mit großem `C:\` ins Verzeichnis wechseln. Die Ursache ist nicht geklärt.
 - Manche Haken sitzen neben der Form, weil sie an der Ecke der Begrenzungsbox hängen (Hallenleuchten, Roboter, Schaltschrank).
 - Der Hinweis lässt Klicks durch. Nach dem Schließen einer Karte mit der Maus bleibt er offen, bis die Maus sich bewegt.
-- Auf schmalen Bildschirmen ist die Kartenschrift klein (etwa 12 px vorne, 11 px hinten, Quellen unter 9 px). Die Rückseite von `wellgetriebe` hat nur 21 px Luft und läuft laut Agent bei 430, 390 und 360 px Breite über und scrollt (nicht nachgeprüft).
+- Auf schmalen Bildschirmen ist die Kartenschrift klein (bei 360 px Breite etwa 13 px vorne, 11 px hinten, Quellen etwa 8 px). Laut Messung läuft derzeit keine Karte über.
 - Schema-Fehler erscheinen teils englisch. Das Prüfskript sieht nur `.json` und `.svg`.
 - Die Migration zwischen Spielstand-Versionen ist ungetestet, weil es nur Version 1 gibt.
 - Nie geprüft: Firefox, echte Touch-Geräte, Screenreader, Handy im Hochformat, eine Karte mit eigenem Bild, eine zweite Textfassung. Alle Prüfungen am laufenden Spiel liefen in ferngesteuertem Edge.
-- Kein Kartentext und kein Hotspot-Text ist gegen seine Quelle gegengelesen. Schwache Stellen laut Autor: `hallenleuchte` (dünne Quellen, keine Lux-Werte), `not-halt-und-zaun` und `roboterzelle` (Zaunhöhe und Normen aus zweiter Hand), `haltebremse` und `motorleitung` (je ein Hersteller), Zahlen bei `robotergelenk`, `encoder`, `kabelkanal` (je ein Produkt). Hotspot-Texte haben keinen Prüfstatus.
+- Kein Kartentext und kein Hotspot-Text ist von einem Menschen gegen seine Quelle gegengelesen; die Agenten haben die Quellen abgerufen. Schwache Stellen: `not-halt-und-zaun` und `roboterzelle` (Zaun und Normen aus einem Sekundärartikel), Zahlen bei `encoder` und `kabelkanal` (je ein Produkt). Hotspot-Texte haben keinen Prüfstatus.
 
 ### Anhaltspunkte im Code
 

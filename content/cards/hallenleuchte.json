@@ -2,7 +2,8 @@
   "id": "hallenleuchte",
   "topic": "elektroinstallation",
   "sources": [
-    "https://www.waldmann.com/applications/industry/industrial-hall/warehouses-and-logistics-halls.6c9.en.html",
+    "https://de.wikipedia.org/wiki/LED-Lampe",
+    "https://de.wikipedia.org/wiki/Quecksilberdampflampe",
     "https://www.baulinks.de/licht/hallenleuchten.php"
   ],
   "texts": {
@@ -12,7 +13,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Hallenleuchten hängen hoch unter dem Dach und leuchten von dort große Flächen aus. Moderne Hallenleuchten arbeiten mit LEDs und brauchen deutlich weniger Strom als ältere Lampen. LEDs lösen Quecksilberdampf- und Metalldampflampen ab. Hersteller nennen für ihre LED-Leuchten 50 000 bis 100 000 Betriebsstunden. Manche Modelle sind für Hallen über 13 Meter Höhe gebaut."
+          "text": "Hallenleuchten beleuchten große, hohe Räume wie Fabrikhallen, Lager und Logistikhallen. Sie hängen hoch unter dem Dach und strahlen von dort auf die Fläche darunter. Moderne Hallenleuchten arbeiten mit LEDs. Eine LED braucht bei gleicher Helligkeit weniger Strom als ältere Lampen. Deshalb lösen LEDs die alten Lampen zunehmend ab."
         }
       ],
       "back": [
@@ -26,14 +27,12 @@
         },
         {
           "type": "text",
-          "text": "Gutes Hallenlicht ist gleichmäßig. Dann sind Beschriftungen in jeder Höhe lesbar, und wer nach oben schaut, wird nicht geblendet."
+          "text": "Lange kamen Quecksilberdampflampen zum Einsatz. Seit April 2015 dürfen sie nur noch gehandelt werden, wenn sie bestimmte Energieeffizienzklassen erreichen. Alternativen sind Halogenmetalldampflampen und LEDs."
         },
         {
           "type": "facts",
           "items": [
-            "Häufige Schutzart IP65: staubdicht und gegen Strahlwasser geschützt",
-            "Präsenzmelder schalten Bereiche nur ein, wenn dort jemand arbeitet",
-            "Ein Hersteller nennt rund 65 Prozent Energieersparnis nach einer Umrüstung"
+            "Häufige Schutzart IP65: staubdicht und gegen Strahlwasser geschützt"
           ]
         }
       ]

@@ -2,8 +2,8 @@
   "id": "robotergelenk",
   "topic": "robotik",
   "sources": [
-    "https://www.harmonicdrive.net/products/rotary-actuators/integrated-actuators/sha-integrated-with-servo-drive",
     "https://de.wikipedia.org/wiki/Industrieroboter",
+    "https://de.wikipedia.org/wiki/Servomotor",
     "https://en.wikipedia.org/wiki/Strain_wave_gearing"
   ],
   "texts": {
@@ -13,7 +13,7 @@
       "front": [
         {
           "type": "text",
-          "text": "Jedes Gelenk eines Industrieroboters hat einen eigenen Antrieb. Ein Motor dreht schnell, ein Getriebe macht daraus eine langsame, kräftige Bewegung, und ein Sensor meldet die Stellung. Ein Hersteller betreibt solche Gelenkantriebe mit 48 Volt Gleichspannung. Bei CANopen genügt ein vieradriges Kabel: zwei Adern für die Signale, zwei für die Versorgung."
+          "text": "Jedes Gelenk eines Industrieroboters hat einen eigenen Antrieb. Ein Motor dreht schnell, ein Getriebe macht daraus eine langsame, kräftige Bewegung, und ein Sensor meldet die Stellung. Die Regelung vergleicht sie mit dem Sollwert und steuert den Motor nach. Ein Knickarmroboter hat fünf oder sechs solcher Gelenke und ähnelt damit einem menschlichen Arm."
         }
       ],
       "back": [
@@ -21,19 +21,19 @@
           "type": "list",
           "items": [
             "Servomotor: Elektromotor, dessen Stellung laufend geregelt wird",
-            "Getriebe: häufig ein Wellgetriebe, kompakt und mit hoher Untersetzung",
+            "Getriebe: häufig ein Wellgetriebe mit hoher Untersetzung",
             "Encoder: misst den Drehwinkel",
-            "Haltebremse: hält die Achse fest, wenn der Strom fehlt"
+            "Regler: vergleicht Soll- und Istwert und steuert den Motor"
           ]
         },
         {
           "type": "text",
-          "text": "Manche Hersteller bauen alles in ein Gehäuse: Getriebe, Motor, Bremse, Antriebsregler und zwei Encoder. Ein Encoder sitzt am Motor, der andere am Ausgang des Getriebes."
+          "text": "Früher bewegten meist hydraulische Zylinder die Roboterarme. Mitte der siebziger Jahre setzten sich elektrische Antriebe mit Mikroprozessorsteuerung durch. Heute verwenden Industrieroboter sie fast ausschließlich."
         },
         {
           "type": "facts",
           "items": [
-            "Untersetzungen einer solchen Baureihe: 51:1 bis 161:1"
+            "Ein Wellgetriebe untersetzt in einer Stufe etwa 30:1 bis 320:1"
           ]
         }
       ]

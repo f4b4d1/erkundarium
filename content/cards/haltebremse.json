@@ -2,7 +2,8 @@
   "id": "haltebremse",
   "topic": "antriebstechnik",
   "sources": [
-    "https://infosys.beckhoff.com/content/1031/am8100/1333496971.html"
+    "https://de.wikipedia.org/wiki/Sicherheitsbremse",
+    "https://en.wikipedia.org/wiki/Electromagnetic_brake"
   ],
   "texts": {
     "de": {
@@ -11,21 +12,21 @@
       "front": [
         {
           "type": "text",
-          "text": "Die Haltebremse sitzt am Motor und blockiert seine Welle, sobald keine Spannung anliegt. So kann eine Achse im Stillstand und bei Stromausfall festgehalten werden. Bei manchen Servomotoren ist sie eine Permanentmagnet-Bremse auf der B-Lagerseite. Man kann sie nicht nachrüsten, und sie macht den Motor länger. Ein Hersteller nennt mehr als zehn Millionen Schaltspiele."
+          "text": "Die Haltebremse sitzt am Motor und blockiert seine Welle, sobald keine Spannung anliegt. So hält sie eine Achse im Stillstand fest, auch bei Stromausfall. Meist drücken Federn die Bremse zu, und ein Elektromagnet löst sie, sobald Spannung anliegt. Sie sitzt in der Regel an der Rückseite des Motors und findet sich zum Beispiel bei Servomotoren."
         }
       ],
       "back": [
         {
           "type": "text",
-          "text": "Sie arbeitet nach dem Ruhestromprinzip: Ohne Spannung ist sie geschlossen. Erst mit Spannung, bei den Motoren eines Herstellers 24 Volt Gleichspannung, öffnet sie und gibt die Welle frei. Fällt der Strom aus, greift sie von selbst."
+          "text": "Das nennt man Ruhestromprinzip: Ohne Strom ist die Bremse geschlossen. Reißt ein Kabel oder fällt der Strom aus, bleibt die Welle gehalten. Man sagt dazu ausfallsicher, englisch fail-safe."
         },
         {
           "type": "facts",
           "items": [
-            "Gedacht zum Halten im Stillstand, nicht zum Abbremsen im Betrieb",
-            "Bremsen bei Not-Stopp oder Stromausfall ist nur begrenzt zulässig",
-            "Laut Hersteller allein nicht für den Personenschutz zugelassen",
-            "Senkrechte Achsen brauchen zusätzliche Sicherungen"
+            "Gedacht zum Halten im Stillstand, nicht zum Abbremsen im normalen Betrieb",
+            "Meist auch für Notbremsungen bei Stromausfall oder Not-Aus ausgelegt",
+            "Mit der Zeit verschleißen die Reibbeläge, und die Bremse schließt langsamer",
+            "Typisch: Roboter und senkrecht verfahrende Achsen (Z-Achse)"
           ]
         }
       ]

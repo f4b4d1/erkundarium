@@ -3,7 +3,8 @@
   "topic": "antriebstechnik",
   "sources": [
     "https://www.harmonicdrive.net/technology",
-    "https://en.wikipedia.org/wiki/Strain_wave_gearing"
+    "https://en.wikipedia.org/wiki/Strain_wave_gearing",
+    "https://de.wikipedia.org/wiki/Spannungswellengetriebe"
   ],
   "link": "https://www.harmonicdrive.net/technology",
   "texts": {
@@ -13,17 +14,29 @@
       "front": [
         {
           "type": "text",
-          "text": "Das Wellgetriebe hat ein verformbares Zahnrad. Ein ovaler Kern drückt eine dünne, außen verzahnte Stahlbüchse an zwei Stellen in einen festen Zahnring. Dreht sich der Kern, wandern diese Stellen mit, und die Büchse dreht sich langsam weiter. Eingang und Ausgang liegen auf derselben Achse. Beim Hersteller Harmonic Drive greifen bis zu 30 Prozent der Zähne gleichzeitig."
+          "text": "Das Wellgetriebe hat ein verformbares Zahnrad. Ein ovaler Kern drückt eine dünne, außen verzahnte Stahlbüchse an zwei Stellen in einen festen Zahnring. Dreht sich der Kern, wandern diese Stellen mit, und die Büchse dreht sich langsam weiter. Sie hat meist zwei Zähne weniger als der Ring, darum ergibt sich eine große Untersetzung. Man findet es oft in Robotern."
         }
       ],
       "back": [
         {
           "type": "table",
           "rows": [
-            ["Bauteil", "Aufgabe"],
-            ["Wave Generator", "ovaler Kern mit Kugellager, wird vom Motor gedreht"],
-            ["Flexspline", "dünne Stahlbüchse mit Außenzähnen, gibt die Drehung ab"],
-            ["Circular Spline", "fester Ring mit Innenzähnen"]
+            [
+              "Bauteil",
+              "Aufgabe"
+            ],
+            [
+              "Wave Generator",
+              "ovaler Kern mit Kugellager, wird vom Motor gedreht"
+            ],
+            [
+              "Flexspline",
+              "dünne Stahlbüchse mit Außenzähnen, gibt die Drehung ab"
+            ],
+            [
+              "Circular Spline",
+              "fester Ring mit Innenzähnen"
+            ]
           ]
         },
         {
@@ -31,7 +44,7 @@
           "items": [
             "Untersetzung in einer Stufe: etwa 30:1 bis 320:1",
             "Spielfrei: kein Wackeln, wenn die Drehrichtung wechselt",
-            "Erfunden von C. W. Musser, Patent von 1957"
+            "Erfunden von C. W. Musser in den 1950er Jahren"
           ]
         },
         {
