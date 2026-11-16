@@ -2,6 +2,7 @@
 // Beziehungen stehen nur an der Ausgangskarte, die Gegenrichtung wird hier berechnet.
 // Listen stehen in der Reihenfolge des Verzeichnisses.
 
+import { vorhandeneKarten } from './fortschritt.ts';
 import type { Inhaltsverzeichnis, Texte } from './inhaltsverzeichnis.ts';
 
 /** Die Szenen, in denen die Karte Eintrittskarte ist oder an einem Hotspot hängt, jede einmal. */
@@ -40,7 +41,7 @@ export function beziehungenDerKarte(verzeichnis: Inhaltsverzeichnis, karte: stri
       }
     }
     const gruppe = (richtung: Beziehungsgruppe['richtung'], bezeichnung: Texte, ids: Set<string>) => {
-      const karten = verzeichnis.cards.filter((k) => ids.has(k.id)).map((k) => k.id);
+      const karten = vorhandeneKarten(verzeichnis, ids);
       if (karten.length > 0) gruppen.push({ typ: typ.id, richtung, bezeichnung, karten });
     };
     gruppe('vorwaerts', typ.forward, vorwaerts);

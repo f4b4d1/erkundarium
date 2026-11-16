@@ -3,7 +3,7 @@
 // Spielstand ohne Karte (F18) und Verweise auf fehlende Karten zählen nirgends mit.
 
 import type { Inhaltsverzeichnis } from './inhaltsverzeichnis.ts';
-import { tiefereSzenen } from './szenennetz.ts';
+import { szenenDerWelt, tiefereSzenen } from './szenennetz.ts';
 
 /** Gefundene und vorhandene Karten; den Anteil bildet die Oberfläche. */
 export interface Stand {
@@ -47,7 +47,7 @@ export function fortschrittDerWelt(
   welt: string,
   gefunden: ReadonlySet<string>,
 ): Stand {
-  const verweise = verzeichnis.scenes.filter((s) => s.world === welt).flatMap((s) => verweiseDerSzene(verzeichnis, s.id));
+  const verweise = szenenDerWelt(verzeichnis, welt).flatMap((s) => verweiseDerSzene(verzeichnis, s));
   return zaehle(vorhandeneKarten(verzeichnis, verweise), gefunden);
 }
 
@@ -68,7 +68,7 @@ function verweiseDerSzene(verzeichnis: Inhaltsverzeichnis, szene: string): strin
 }
 
 /** Die IDs aus `ids`, die im Verzeichnis als Karte stehen, jede einmal, in dessen Reihenfolge. */
-function vorhandeneKarten(verzeichnis: Inhaltsverzeichnis, ids: readonly string[]): string[] {
+export function vorhandeneKarten(verzeichnis: Inhaltsverzeichnis, ids: Iterable<string>): string[] {
   const gesucht = new Set(ids);
   return verzeichnis.cards.filter((k) => gesucht.has(k.id)).map((k) => k.id);
 }

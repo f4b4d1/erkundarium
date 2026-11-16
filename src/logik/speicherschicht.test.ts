@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { speicherImArbeitsspeicher } from './speicherschicht.ts';
-import { einlesen, markiereGefunden, neuerSpielstand } from './spielstand.ts';
+import { einlesen, gefundeneKarten, markiereGefunden, neuerSpielstand } from './spielstand.ts';
 
 describe('speicherImArbeitsspeicher', () => {
   it('lädt nichts, solange nichts gespeichert ist', () => {
@@ -13,9 +13,21 @@ describe('speicherImArbeitsspeicher', () => {
 
   it('lädt einen gespeicherten Spielstand so, dass er sich wieder einlesen lässt', () => {
     const speicher = speicherImArbeitsspeicher();
-    const stand = markiereGefunden(neuerSpielstand(), 'karte-a', '2026-01-01T10:00:00Z');
-    speicher.speichern(stand);
-    expect(einlesen(speicher.laden())).toEqual({ art: 'gelesen', stand });
+    const spielstand = markiereGefunden(neuerSpielstand(), 'karte-a', '2026-01-01T10:00:00Z');
+    speicher.speichern(spielstand);
+    expect(einlesen(speicher.laden())).toEqual({ art: 'gelesen', spielstand });
+  });
+
+  it('behält Profil und Karte mit dem Schlüssel __proto__ über Speichern und erneutes Einlesen', () => {
+    const daten = JSON.parse(
+      '{"schema":1,"active":"__proto__","profiles":{"__proto__":{"cards":{"__proto__":"2026-01-01T10:00:00Z"},"settings":{"showMarkers":true}}}}',
+    ) as unknown;
+    const speicher = speicherImArbeitsspeicher();
+    speicher.speichern(einlesen(daten).spielstand);
+    const { spielstand } = einlesen(speicher.laden());
+    expect(spielstand.active).toBe('__proto__');
+    expect(Object.keys(spielstand.profiles)).toEqual(['__proto__']);
+    expect(gefundeneKarten(spielstand)).toEqual(new Set(['__proto__']));
   });
 
   it('ersetzt beim Speichern den vorigen Spielstand', () => {

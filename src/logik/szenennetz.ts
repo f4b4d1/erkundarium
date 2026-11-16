@@ -38,7 +38,7 @@ export function tiefereSzenen(verzeichnis: Inhaltsverzeichnis, szene: string): s
  */
 export function findeKreise(verzeichnis: Inhaltsverzeichnis): string[][] {
   const kreise: string[][] = [];
-  const zustand = new Map<string, 'auf-dem-weg' | 'fertig'>();
+  const zustand = new Map<string, 'auf-dem-weg' | 'besucht'>();
   const weg: string[] = [];
 
   function besuche(szene: string): void {
@@ -50,7 +50,7 @@ export function findeKreise(verzeichnis: Inhaltsverzeichnis): string[][] {
       else if (z === undefined) besuche(ziel);
     }
     weg.pop();
-    zustand.set(szene, 'fertig');
+    zustand.set(szene, 'besucht');
   }
 
   for (const szene of verzeichnis.scenes) {
@@ -73,7 +73,8 @@ export function unerreichbareSzenen(verzeichnis: Inhaltsverzeichnis, welt: strin
   return szenenDerWelt(verzeichnis, welt).filter((id) => !erreicht.has(id));
 }
 
-function szenenDerWelt(verzeichnis: Inhaltsverzeichnis, welt: string): string[] {
+/** Die Szenen der Welt, in der Reihenfolge des Verzeichnisses. */
+export function szenenDerWelt(verzeichnis: Inhaltsverzeichnis, welt: string): string[] {
   return verzeichnis.scenes.filter((s) => s.world === welt).map((s) => s.id);
 }
 
