@@ -2,7 +2,7 @@
 // Der Hinweis bleibt immer im Bereich und verdeckt den Hotspot möglichst nicht. Probiert werden
 // der Reihe nach: über, unter, rechts und links neben dem Hotspot, jeweils mittig und in den
 // Bereich geschoben. Die erste Lage ohne Überdeckung gewinnt; gibt es keine, die mit der
-// kleinsten Überdeckung. Am Zeiger (Maus, Touch) sitzt der Hinweis stattdessen an einem Ankerpunkt.
+// kleinsten Überdeckung. Am Zeiger (Maus, Touch) sitzt der Hinweis stattdessen über einem Ankerpunkt.
 
 import type { Punkt, Rechteck } from '../szene/szene.ts';
 
@@ -45,37 +45,30 @@ export function platziereHinweis(ziel: Rechteck, hinweis: Groesse, bereich: Rech
   return beste;
 }
 
-/** Abstand des Hinweises vom Ankerpunkt, waagrecht wie senkrecht. */
+/** Abstand zwischen Unterkante des Hinweises und Anker, wenn der Hinweis über dem Anker sitzt. */
 export const ANKERVERSATZ = 12;
+/**
+ * Abstand zwischen Anker und Oberkante des Hinweises, wenn der Hinweis unter dem Anker sitzt. Größer
+ * als der Versatz oben: Platz für die Zeigerhand, die von der Spitze (Anker) nach unten ragt.
+ */
+export const ANKERVERSATZ_UNTEN = 32;
 /** Entfernt sich der Zeiger weiter vom Anker, setzt sich der Anker an den Zeiger. */
 export const NEU_ANKERN_AB = 120;
 
 /**
- * Lage des Hinweises an einem Ankerpunkt (dem Zeiger): rechts unterhalb. Fehlt dort der Platz, geht er
- * auf die Gegenseite, links und/oder oben. Passt keine Lage ganz in den Bereich, wird die erste
- * hineingeschoben, die den Anker nicht verdeckt. Der Hinweis darf den Hotspot verdecken, nie den Anker.
+ * Lage des Hinweises an einem Ankerpunkt (dem Zeiger): waagrecht mittig, bevorzugt über dem Anker.
+ * Fehlt oben der Platz, sitzt er mit größerem Abstand darunter. Passt keins von beiden ganz in den
+ * Bereich (sehr kleines Fenster), gewinnt die Lage mit weniger Überlauf, in den Bereich geschoben;
+ * der Hinweis darf den Anker dann verdecken.
  */
 export function platziereAmAnker(anker: Punkt, hinweis: Groesse, bereich: Rechteck, versatz = ANKERVERSATZ): Lage {
-  const rechts = anker.x + versatz;
-  const links = anker.x - versatz - hinweis.breite;
-  const unten = anker.y + versatz;
-  const oben = anker.y - versatz - hinweis.hoehe;
-  const kandidaten: Lage[] = [
-    { links: rechts, oben: unten },
-    { links, oben: unten },
-    { links: rechts, oben },
-    { links, oben },
-  ];
-  const passt = (l: Lage) => {
-    const r = inDenBereich(l, hinweis, bereich);
-    return r.links === l.links && r.oben === l.oben;
-  };
-  const ganz = kandidaten.find(passt);
-  if (ganz !== undefined) return ganz;
-  const geschoben = kandidaten.map((l) => inDenBereich(l, hinweis, bereich));
-  const deckt = (l: Lage) =>
-    anker.x >= l.links && anker.x <= l.links + hinweis.breite && anker.y >= l.oben && anker.y <= l.oben + hinweis.hoehe;
-  return geschoben.find((l) => !deckt(l)) ?? geschoben[0]!;
+  const links = anker.x - hinweis.breite / 2;
+  const oben = { links, oben: anker.y - versatz - hinweis.hoehe };
+  const unten = { links, oben: anker.y + ANKERVERSATZ_UNTEN };
+  const geschobenOben = inDenBereich(oben, hinweis, bereich);
+  const geschobenUnten = inDenBereich(unten, hinweis, bereich);
+  const ueberlauf = (roh: Lage, geschoben: Lage) => Math.abs(geschoben.oben - roh.oben);
+  return ueberlauf(unten, geschobenUnten) < ueberlauf(oben, geschobenOben) ? geschobenUnten : geschobenOben;
 }
 
 /** Ob sich der Anker an den Zeiger setzen soll, weil dieser sich weit genug entfernt hat. */
