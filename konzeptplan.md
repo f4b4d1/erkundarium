@@ -162,7 +162,7 @@ Ablauf wie unter „Arbeitsweise“. Auftrag 2 bringt neue Logik und Abläufe, b
 
 Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er sie ändert; in `CLAUDE.md` stehen sie nicht.
 
-- Die Hauptsession orchestriert und schreibt selbst keinen Anwendungscode. Dokumente und kleine Inhaltsänderungen macht sie selbst.
+- Die Hauptsession orchestriert und schreibt selbst keinen Anwendungscode. Dokumente, kleine Inhaltsänderungen und Werkzeuge unter `tools/` (etwa `browser.ts`) darf sie selbst machen.
 - Die Hauptsession läuft auf Opus, Stufe medium. Code schreiben Subagenten mit dem Modell Sonnet (seit 2026-11-16 für alle Coding-Aufgaben), nacheinander, je Auftrag ein abgegrenzter Schritt mit Verweis auf Spec, Glossar und ADRs.
 - Der Nutzer arbeitet nah am 5-Stunden-Limit: nichts Großes ohne Rückfrage starten.
 - Ablauf je Schritt nach dem implement-Skill: testgetrieben an den vereinbarten Nahtstellen (Szenennetz, Fundorte, Fortschritt und Abschluss, Spielstand, Prüfskript; dazu jede weitere reine Logik), Typprüfung und Tests regelmäßig. Danach Code-Review, Befunde in einem eigenen Commit beheben.
