@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Welt",
+  "description": "worlds/<welt>/world.json. Die Szenen ergeben sich aus dem Ordner.",
+  "type": "object",
+  "required": ["id", "title", "start"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "title": { "$ref": "common.schema.json#/$defs/texte" },
+    "start": {
+      "description": "ID der Startszene.",
+      "$ref": "common.schema.json#/$defs/id"
+    }
+  },
+  "additionalProperties": false
+}

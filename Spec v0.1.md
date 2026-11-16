@@ -151,8 +151,10 @@ content/
   topics.json
   relations.json
   limits.json
+  schema/<name>.schema.json
+  topics/<id>.svg
   cards/<id>.json
-  cards/<id>.svg
+  cards/<name>.svg
   worlds/<welt>/world.json
   worlds/<welt>/scenes/<id>.json
   worlds/<welt>/scenes/<id>.svg
@@ -221,8 +223,38 @@ Welche Szenen zur Welt gehören, ergibt sich aus dem Ordner; welche Karten, aus 
 }
 ```
 
-- `image`, `link` und `relations` sind freiwillig.
+- `image`, `link`, `relations` und `linkLabel` sind freiwillig. `linkLabel` ohne `link` meldet das Prüfskript als Fehler.
+- `image` nennt eine SVG-Datei in `cards/`, ohne Pfad. Der Name ist frei; das Prüfskript prüft, dass die Datei existiert.
+- `sources` sind beliebige Texte (auch Bücher), mindestens einer. `link` beginnt mit `http://` oder `https://`.
 - `status` ist `entwurf` oder `geprueft`. `geprueft` setzt nur ein Mensch, der den Text gegen die Quelle gelesen hat.
+- Jede Textfassung einer Karte ist vollständig: `status`, `title`, `front` und `back` sind Pflicht. `front` hat mindestens einen Baustein, `back` darf leer sein. Die Rückfallregel auf `de` greift, wenn einer Karte die ganze Fassung fehlt.
+- Wo ein Text je Textfassung vorhanden ist (auch `label`, `hint`, `title` der Szene), ist `de` Pflicht.
+
+**Bausteine**
+
+| Baustein | Form |
+| --- | --- |
+| `text` | `{ "type": "text", "text": "..." }` |
+| `funfact` | `{ "type": "funfact", "text": "..." }` |
+| `list` | `{ "type": "list", "items": ["...", "..."] }` |
+| `facts` | `{ "type": "facts", "items": ["...", "..."] }` |
+| `table` | `{ "type": "table", "rows": [["Kopf A", "Kopf B"], ["a", "b"]] }`; die erste Zeile ist die Kopfzeile |
+
+**limits.json** (vorläufige Werte, gezählt in Zeichen)
+
+```json
+{
+  "maxTitleLength": 40,
+  "maxTextLength": 300,
+  "maxItemLength": 100,
+  "maxBlocksPerSide": 4
+}
+```
+
+- `maxTitleLength` gilt für `title` und `linkLabel`.
+- `maxTextLength` gilt für den Text in `text` und `funfact`.
+- `maxItemLength` gilt für Einträge in `list` und `facts` und für Tabellenzellen.
+- `maxBlocksPerSide` gilt je Kartenseite.
 
 **relations.json**
 
@@ -239,7 +271,7 @@ Welche Szenen zur Welt gehören, ergibt sich aus dem Ordner; welche Karten, aus 
 ]
 ```
 
-Schalter je Typ: `symmetric` (gilt in beide Richtungen) und `acyclic` (darf keinen Kreis bilden). Beide sind freiwillig und sonst falsch.
+Schalter je Typ: `symmetric` (gilt in beide Richtungen) und `acyclic` (darf keinen Kreis bilden). Beide sind freiwillig und sonst falsch. Bei einem symmetrischen Typ ist `backward` verboten, sonst Pflicht.
 
 **topics.json**
 
@@ -249,6 +281,8 @@ Schalter je Typ: `symmetric` (gilt in beide Richtungen) und `acyclic` (darf kein
     "color": "#FF7A1A", "icon": "antriebstechnik.svg" }
 ]
 ```
+
+`icon` nennt eine SVG-Datei in `content/topics/`, ohne Pfad. `color` hat die Form `#RRGGBB`.
 
 **Spielstand**
 

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Szene",
+  "description": "worlds/<welt>/scenes/<id>.json. Die SVG heißt wie die Szene und liegt daneben.",
+  "type": "object",
+  "required": ["id", "type", "title", "hotspots"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "type": {
+      "description": "Szenentyp, nur für das Prüfskript.",
+      "enum": ["ansicht", "objekt", "schema"]
+    },
+    "title": { "$ref": "common.schema.json#/$defs/texte" },
+    "card": {
+      "description": "Eintrittskarte, freiwillig.",
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "hotspots": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/hotspot" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hotspot": {
+      "description": "Klickbares Ding mit genau einer Aktion. id entspricht data-hotspot in der SVG.",
+      "type": "object",
+      "required": ["id", "action", "label"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/id" },
+        "action": {
+          "description": "card: Karte geben, scene: zoomen, info: nur Hinweis.",
+          "enum": ["card", "scene", "info"]
+        },
+        "target": {
+          "description": "Karten-ID bei card, Szenen-ID bei scene.",
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "label": {
+          "description": "Name im Hinweis, erscheint immer.",
+          "$ref": "common.schema.json#/$defs/texte"
+        },
+        "hint": {
+          "description": "Erklärung im Hinweis, nie eine Bedienanweisung. Pflicht bei info.",
+          "$ref": "common.schema.json#/$defs/texte"
+        }
+      },
+      "additionalProperties": false,
+      "if": {
+        "properties": { "action": { "const": "info" } },
+        "required": ["action"]
+      },
+      "then": {
+        "required": ["hint"],
+        "not": { "required": ["target"] }
+      },
+      "else": { "required": ["target"] }
+    }
+  }
+}

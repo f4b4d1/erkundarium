@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Vorgaben für Kartentexte",
+  "description": "limits.json. Längen in Zeichen je Textfassung, geprüft vom Prüfskript.",
+  "type": "object",
+  "required": ["maxTitleLength", "maxTextLength", "maxItemLength", "maxBlocksPerSide"],
+  "properties": {
+    "maxTitleLength": {
+      "description": "Höchstlänge von title und linkLabel.",
+      "$ref": "#/$defs/anzahl"
+    },
+    "maxTextLength": {
+      "description": "Höchstlänge des Felds text in den Bausteinen text und funfact.",
+      "$ref": "#/$defs/anzahl"
+    },
+    "maxItemLength": {
+      "description": "Höchstlänge eines Eintrags in list und facts und einer Zelle in table.",
+      "$ref": "#/$defs/anzahl"
+    },
+    "maxBlocksPerSide": {
+      "description": "Höchstzahl an Bausteinen je Kartenseite.",
+      "$ref": "#/$defs/anzahl"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "anzahl": { "type": "integer", "minimum": 1 }
+  }
+}

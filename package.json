@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/logik/tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/logik/tsconfig.json && tsc --noEmit -p tools/tsconfig.json",
     "test": "vitest run"
   },
   "dependencies": {
     "preact": "^11.2.0"
   },
   "devDependencies": {
+    "@types/node": "^24.19.2",
+    "ajv": "^8.20.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"

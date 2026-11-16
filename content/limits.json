@@ -1,0 +1,6 @@
+{
+  "maxTitleLength": 40,
+  "maxTextLength": 300,
+  "maxItemLength": 100,
+  "maxBlocksPerSide": 4
+}

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Karte",
+  "description": "cards/<id>.json. Struktur der Karte, sichtbare Texte je Textfassung.",
+  "type": "object",
+  "required": ["id", "topic", "sources", "texts"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "topic": {
+      "description": "ID des Themengebiets.",
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "image": {
+      "description": "Kartenbild in cards/, freiwillig. Fehlt es, zeigt die Karte das Symbol des Themengebiets.",
+      "$ref": "common.schema.json#/$defs/svgDatei"
+    },
+    "sources": {
+      "description": "Quellen der Karte, mindestens eine.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "common.schema.json#/$defs/text" }
+    },
+    "link": {
+      "description": "Weiterführender Link, freiwillig.",
+      "type": "string",
+      "pattern": "^https?://\\S+$"
+    },
+    "relations": {
+      "description": "Beziehungen, nur an der Ausgangskarte. Freiwillig.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/beziehung" }
+    },
+    "texts": {
+      "description": "Textfassungen, Schlüssel ist die Fassungs-ID. de ist Pflicht.",
+      "type": "object",
+      "required": ["de"],
+      "patternProperties": {
+        "^[a-z0-9]+(-[a-z0-9]+)*$": { "$ref": "#/$defs/textfassung" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "beziehung": {
+      "type": "object",
+      "required": ["type", "card"],
+      "properties": {
+        "type": {
+          "description": "ID des Beziehungstyps aus relations.json.",
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "card": {
+          "description": "ID der Zielkarte.",
+          "$ref": "common.schema.json#/$defs/id"
+        }
+      },
+      "additionalProperties": false
+    },
+    "textfassung": {
+      "type": "object",
+      "required": ["status", "title", "front", "back"],
+      "properties": {
+        "status": {
+          "description": "Prüfstatus. geprueft setzt nur ein Mensch, der den Text gegen die Quelle gelesen hat.",
+          "enum": ["entwurf", "geprueft"]
+        },
+        "title": { "$ref": "common.schema.json#/$defs/text" },
+        "front": {
+          "description": "Bausteine der Vorderseite, mindestens einer.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/baustein" }
+        },
+        "back": {
+          "description": "Bausteine der Rückseite.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/baustein" }
+        },
+        "linkLabel": {
+          "description": "Text des Links, freiwillig.",
+          "$ref": "common.schema.json#/$defs/text"
+        }
+      },
+      "additionalProperties": false
+    },
+    "eintraege": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "common.schema.json#/$defs/text" }
+    },
+    "baustein": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "enum": ["text", "list", "facts", "table", "funfact"] }
+      },
+      "oneOf": [
+        {
+          "description": "Fließtext.",
+          "properties": {
+            "type": { "const": "text" },
+            "text": { "$ref": "common.schema.json#/$defs/text" }
+          },
+          "required": ["text"],
+          "additionalProperties": false
+        },
+        {
+          "description": "Aufzählung.",
+          "properties": {
+            "type": { "const": "list" },
+            "items": { "$ref": "#/$defs/eintraege" }
+          },
+          "required": ["items"],
+          "additionalProperties": false
+        },
+        {
+          "description": "Kurze Fakten.",
+          "properties": {
+            "type": { "const": "facts" },
+            "items": { "$ref": "#/$defs/eintraege" }
+          },
+          "required": ["items"],
+          "additionalProperties": false
+        },
+        {
+          "description": "Tabelle, Zeilen aus Zellen. Die erste Zeile ist die Kopfzeile.",
+          "properties": {
+            "type": { "const": "table" },
+            "rows": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/eintraege" }
+            }
+          },
+          "required": ["rows"],
+          "additionalProperties": false
+        },
+        {
+          "description": "Kurioser Fakt, hervorgehoben.",
+          "properties": {
+            "type": { "const": "funfact" },
+            "text": { "$ref": "common.schema.json#/$defs/text" }
+          },
+          "required": ["text"],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

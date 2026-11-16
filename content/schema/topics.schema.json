@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Themengebiete",
+  "description": "topics.json. Jede Karte gehört genau einem Themengebiet.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "title", "color", "icon"],
+    "properties": {
+      "id": { "$ref": "common.schema.json#/$defs/id" },
+      "title": { "$ref": "common.schema.json#/$defs/texte" },
+      "color": {
+        "description": "Farbe als #RRGGBB.",
+        "type": "string",
+        "pattern": "^#[0-9A-Fa-f]{6}$"
+      },
+      "icon": {
+        "description": "Symbol des Themengebiets als SVG.",
+        "$ref": "common.schema.json#/$defs/svgDatei"
+      }
+    },
+    "additionalProperties": false
+  }
+}

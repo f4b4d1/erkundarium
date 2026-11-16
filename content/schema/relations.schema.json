@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Beziehungstypen",
+  "description": "relations.json. Je Typ die Bezeichnung je Richtung und Textfassung.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "forward"],
+    "properties": {
+      "id": { "$ref": "common.schema.json#/$defs/id" },
+      "symmetric": {
+        "description": "Gilt in beide Richtungen. Dann gibt es nur forward. Standard: false.",
+        "type": "boolean"
+      },
+      "acyclic": {
+        "description": "Darf keinen Kreis bilden. Standard: false.",
+        "type": "boolean"
+      },
+      "forward": {
+        "description": "Bezeichnung von der Ausgangskarte aus.",
+        "$ref": "common.schema.json#/$defs/texte"
+      },
+      "backward": {
+        "description": "Bezeichnung von der Zielkarte aus. Pflicht, außer bei symmetric, dort verboten.",
+        "$ref": "common.schema.json#/$defs/texte"
+      }
+    },
+    "additionalProperties": false,
+    "if": {
+      "properties": { "symmetric": { "const": true } },
+      "required": ["symmetric"]
+    },
+    "then": { "not": { "required": ["backward"] } },
+    "else": { "required": ["backward"] }
+  }
+}

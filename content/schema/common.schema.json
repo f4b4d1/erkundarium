@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gemeinsame Bausteine der Inhaltsschemas",
+  "$defs": {
+    "id": {
+      "description": "ID aus Kleinbuchstaben, Ziffern und Bindestrichen.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "svgDatei": {
+      "description": "Dateiname einer SVG im selben Ordner.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*\\.svg$"
+    },
+    "text": {
+      "description": "Sichtbarer Text, nicht leer.",
+      "type": "string",
+      "minLength": 1
+    },
+    "texte": {
+      "description": "Text je Textfassung, Schlüssel ist die Fassungs-ID. de ist Pflicht.",
+      "type": "object",
+      "required": ["de"],
+      "patternProperties": {
+        "^[a-z0-9]+(-[a-z0-9]+)*$": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
