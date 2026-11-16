@@ -1,0 +1,234 @@
+// Die Kartenansicht: ein modaler Dialog über der Szene (F6 bis F10, F34). Sie lädt die Kartendatei
+// erst beim Öffnen, deckt die Karte beim ersten Fund mit einer Drehung auf und lässt sie wenden.
+// Solange sie offen ist, ist die Szene dahinter gesperrt; den Fokus zurück zum Hotspot legt der
+// Aufrufer nach dem Schließen.
+
+import type { CSSProperties, TargetedMouseEvent } from 'preact';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import type { Themengebiet } from '../logik/inhaltsverzeichnis.ts';
+import type { Kartendatei, Kartentext } from '../logik/kartendatei.ts';
+import { text as textAus, waehleFassung } from '../logik/textfassung.ts';
+import { kartenbildPfad, ladeKarte, symbolPfad } from '../inhalte/laden.ts';
+import { Deckblatt, Rueckseite, Vorderseite, type Kartengebiet } from './kartenseiten.tsx';
+import { TEXTE } from './texte.ts';
+
+interface Eigenschaften {
+  karte: string;
+  /** Erster Fund: Die verdeckte Karte dreht sich zur Vorderseite. */
+  aufdecken: boolean;
+  themengebiete: readonly Themengebiet[];
+  fassung: string;
+  onSchliessen: () => void;
+}
+
+type Ladezustand =
+  | { art: 'laedt' }
+  | { art: 'fehler'; detail?: string }
+  | { art: 'bereit'; datei: Kartendatei; text: Kartentext };
+
+/** Farbe, wenn das Themengebiet fehlt oder keine gültige Farbe hat: Metall mittel. */
+const NEUTRALE_FARBE = '#6B7785';
+const FARBE = /^#[0-9a-fA-F]{6}$/;
+/** Endet die Aufdeck-Animation nicht von selbst, etwa weil Animationen abgeschaltet sind. */
+const AUFDECKEN_HOECHSTENS_MS = 2500;
+
+export function Kartenansicht({ karte, aufdecken, themengebiete, fassung, onSchliessen }: Eigenschaften) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const schliessen = useRef<HTMLButtonElement>(null);
+  const [laden, setLaden] = useState<Ladezustand>({ art: 'laedt' });
+  const [deckeAuf, setDeckeAuf] = useState(aufdecken);
+  const [gewendet, setGewendet] = useState(false);
+
+  useLayoutEffect(() => {
+    const element = dialog.current;
+    if (element === null) return;
+    element.showModal();
+    return () => element.close();
+  }, []);
+
+  useEffect(() => {
+    let aktuell = true;
+    ladeKarte(karte).then(
+      (datei) => {
+        if (!aktuell) return;
+        const text = waehleFassung(datei.texts, fassung);
+        setLaden(text === undefined ? { art: 'fehler' } : { art: 'bereit', datei, text });
+      },
+      (fehler: unknown) => {
+        if (aktuell) setLaden({ art: 'fehler', ...(fehler instanceof Error ? { detail: fehler.message } : {}) });
+      },
+    );
+    return () => {
+      aktuell = false;
+    };
+  }, [karte, fassung]);
+
+  const bereit = laden.art === 'bereit';
+  const fehlgeschlagen = laden.art === 'fehler';
+  useEffect(() => {
+    // Der Knopf Wenden verschwindet mit dem Fehler; der Fokus bleibt im Dialog.
+    if (fehlgeschlagen) schliessen.current?.focus();
+  }, [fehlgeschlagen]);
+
+  useEffect(() => {
+    if (!bereit || !deckeAuf) return;
+    const zeitgeber = setTimeout(() => setDeckeAuf(false), AUFDECKEN_HOECHSTENS_MS);
+    return () => clearTimeout(zeitgeber);
+  }, [bereit, deckeAuf]);
+
+  function wende(): void {
+    // Wer während des Aufdeckens wendet, überspringt nur die Animation.
+    if (deckeAuf) setDeckeAuf(false);
+    else setGewendet((g) => !g);
+  }
+
+  function beimKlick(e: TargetedMouseEvent<HTMLDialogElement>): void {
+    const ziel = e.target instanceof Element ? e.target : null;
+    // Klick oder Tippen neben die Karte schließt.
+    if (ziel === null || ziel.closest('.karte, .kartenansicht-knoepfe, .karte-fehler') === null) onSchliessen();
+  }
+
+  function beimKlickAufKarte(e: TargetedMouseEvent<HTMLDivElement>): void {
+    if (e.target instanceof Element && e.target.closest('a') !== null) return;
+    // Wer Text markiert hat, will nicht wenden.
+    const auswahl = window.getSelection();
+    if (auswahl !== null && !auswahl.isCollapsed) return;
+    wende();
+  }
+
+  const titel = laden.art === 'bereit' ? laden.text.title : TEXTE.karte.laedt;
+
+  return (
+    <dialog
+      ref={dialog}
+      class="kartenansicht"
+      aria-label={titel}
+      onCancel={(e) => {
+        // Escape schließt; der Aufrufer nimmt den Dialog dann aus der Seite.
+        e.preventDefault();
+        onSchliessen();
+      }}
+      onClick={beimKlick}
+    >
+      <div class="kartenansicht-flaeche">
+        {laden.art === 'laedt' && (
+          <p class="karte-laedt" role="status">
+            {TEXTE.karte.laedt}
+          </p>
+        )}
+        {laden.art === 'fehler' && (
+          <div class="karte-fehler" role="alert">
+            <p class="karte-fehler-titel">{TEXTE.karte.nichtGeladen}</p>
+            <p>{TEXTE.karte.trotzdemGefunden}</p>
+            {laden.detail !== undefined && <p class="fehler-detail">{laden.detail}</p>}
+          </div>
+        )}
+        {laden.art === 'bereit' && (
+          <Karte
+            datei={laden.datei}
+            text={laden.text}
+            gebiet={gebiet(laden.datei.topic, themengebiete, fassung)}
+            deckeAuf={deckeAuf}
+            gewendet={gewendet}
+            onKlick={beimKlickAufKarte}
+            onAufgedeckt={() => setDeckeAuf(false)}
+          />
+        )}
+        <div class="kartenansicht-knoepfe">
+          {/* Schon während des Ladens da, damit der Dialog mit dem Fokus auf ihm öffnet. */}
+          {laden.art !== 'fehler' && (
+            <button
+              type="button"
+              class="kartenknopf"
+              aria-label={gewendet ? TEXTE.karte.vorderseiteZeigen : TEXTE.karte.rueckseiteZeigen}
+              aria-disabled={!bereit}
+              onClick={() => bereit && wende()}
+            >
+              <SymbolWenden />
+              <span aria-hidden="true">{TEXTE.karte.wenden}</span>
+            </button>
+          )}
+          <button ref={schliessen} type="button" class="kartenknopf" onClick={onSchliessen}>
+            <SymbolSchliessen />
+            <span>{TEXTE.karte.schliessen}</span>
+          </button>
+        </div>
+        {aufdecken && laden.art === 'bereit' && (
+          <p class="nur-vorlesen" role="status">
+            {`${TEXTE.karte.neuGefunden}: ${laden.text.title}`}
+          </p>
+        )}
+      </div>
+    </dialog>
+  );
+}
+
+interface Karteneigenschaften {
+  datei: Kartendatei;
+  text: Kartentext;
+  gebiet: Kartengebiet & { farbe: string };
+  deckeAuf: boolean;
+  gewendet: boolean;
+  onKlick: (e: TargetedMouseEvent<HTMLDivElement>) => void;
+  onAufgedeckt: () => void;
+}
+
+function Karte({ datei, text, gebiet, deckeAuf, gewendet, onKlick, onAufgedeckt }: Karteneigenschaften) {
+  const bild = datei.image === undefined ? undefined : kartenbildPfad(datei.image);
+  const seite = { datei, text, gebiet, ...(bild === undefined ? {} : { bild }) };
+  const klassen = ['karte', deckeAuf && 'karte-aufdecken', gewendet && 'karte-gewendet'].filter(Boolean).join(' ');
+  return (
+    <div
+      class={deckeAuf ? 'karte-halter karte-halter-aufdecken' : 'karte-halter'}
+      style={{ '--themenfarbe': gebiet.farbe } as CSSProperties}
+    >
+      <div class={klassen} onClick={onKlick} onAnimationEnd={onAufgedeckt}>
+        <section class="kartenseite kartenseite-vorne" aria-label={TEXTE.karte.vorderseite} inert={gewendet}>
+          <Vorderseite {...seite} />
+        </section>
+        <section
+          class="kartenseite kartenseite-hinten"
+          aria-label={TEXTE.karte.rueckseite}
+          inert={!gewendet || deckeAuf}
+        >
+          {/* Während des Aufdeckens liegt hier das Deckblatt; danach ist es die Rückseite der Karte. */}
+          {deckeAuf ? <Deckblatt gebiet={gebiet} /> : <Rueckseite {...seite} />}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function gebiet(id: string, themengebiete: readonly Themengebiet[], fassung: string): Kartengebiet & { farbe: string } {
+  const eintrag = themengebiete.find((t) => t.id === id);
+  if (eintrag === undefined) return { name: '', farbe: NEUTRALE_FARBE };
+  const symbol = symbolPfad(eintrag.icon);
+  return {
+    name: textAus(eintrag.title, fassung),
+    farbe: FARBE.test(eintrag.color) ? eintrag.color : NEUTRALE_FARBE,
+    ...(symbol === undefined ? {} : { symbol }),
+  };
+}
+
+function SymbolWenden() {
+  return (
+    <svg class="knopf-symbol" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4.5,10.5a7.5,7.5 0 0 1 13.4,-3.2M19.5,13.5a7.5,7.5 0 0 1 -13.4,3.2M18.5,3.5v4.3h-4.3M5.5,20.5v-4.3h4.3"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+
+function SymbolSchliessen() {
+  return (
+    <svg class="knopf-symbol" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6,6L18,18M18,6L6,18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
+    </svg>
+  );
+}

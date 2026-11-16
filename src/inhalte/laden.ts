@@ -1,12 +1,14 @@
-// Lädt Inhaltsverzeichnis und Szenen per fetch aus dem eigenen Ordner content/, immer über
+// Lädt Inhaltsverzeichnis, Szenen und Karten per fetch aus dem eigenen Ordner content/, immer über
 // relative Pfade (Q5), damit die gebaute Seite in einem Unterverzeichnis läuft. Pfade entstehen nur
-// aus IDs nach dem Muster des Schemas, damit keine ID aus dem Ordner herausführt.
+// aus IDs und Dateinamen nach dem Muster des Schemas, damit keiner aus dem Ordner herausführt.
 
 import type { Inhaltsverzeichnis, Szeneneintrag } from '../logik/inhaltsverzeichnis.ts';
+import { liesKartendatei, type Kartendatei } from '../logik/kartendatei.ts';
 import { liesSzenendatei, type Szenendatei } from '../logik/szenendatei.ts';
 
 const INHALTSORDNER = 'content/';
 const ID_MUSTER = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const SVG_DATEI = /^[a-z0-9]+(-[a-z0-9]+)*\.svg$/;
 
 /** Eine Inhaltsdatei fehlt, ist nicht erreichbar oder hat nicht die erwartete Form. */
 export class Ladefehler extends Error {
@@ -35,6 +37,31 @@ export async function ladeSzene(eintrag: Szeneneintrag): Promise<GeladeneSzene> 
   const datei = liesSzenendatei(JSON.parse(json));
   if (datei === undefined || datei.id !== eintrag.id) throw new Ladefehler(`${ordner}.json`, 'keine gültige Szenendatei');
   return { datei, svg };
+}
+
+/** Lädt die Datei einer Karte erst beim Öffnen. */
+export async function ladeKarte(id: string): Promise<Kartendatei> {
+  const pfad = `${INHALTSORDNER}cards/${pruefeId(id)}.json`;
+  const text = await ladeText(pfad, 'application/json');
+  let daten: unknown;
+  try {
+    daten = JSON.parse(text);
+  } catch {
+    throw new Ladefehler(pfad, 'kein gültiges JSON');
+  }
+  const karte = liesKartendatei(daten);
+  if (karte === undefined || karte.id !== id) throw new Ladefehler(pfad, 'keine gültige Kartendatei');
+  return karte;
+}
+
+/** Pfad des Symbols eines Themengebiets, `undefined`, wenn der Dateiname keine SVG im Ordner nennt. */
+export function symbolPfad(datei: string): string | undefined {
+  return SVG_DATEI.test(datei) ? `${INHALTSORDNER}topics/${datei}` : undefined;
+}
+
+/** Pfad eines Kartenbilds, `undefined`, wenn der Dateiname keine SVG im Ordner nennt. */
+export function kartenbildPfad(datei: string): string | undefined {
+  return SVG_DATEI.test(datei) ? `${INHALTSORDNER}cards/${datei}` : undefined;
 }
 
 async function ladeText(pfad: string, art: string): Promise<string> {

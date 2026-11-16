@@ -37,6 +37,8 @@ export interface Szene {
   zeige(darstellung: Darstellung): void;
   /** Die aktuelle Lage des Hotspots auf dem Bildschirm, etwa nach einer Größenänderung. */
   lageVon(hotspot: string): Rechteck | undefined;
+  /** Legt den Tastaturfokus auf den Hotspot, etwa wenn eine darüber geöffnete Ansicht schließt. */
+  fokussiere(hotspot: string): void;
   abbauen(): void;
 }
 
@@ -154,6 +156,9 @@ export function baueSzene(
       zeichneHaken(svg, hakenebene, darstellung.abgehakt, elemente);
     },
     lageVon,
+    fokussiere(hotspot) {
+      elemente.get(hotspot)?.focus({ preventScroll: true });
+    },
     abbauen() {
       svg.remove();
     },

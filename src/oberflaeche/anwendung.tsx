@@ -1,15 +1,18 @@
-// Die Anwendung hält den Zustand zusammen: geladene Szene, Spielstand, offener Hinweis und
-// Meldungen. Sie startet immer in der Startszene der ersten Welt (F1).
+// Die Anwendung hält den Zustand zusammen: geladene Szene, Spielstand, offener Hinweis, offene
+// Karte und Meldungen. Sie startet immer in der Startszene der ersten Welt (F1).
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { abgehakteHotspots, hinweisinhalt, karteGefunden } from '../logik/hinweis.ts';
+import { abgehakteHotspots, hinweisinhalt } from '../logik/hinweis.ts';
+import type { Themengebiet } from '../logik/inhaltsverzeichnis.ts';
+import { oeffneKarte } from '../logik/karte-oeffnen.ts';
 import type { Speicherschicht } from '../logik/speicherschicht.ts';
-import { aktiveEinstellungen, einlesen, gefundeneKarten, markiereGefunden, type Spielstand } from '../logik/spielstand.ts';
+import { aktiveEinstellungen, einlesen, gefundeneKarten, type Spielstand } from '../logik/spielstand.ts';
 import type { Hotspot } from '../logik/szenendatei.ts';
 import { STANDARDFASSUNG, text } from '../logik/textfassung.ts';
 import { ladeInhaltsverzeichnis, ladeSzene, type GeladeneSzene } from '../inhalte/laden.ts';
 import type { Rechteck, Szene, Szenenereignis } from '../szene/szene.ts';
 import { Hinweis } from './hinweis.tsx';
+import { Kartenansicht } from './kartenansicht.tsx';
 import { Szenenansicht } from './szenenansicht.tsx';
 import { TEXTE } from './texte.ts';
 
@@ -19,11 +22,20 @@ const FASSUNG = STANDARDFASSUNG;
 type Ladezustand =
   | { art: 'laedt' }
   | { art: 'fehler'; meldung: string; detail?: string }
-  | { art: 'bereit'; szene: GeladeneSzene };
+  | { art: 'bereit'; szene: GeladeneSzene; themengebiete: readonly Themengebiet[] };
 
 interface OffenerHinweis {
   hotspot: string;
   lage: Rechteck;
+}
+
+interface OffeneKarte {
+  karte: string;
+  aufdecken: boolean;
+  /** Der Hotspot, von dem aus sie geöffnet wurde; er bekommt nach dem Schließen den Fokus zurück. */
+  hotspot: string;
+  /** Zählt jedes Öffnen, damit die Kartenansicht jedes Mal neu beginnt. */
+  nummer: number;
 }
 
 export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
@@ -33,14 +45,23 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const speichernErlaubt = start.art !== 'neuere-version';
   const [speichernFehlgeschlagen, setSpeichernFehlgeschlagen] = useState(false);
   const [offen, setOffen] = useState<OffenerHinweis | undefined>(undefined);
+  const [offeneKarte, setOffeneKarte] = useState<OffeneKarte | undefined>(undefined);
+  const fokusZurueck = useRef<string | undefined>(undefined);
   const szeneRef = useRef<Szene | undefined>(undefined);
 
   useEffect(() => {
     starte().then(
-      (szene) => setLadezustand({ art: 'bereit', szene }),
+      ({ szene, themengebiete }) => setLadezustand({ art: 'bereit', szene, themengebiete }),
       (fehler: unknown) => setLadezustand(alsFehlerzustand(fehler)),
     );
   }, []);
+
+  // Erst wenn die Kartenansicht aus der Seite ist, ist die Szene wieder bedienbar und fokussierbar.
+  useEffect(() => {
+    if (offeneKarte !== undefined || fokusZurueck.current === undefined) return;
+    szeneRef.current?.fokussiere(fokusZurueck.current);
+    fokusZurueck.current = undefined;
+  }, [offeneKarte]);
 
   const gefunden = useMemo(() => gefundeneKarten(spielstand), [spielstand]);
   const szene = ladezustand.art === 'bereit' ? ladezustand.szene : undefined;
@@ -69,12 +90,20 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   }
 
   const { datei, svg } = ladezustand.szene;
+  const { themengebiete } = ladezustand;
   const finde = (id: string): Hotspot | undefined => datei.hotspots.find((h) => h.id === id);
 
   function loeseAus(hotspot: Hotspot): void {
     // `scene` zoomt erst im nächsten Schritt; `info` hat nur den Hinweis (F24).
-    if (hotspot.action !== 'card' || hotspot.target === undefined || karteGefunden(hotspot, gefunden)) return;
-    const neu = markiereGefunden(spielstand, hotspot.target, new Date().toISOString());
+    if (hotspot.action !== 'card' || hotspot.target === undefined) return;
+    const { spielstand: neu, aufdecken } = oeffneKarte(spielstand, hotspot.target, new Date().toISOString());
+    // Gespeichert wird vor dem Laden der Karte: Der Fund bleibt, auch wenn sie nicht lädt.
+    if (aufdecken) speichere(neu);
+    const karte = hotspot.target;
+    setOffeneKarte((bisher) => ({ karte, aufdecken, hotspot: hotspot.id, nummer: (bisher?.nummer ?? 0) + 1 }));
+  }
+
+  function speichere(neu: Spielstand): void {
     setSpielstand(neu);
     if (!speichernErlaubt) return;
     try {
@@ -83,6 +112,11 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     } catch {
       setSpeichernFehlgeschlagen(true);
     }
+  }
+
+  function schliesseKarte(): void {
+    fokusZurueck.current = offeneKarte?.hotspot;
+    setOffeneKarte(undefined);
   }
 
   function beimEreignis(ereignis: Szenenereignis): void {
@@ -147,7 +181,19 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           szeneRef={szeneRef}
         />
       </main>
-      {offen && offenerHotspot && <Hinweis inhalt={hinweisinhalt(offenerHotspot, gefunden, FASSUNG)} ziel={offen.lage} />}
+      {offen && offenerHotspot && !offeneKarte && (
+        <Hinweis inhalt={hinweisinhalt(offenerHotspot, gefunden, FASSUNG)} ziel={offen.lage} />
+      )}
+      {offeneKarte && (
+        <Kartenansicht
+          key={offeneKarte.nummer}
+          karte={offeneKarte.karte}
+          aufdecken={offeneKarte.aufdecken}
+          themengebiete={themengebiete}
+          fassung={FASSUNG}
+          onSchliessen={schliesseKarte}
+        />
+      )}
     </>
   );
 }
@@ -155,13 +201,13 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 class Startfehler extends Error {}
 
 /** Lädt das Inhaltsverzeichnis und die Startszene der ersten Welt. */
-async function starte(): Promise<GeladeneSzene> {
+async function starte(): Promise<{ szene: GeladeneSzene; themengebiete: readonly Themengebiet[] }> {
   const verzeichnis = await ladeInhaltsverzeichnis();
   const welt = verzeichnis.worlds[0];
   if (welt === undefined) throw new Startfehler(TEXTE.keineWelt);
   const eintrag = verzeichnis.scenes.find((s) => s.id === welt.start);
   if (eintrag === undefined) throw new Startfehler(TEXTE.startszeneFehlt);
-  return ladeSzene(eintrag);
+  return { szene: await ladeSzene(eintrag), themengebiete: verzeichnis.topics };
 }
 
 function alsFehlerzustand(fehler: unknown): Ladezustand {
