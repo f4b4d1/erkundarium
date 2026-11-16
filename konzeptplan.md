@@ -141,17 +141,17 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `f860462`)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `d323dbf`)
 
 Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
 
 ### Einstieg für die nächste Session
 
-Zoom (F3), Pfadanzeige (F4) und Auftrag 2a (F30, F31, Stand im Hinweis F11) sind fertig und reviewt, mit einer vorläufigen Szene `roboterzelle` als Zoom-Ziel (Entscheidung des Nutzers: Platzhalter zuerst, Zeichnen in Schritt 2). Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
+Schritt 1 der nächsten Schritte ist fertig und reviewt: Zoom (F3), Pfadanzeige (F4), Eintrittskarte (F30, F31), Stand im Hinweis (F11), bedienbarer Hinweis am Zeiger mit Kartenknopf (F32). `roboterzelle` ist weiterhin ein Platzhalter (Entscheidung des Nutzers: Platzhalter zuerst, Zeichnen in Schritt 2). Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
 
-Als Nächstes Auftrag 2b (siehe „Nächste Schritte in M1“, Punkt 1): Hinweis bedienbar machen, Lage am Zeiger, Kartenknopf im Hinweis (F32). Anknüpfungspunkte: `Hinweis` in `src/oberflaeche/hinweis.tsx` (heute `role="tooltip"`, lässt Klicks durch), `platziereHinweis` in `src/oberflaeche/platzierung.ts` (reine Rechnung, an der Begrenzungsbox), Ereignisse `betreten`/`verlassen` in `beimEreignis` in `src/oberflaeche/anwendung.tsx` und `src/szene/eingabe.ts` (liefern bisher keine Zeigerposition), `SymbolKarte` in `src/oberflaeche/symbole.tsx`, `zeigeKarte` mit `Fokusziel` in `anwendung.tsx`. Die Eintrittskarte der Zielszene für den Knopf liefert `hinweisinhalt` noch nicht.
+Offen beim Nutzer: Kartenknopf und Aktionssymbol (Lupe „Hineinzoomen“) stehen im Hinweis nebeneinander und sehen gleich aus; nur der Kartenknopf ist ein Knopf. Jetzt angleichen oder mit dem endgültigen Aussehen (M4)?
 
-Ablauf wie unter „Arbeitsweise“. Auftrag 2b bringt neue Abläufe, bekommt also ein Review.
+Als Nächstes entscheidet der Nutzer zwischen Schritt 2 (Zeichnen) und den anderen Punkten unter „Nächste Schritte in M1“.
 
 ### Arbeitsweise
 
@@ -187,10 +187,11 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 | 8b | Kartendesign abgeschlossen: Schild auf beiden Seiten mit Themengebiet, Titel hinten als kleine Überschrift, Schrift vorne +10 %, Quellen als bloße URL ohne Nummern, Bedienregeln in der Spec (F8a), endgültige `limits.json` (Kurztext 300 bis 400 Zeichen), alle elf Kurztexte verlängert, `design-guidelines-karte.md` mit Regeln für Kartentexte (Allgemeingültigkeit, Belege, Verständlichkeit) |
 | 9a | Zoom (F3) und Pfadanzeige (F4): vorläufige Szene `roboterzelle`, `src/logik/pfad.ts` mit Tests, Zoom per Web Animations mit `prefers-reduced-motion`, Ladefehler und nicht darstellbare Zielszene lassen die aktuelle Szene stehen, Szene als `role="group"` mit Titel benannt; reviewt, Befunde behoben (Commits `f3831ae`, `745e30c`) |
 | 9b | Auftrag 2a: Eintrittskarte deckt sich beim ersten Betreten nach dem Zoom auf (F30, auch für die Startszene; `aufzudeckendeEintrittskarte` in `src/logik/karte-oeffnen.ts`), Kartenknopf an der aktuellen Szene in der Pfadanzeige (F31), Stand im Hinweis eines Zoom-Hotspots (F11); Fokus nach dem Schließen über `Fokusziel` (Hotspot, Kartenknopf, Szene); reviewt, Befunde behoben (Commits `e893b5d`, `f860462`). Nur in Logiktests geprüft: Startszene mit Eintrittskarte |
+| 9c | Auftrag 2b: Hinweis als `role="group"`, lässt keine Klicks durch, bleibt beim Fahren in den Hinweis offen, schließt 150 ms nach Verlassen und nach dem Schließen einer Karte; Lage am Zeiger (`platziereAmAnker`, `sollNeuAnkern` in `src/oberflaeche/platzierung.ts`; 12 px Versatz, neu ankern ab 120 px), bei Tastaturfokus an der Box; Ereignis `bewegt` und `zeiger` im Szenenmodul; Kartenknopf im Hinweis eines Zoom-Hotspots (F32, `eintrittskarte` in `hinweisinhalt`); `mausNach`, `klickeBei` in `tools/browser.ts`; reviewt, Befunde behoben (Commits `43e7f1c`, `d323dbf`) |
 
 Die Schritte 5, 6 und 7 sind reviewt und die Befunde behoben. Schritt 8 und 8a sind auf beiden Achsen reviewt und die Befunde behoben (Commit `aabd984`). Ungeprüft im Browser: der Name des Dialogs im Fehlerzustand und die Ansage „Neue Karte gefunden“ im Screenreader. Offen, gleiches Muster: `.karte-laedt` ist eine bedingt gerenderte `role="status"`-Region.
 
-Umgesetzte Anforderungen der Spec: F1 bis F5, F7 bis F10, F17, F18, F21, F22, F24, F25, F30, F31, F33 bis F36. Teilweise: F6 (der Zähler fehlt), F11 (Haken und Stand im Hinweis ja; Schalter fehlt), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe unten), F23 (Kartenknopf im Hinweis fehlt), F32 (fehlt, Auftrag 2b), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
+Umgesetzte Anforderungen der Spec: F1 bis F5, F7 bis F10, F17, F18, F21, F22, F24, F25, F23, F30, F33 bis F36. Teilweise: F6 (der Zähler fehlt), F11 (Haken und Stand im Hinweis ja; Schalter fehlt), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe unten), F31 und F32 (Kartenknopf im Hinweis nicht per Tastatur erreichbar, Punkt 1a), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
 
 ### Offene Entscheidungen des Nutzers
 
@@ -201,7 +202,7 @@ Umgesetzte Anforderungen der Spec: F1 bis F5, F7 bis F10, F17, F18, F21, F22, F2
 
 Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 
-1. Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11). Auftrag 2 ist geteilt (Entscheidung des Nutzers vom 2026-11-16):
+1. Erledigt (9a bis 9c). Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11). Auftrag 2 war geteilt (Entscheidung des Nutzers vom 2026-11-16):
    - 2a: F30, F31, Stand im Hinweis (F11).
    - 2b: Hinweis bedienbar: lässt keine Klicks mehr durch, bleibt offen, solange der Zeiger darin ist, trägt den Kartenknopf (F32); schließt nach dem Schließen einer Karte. Dazu sitzt der Hinweis am Zeiger statt an der Begrenzungsbox: Anker ist der Eintrittspunkt der Maus (bei Touch der Tippunkt), etwa 12 px versetzt, im Fenster gehalten, darf den Hotspot verdecken; er läuft nicht mit, setzt sich aber neu an den Zeiger, wenn dieser sich im Hotspot mehr als etwa 120 px vom Anker entfernt. Bei Tastaturfokus bleibt die Lage an der Begrenzungsbox.
 1a. Tastaturbedienung des Hinweises: den Kartenknopf im Hinweis (F32) ohne Maus erreichen. Vom Nutzer zurückgestellt (2026-11-16), bleibt aber Teil der M1-Abnahme „Alles ist ohne Maus bedienbar“ und muss vor Schritt 7 erledigt sein. Vorschlag: Der Hinweis hängt im DOM direkt hinter dem fokussierten Hotspot, der Knopf ist per Tab erreichbar.
@@ -219,7 +220,7 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt.
 - `pruefeSvg` in `src/szene/szene.ts` ist ohne Test, weil es keine DOM-Testumgebung gibt; nur im Browser geprüft. Eine SVG mit verbotenen Elementen wird bereinigt statt abgelehnt und lädt dann gegebenenfalls ohne Hotspots.
 - `npm test` scheitert, wenn das Terminal im Pfad ein kleines `c:` zeigt (`Cannot read properties of undefined (reading 'config')`). Abhilfe: mit großem `C:\` ins Verzeichnis wechseln. Die Ursache ist nicht geklärt.
 - Manche Haken sitzen neben der Form, weil sie an der Ecke der Begrenzungsbox hängen (Hallenleuchten, Roboter, Schaltschrank).
-- Der Hinweis lässt Klicks durch. Nach dem Schließen einer Karte mit der Maus bleibt er offen, bis die Maus sich bewegt.
+- Hinweis: Der Kartenknopf hat `tabindex=-1` (Punkt 1a). Ändern sich Größe oder Lage der Szene, schließt ein Hinweis am Zeiger und kommt bei der nächsten Mausbewegung im Hotspot wieder. Nach dem Schließen einer Karte kommt er ebenfalls erst bei der nächsten Bewegung. Touch nur per Emulation geprüft.
 - Auf schmalen Bildschirmen ist die Kartenschrift klein (bei 360 px Breite etwa 13 px vorne, 11 px hinten, Quellen etwa 8 px). Laut Messung läuft derzeit keine Karte über.
 - Schema-Fehler erscheinen teils englisch. Das Prüfskript sieht nur `.json` und `.svg`.
 - Die Migration zwischen Spielstand-Versionen ist ungetestet, weil es nur Version 1 gibt.
