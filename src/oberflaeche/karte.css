@@ -12,6 +12,15 @@
   --karte-papier-rueckseite: #f4f1ea;
   --karte-funfact: #f6c945;
   --karte-text-leise: rgb(38 38 46 / 0.72);
+  /* feine Linien in der Kontur-Farbe: Merkpunkte, Tabellenzellen, Fuß der Rückseite */
+  --karte-linie-fakten: rgb(38 38 46 / 0.45);
+  --karte-linie-tabelle: rgb(38 38 46 / 0.3);
+  --karte-linie-fuss: rgb(38 38 46 / 0.35);
+  /* Sockel der Glühbirne bei "Schon gewusst?" */
+  --karte-gluehbirne-sockel: #a7b1bc;
+  /* Vorgabe, falls die Anwendung keine Farbe des Wissensgebiets setzt: farblos, aber lesbar.
+     Der Wert der Anwendung am Kartenhalter überschreibt sie. */
+  --gebietsfarbe: var(--karte-papier);
   --karte-abdunklung: rgb(24 24 32 / 0.66);
   --karte-schatten: rgb(0 0 0 / 0.38);
   /* Anteil der Gebietsfarbe in hellen Flächen (Bildfeld, Kopfzeile der Tabelle, Merkpunkte) */
@@ -559,7 +568,7 @@
 }
 
 .baustein-fakten li + li {
-  border-top: 0.08em dashed rgb(38 38 46 / 0.45);
+  border-top: 0.08em dashed var(--karte-linie-fakten);
 }
 
 .baustein-fakten li::before {
@@ -608,12 +617,12 @@
 }
 
 .baustein-tabelle tbody tr + tr td {
-  border-top: 0.08em solid rgb(38 38 46 / 0.3);
+  border-top: 0.08em solid var(--karte-linie-tabelle);
 }
 
 .baustein-tabelle th + th,
 .baustein-tabelle td + td {
-  border-left: 0.08em solid rgb(38 38 46 / 0.3);
+  border-left: 0.08em solid var(--karte-linie-tabelle);
 }
 
 .baustein-tabelle td:first-child {
@@ -648,6 +657,15 @@
   width: 1.35em;
   height: 1.35em;
   flex: none;
+  stroke: var(--karte-kontur);
+}
+
+.gluehbirne-glas {
+  fill: var(--karte-papier);
+}
+
+.gluehbirne-sockel {
+  fill: var(--karte-gluehbirne-sockel);
 }
 
 .funfact-text {
@@ -659,7 +677,7 @@
   flex: none;
   margin-top: auto;
   padding-top: 0.5em;
-  border-top: 0.1em solid rgb(38 38 46 / 0.35);
+  border-top: 0.1em solid var(--karte-linie-fuss);
   font-size: 0.68em;
   line-height: 1.3;
   color: var(--karte-text-leise);

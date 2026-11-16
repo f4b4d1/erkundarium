@@ -21,8 +21,9 @@ export const TEXTE = {
     laedt: 'Karte wird geladen …',
     neuGefunden: 'Neue Karte gefunden',
     wenden: 'Wenden',
-    rueckseiteZeigen: 'Rückseite zeigen',
-    vorderseiteZeigen: 'Vorderseite zeigen',
+    /** Zugängliche Namen des Knopfs Wenden: beginnen mit seinem sichtbaren Text (WCAG 2.5.3). */
+    wendenZurRueckseite: 'Wenden, Rückseite zeigen',
+    wendenZurVorderseite: 'Wenden, Vorderseite zeigen',
     schliessen: 'Schließen',
     vorderseite: 'Vorderseite',
     rueckseite: 'Rückseite',

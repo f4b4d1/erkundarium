@@ -3,12 +3,11 @@
 // aus IDs und Dateinamen nach dem Muster des Schemas, damit keiner aus dem Ordner herausführt.
 
 import type { Inhaltsverzeichnis, Szeneneintrag } from '../logik/inhaltsverzeichnis.ts';
-import { liesKartendatei, type Kartendatei } from '../logik/kartendatei.ts';
+import { liesKartendatei, SVG_DATEI, type Kartendatei } from '../logik/kartendatei.ts';
 import { liesSzenendatei, type Szenendatei } from '../logik/szenendatei.ts';
 
 const INHALTSORDNER = 'content/';
 const ID_MUSTER = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const SVG_DATEI = /^[a-z0-9]+(-[a-z0-9]+)*\.svg$/;
 
 /** Eine Inhaltsdatei fehlt, ist nicht erreichbar oder hat nicht die erwartete Form. */
 export class Ladefehler extends Error {

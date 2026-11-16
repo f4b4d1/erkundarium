@@ -4,7 +4,7 @@
 
 import { useId, useState } from 'preact/hooks';
 import type { Baustein, Kartendatei, Kartentext } from '../logik/kartendatei.ts';
-import { KONTUR, WEISS } from '../szene/haken.ts';
+import { teileTabelle } from '../logik/tabelle.ts';
 import { TEXTE } from './texte.ts';
 
 /** Was die Karte vom Themengebiet zeigt. Die Farbe des Wissensgebiets setzt die Kartenansicht als CSS-Variable. */
@@ -185,16 +185,13 @@ function BausteinAnzeige({ baustein }: { baustein: Baustein }) {
   }
 }
 
-/** Die erste Zeile ist die Kopfzeile. Kürzere Zeilen werden mit leeren Zellen aufgefüllt. */
 function Tabelle({ zeilen }: { zeilen: readonly (readonly string[])[] }) {
-  const [kopf = [], ...rumpf] = zeilen;
-  const spalten = Math.max(...zeilen.map((z) => z.length));
-  const aufgefuellt = (zeile: readonly string[]) => Array.from({ length: spalten }, (_, i) => zeile[i] ?? '');
+  const { kopf, rumpf } = teileTabelle(zeilen);
   return (
     <table class="baustein-tabelle">
       <thead>
         <tr>
-          {aufgefuellt(kopf).map((zelle, i) => (
+          {kopf.map((zelle, i) => (
             <th key={i} scope="col">
               {zelle}
             </th>
@@ -205,7 +202,7 @@ function Tabelle({ zeilen }: { zeilen: readonly (readonly string[])[] }) {
         <tbody>
           {rumpf.map((zeile, z) => (
             <tr key={z}>
-              {aufgefuellt(zeile).map((zelle, i) => (
+              {zeile.map((zelle, i) => (
                 <td key={i}>{zelle}</td>
               ))}
             </tr>
@@ -216,17 +213,17 @@ function Tabelle({ zeilen }: { zeilen: readonly (readonly string[])[] }) {
   );
 }
 
+/** Die Farben setzt das CSS. */
 function SymbolGluehbirne() {
   return (
     <svg class="funfact-symbol" viewBox="0 0 24 24" aria-hidden="true">
       <path
+        class="gluehbirne-glas"
         d="M12,3a6.5,6.5 0 0 0 -3.6,11.9V17h7.2v-2.1A6.5,6.5 0 0 0 12,3z"
-        fill={WEISS}
-        stroke={KONTUR}
         stroke-width="2"
         stroke-linejoin="round"
       />
-      <rect x="8.9" y="17" width="6.2" height="3.6" rx="1" fill="#A7B1BC" stroke={KONTUR} stroke-width="2" />
+      <rect class="gluehbirne-sockel" x="8.9" y="17" width="6.2" height="3.6" rx="1" stroke-width="2" />
     </svg>
   );
 }

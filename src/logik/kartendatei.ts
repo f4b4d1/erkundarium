@@ -32,7 +32,8 @@ export interface Kartendatei {
 }
 
 const LINK = /^https?:\/\/\S+$/;
-const SVG_DATEI = /^[a-z0-9]+(-[a-z0-9]+)*\.svg$/;
+/** Dateiname einer SVG ohne Pfad, nach dem Muster des Schemas. */
+export const SVG_DATEI = /^[a-z0-9]+(-[a-z0-9]+)*\.svg$/;
 
 /**
  * Liest geparstes JSON als Kartendatei, `undefined`, wenn `id`, `topic` oder jede lesbare

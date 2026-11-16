@@ -3,7 +3,7 @@
 // Solange sie offen ist, ist die Szene dahinter gesperrt; den Fokus zurück zum Hotspot legt der
 // Aufrufer nach dem Schließen.
 
-import type { CSSProperties, TargetedMouseEvent } from 'preact';
+import type { CSSProperties, TargetedMouseEvent, TargetedPointerEvent } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { gebietsfarbe } from '../logik/gebietsfarbe.ts';
 import type { Themengebiet, Wissensgebiet } from '../logik/inhaltsverzeichnis.ts';
@@ -37,6 +37,7 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
   const [laden, setLaden] = useState<Ladezustand>({ art: 'laedt' });
   const [deckeAuf, setDeckeAuf] = useState(aufdecken);
   const [gewendet, setGewendet] = useState(false);
+  const druckNebenKarte = useRef(false);
 
   useLayoutEffect(() => {
     const element = dialog.current;
@@ -81,10 +82,14 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
     else setGewendet((g) => !g);
   }
 
+  function beimDruecken(e: TargetedPointerEvent<HTMLDialogElement>): void {
+    druckNebenKarte.current = nebenKarte(e.target);
+  }
+
   function beimKlick(e: TargetedMouseEvent<HTMLDialogElement>): void {
-    const ziel = e.target instanceof Element ? e.target : null;
-    // Klick oder Tippen neben die Karte schließt.
-    if (ziel === null || ziel.closest('.karte, .kartenansicht-knoepfe, .karte-fehler') === null) onSchliessen();
+    // Klick oder Tippen neben die Karte schließt. Wer auf der Karte Text markiert und neben ihr
+    // loslässt, löst einen Klick auf einem gemeinsamen Vorfahren aus; der schließt nicht.
+    if (druckNebenKarte.current && nebenKarte(e.target)) onSchliessen();
   }
 
   function beimKlickAufKarte(e: TargetedMouseEvent<HTMLDivElement>): void {
@@ -95,7 +100,8 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
     wende();
   }
 
-  const titel = laden.art === 'bereit' ? laden.text.title : TEXTE.karte.laedt;
+  const titel =
+    laden.art === 'bereit' ? laden.text.title : laden.art === 'fehler' ? TEXTE.karte.nichtGeladen : TEXTE.karte.laedt;
 
   return (
     <dialog
@@ -107,6 +113,7 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
         e.preventDefault();
         onSchliessen();
       }}
+      onPointerDown={beimDruecken}
       onClick={beimKlick}
     >
       <div class="kartenansicht-flaeche">
@@ -140,7 +147,7 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
             <button
               type="button"
               class="kartenknopf"
-              aria-label={gewendet ? TEXTE.karte.vorderseiteZeigen : TEXTE.karte.rueckseiteZeigen}
+              aria-label={gewendet ? TEXTE.karte.wendenZurVorderseite : TEXTE.karte.wendenZurRueckseite}
               aria-disabled={!bereit}
               onClick={() => bereit && wende()}
             >
@@ -153,11 +160,10 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
             <span>{TEXTE.karte.schliessen}</span>
           </button>
         </div>
-        {aufdecken && laden.art === 'bereit' && (
-          <p class="nur-vorlesen" role="status">
-            {`${TEXTE.karte.neuGefunden}: ${laden.text.title}`}
-          </p>
-        )}
+        {/* Die Region steht von Anfang an da; nur ein später gesetzter Text wird vorgelesen. */}
+        <p class="nur-vorlesen" role="status">
+          {aufdecken && laden.art === 'bereit' ? `${TEXTE.karte.neuGefunden}: ${laden.text.title}` : ''}
+        </p>
       </div>
     </dialog>
   );
@@ -167,7 +173,7 @@ interface Karteneigenschaften {
   datei: Kartendatei;
   text: Kartentext;
   gebiet: Kartengebiet;
-  /** Farbe des Wissensgebiets; fehlt sie, setzt die Karte keine Farbe. */
+  /** Farbe des Wissensgebiets; fehlt sie, gilt der Vorgabewert aus karte.css und die Karte bleibt farblos. */
   farbe: string | undefined;
   deckeAuf: boolean;
   gewendet: boolean;
@@ -199,6 +205,11 @@ function Karte({ datei, text, gebiet, farbe, deckeAuf, gewendet, onKlick, onAufg
       </div>
     </div>
   );
+}
+
+/** Liegt das Ziel eines Zeigerereignisses neben Karte, Knöpfen und Fehlermeldung? */
+function nebenKarte(ziel: EventTarget | null): boolean {
+  return !(ziel instanceof Element) || ziel.closest('.karte, .kartenansicht-knoepfe, .karte-fehler') === null;
 }
 
 function gebiet(id: string, themengebiete: readonly Themengebiet[], fassung: string): Kartengebiet {
