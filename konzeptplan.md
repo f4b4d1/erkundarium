@@ -141,13 +141,15 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `f7e6093`)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-16, Stand Commit `8f6e56d`)
 
 Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
 
 ### Einstieg für die nächste Session
 
 Die Zoomszene `roboterzelle` ist gezeichnet und vom Nutzer abgenommen (Commit `f7e6093`, Schritt 10b). **Nächste Aufgabe (Wunsch des Nutzers vom 2026-11-16): das Herauszoomen aus einer Szene in die Szene davor implementieren**, siehe „Auftrag Herauszoomen“ unten. Erst mit dem Nutzer klären, dann umsetzen. Danach `robotergelenk` zeichnen (Vorgehen unter „Zoom-Ansicht erstellen“).
+
+Seit `8f6e56d` erzeugt `npm run zoomansicht` das Grundgerüst einer Zoom-Ansicht (Wunsch des Nutzers: wiederverwendbar im Projekt statt im Scratchpad). Das Werkzeug hat Tests, aber kein Review (vom Nutzer nicht verlangt).
 
 Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
 
@@ -165,7 +167,7 @@ Neue Logik, also nach der Arbeitsweise mit Tests an der Nahtstelle und Review du
 
 ### Zoom-Ansicht erstellen (Vorgehen aus `roboterzelle`, gilt für `robotergelenk`)
 
-- Eine Zoom-Ansicht (Guidelines Abschnitt 5) zeigt genau den Endausschnitt des Zooms in der Elternszene; Lage, Form und Farbe bleiben gleich, dazu kommen Details. Ausschnitt aus der Begrenzungsbox des Zoom-Hotspots (Seitenverhältnis 16 : 9, `starteZoom`). Für `roboterzelle`: Box von `#roboter` x 720, y 332,6, 310 × 307,4, Faktor f = 2,342, Ausschnitt x 533,4–1216,6, y 294,2–678,5, Maßstab ≈ 300 Einheiten/m. Für `robotergelenk` gilt dasselbe mit der Box des Achse-3-Hotspots in `roboterzelle.svg`.
+- Eine Zoom-Ansicht (Guidelines Abschnitt 5) zeigt genau den Endausschnitt des Zooms in der Elternszene; Lage, Form und Farbe bleiben gleich, dazu kommen Details. Ausschnitt aus der Begrenzungsbox des Zoom-Hotspots (per `getBBox` in der Elternszene, also ohne Strichbreiten), wie `starteZoom` ihn rechnet: gleiche Mitte wie die Box, Breite = max(Boxbreite, Boxhöhe · 16/9) / 0,8 (`ZOOM_FUELLUNG`), Höhe = Breite · 9/16, f = 1600 / Breite. Für `roboterzelle`: Box von `#roboter` x 720, y 332,6, 310 × 307,4, Faktor f = 2,342, Ausschnitt x 533,4–1216,6, y 294,2–678,5, Maßstab ≈ 300 Einheiten/m. Für `robotergelenk` gilt dasselbe mit der Box des Achse-3-Hotspots in `roboterzelle.svg`.
 - Das Grundgerüst erzeugt `npm run zoomansicht -- <quelle.svg> <ziel.svg> <x> <y> <breite> [koerperAb]` (`tools/zoom-ansicht.ts`, Logik mit Tests in `tools/zoom-ausschnitt.ts`). Es übernimmt die Elemente im Ausschnitt und rechnet sie um: Konturen, Binnenlinien und Leitungen behalten ihre Breite; Körpermaße (Radien, `rx`, Striche ab `koerperAb`, Standard 19, etwa Robotergliedbreiten) werden mit f skaliert, die Unterlage eines Körperstrichs bleibt Kern + 6. Kein `transform="scale(…)"`; Gruppentransforms werden eingerechnet, Gruppen mit einem Clip außerhalb des Bildes fallen weg. Dünnere Körperstriche (Katzenschwanz) von Hand nachziehen. Für `roboterzelle`: `npm run zoomansicht -- content/worlds/fabrik/scenes/fabrikhalle.svg <ziel> 533.4 294.2 683.2`.
 - Dann zeichnet ein Sonnet-Agent die vom Nutzer freigegebenen Details, schreibt SVG und JSON, prüft (`npm run pruefen`, Browser, Guidelines Abschnitt 8). Die Hauptsession prüft per PNG neben dem Elternausschnitt und Bildschirmfoto kurz vor und nach dem Tausch.
 - Der Konturensprung beim Tausch wird hingenommen; eine Überblendung käme in M4.
