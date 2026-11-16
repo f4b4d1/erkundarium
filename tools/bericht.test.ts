@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { formatiereBericht } from './bericht.ts';
 import type { Pruefbericht } from './pruefung.ts';
 
-const leer: Pruefbericht['verzeichnis'] = { worlds: [], scenes: [], cards: [], topics: [], relations: [] };
+const leer: Pruefbericht['verzeichnis'] = { worlds: [], scenes: [], cards: [], topics: [], domains: [], relations: [] };
 
 describe('formatiereBericht', () => {
   it('gibt je Meldung eine Zeile mit Datei, Regel und Text aus, Fehler zuerst, am Ende die Zusammenfassung', () => {

@@ -74,8 +74,10 @@ const beziehungstypen: Daten[] = [
 ];
 
 const themengebiete: Daten[] = [
-  { id: 'antriebstechnik', title: { de: 'Antriebstechnik' }, color: '#FF7A1A', icon: 'antriebstechnik.svg' },
+  { id: 'antriebstechnik', title: { de: 'Antriebstechnik' }, domain: 'technik', icon: 'antriebstechnik.svg' },
 ];
+
+const wissensgebiete: Daten[] = [{ id: 'technik', title: { de: 'Technik' }, color: '#6B7785' }];
 
 const vorgaben: Daten = {
   maxTitleLength: 40,
@@ -354,23 +356,53 @@ describe('relations.json', () => {
 describe('topics.json', () => {
   it('akzeptiert das Beispiel aus der Spec', () => erwarteGueltig('topics', themengebiete));
 
-  it.each(['id', 'title', 'color', 'icon'])('verlangt %s', (feld) => {
+  it.each(['id', 'title', 'domain', 'icon'])('verlangt %s', (feld) => {
     const t = kopie(themengebiete);
     delete t[0][feld];
     erwarteUngueltig('topics', t);
   });
 
-  it.each(['FF7A1A', '#FF7A1', 'orange', '#GG7A1A'])('lehnt die Farbe %j ab', (color) => {
-    erwarteUngueltig('topics', [{ ...themengebiete[0], color }]);
+  it('verlangt eine ID als domain', () => {
+    erwarteUngueltig('topics', [{ ...themengebiete[0], domain: 'Technik' }]);
   });
 
   it('verlangt eine SVG-Datei als icon', () => {
     erwarteUngueltig('topics', [{ ...themengebiete[0], icon: 'antrieb.png' }]);
   });
 
-  it('verbietet unbekannte Felder', () => {
+  it('verbietet unbekannte Felder, auch die frühere Farbe', () => {
     erwarteUngueltig('topics', [{ ...themengebiete[0], colour: '#FF7A1A' }]);
+    erwarteUngueltig('topics', [{ ...themengebiete[0], color: '#FF7A1A' }]);
   });
+});
+
+describe('domains.json', () => {
+  it('akzeptiert das Beispiel aus der Spec', () => erwarteGueltig('domains', wissensgebiete));
+
+  it('akzeptiert die Datei content/domains.json', () => {
+    const datei = JSON.parse(readFileSync(join(INHALTSORDNER, 'domains.json'), 'utf8'));
+    erwarteGueltig('domains', datei);
+  });
+
+  it.each(['id', 'title', 'color'])('verlangt %s', (feld) => {
+    const w = kopie(wissensgebiete);
+    delete w[0][feld];
+    erwarteUngueltig('domains', w);
+  });
+
+  it('verlangt eine ID als id', () => {
+    erwarteUngueltig('domains', [{ ...wissensgebiete[0], id: 'Technik' }]);
+  });
+
+  it.each(['6B7785', '#6B778', 'grau', '#GG7785'])('lehnt die Farbe %j ab', (color) => {
+    erwarteUngueltig('domains', [{ ...wissensgebiete[0], color }]);
+  });
+
+  it('verbietet unbekannte Felder', () => {
+    erwarteUngueltig('domains', [{ ...wissensgebiete[0], icon: 'technik.svg' }]);
+  });
+
+  it('verlangt eine Liste', () => erwarteUngueltig('domains', wissensgebiete[0]));
 });
 
 describe('limits.json', () => {

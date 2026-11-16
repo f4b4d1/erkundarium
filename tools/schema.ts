@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 
-export type SchemaName = 'world' | 'scene' | 'card' | 'topics' | 'relations' | 'limits';
+export type SchemaName = 'world' | 'scene' | 'card' | 'domains' | 'topics' | 'relations' | 'limits';
 
 export interface Pruefergebnis {
   gueltig: boolean;

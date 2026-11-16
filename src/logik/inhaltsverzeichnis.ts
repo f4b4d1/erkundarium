@@ -12,6 +12,7 @@ export interface Inhaltsverzeichnis {
   scenes: Szeneneintrag[];
   cards: Karteneintrag[];
   topics: Themengebiet[];
+  domains: Wissensgebiet[];
   relations: Beziehungstyp[];
 }
 
@@ -56,8 +57,16 @@ export interface Beziehung {
 export interface Themengebiet {
   id: string;
   title: Texte;
-  color: string;
+  /** ID des Wissensgebiets; es bestimmt die Farbe der Karte (ADR 0005). */
+  domain: string;
   icon: string;
+}
+
+export interface Wissensgebiet {
+  id: string;
+  title: Texte;
+  /** Farbe der Karten als `#RRGGBB`. */
+  color: string;
 }
 
 export interface Beziehungstyp {

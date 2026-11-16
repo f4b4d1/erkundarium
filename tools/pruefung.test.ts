@@ -12,8 +12,9 @@ type Daten = Record<string, any>;
 // Strings bleiben, wie sie sind (SVG), alles andere wird zu JSON.
 function grundinhalt(): Record<string, Daten | string> {
   return {
+    'domains.json': [{ id: 'wissen-a', title: { de: 'Wissen A' }, color: '#112233' }],
     'topics.json': [
-      { id: 'gebiet-a', title: { de: 'Gebiet A' }, color: '#112233', icon: 'gebiet-a.svg' },
+      { id: 'gebiet-a', title: { de: 'Gebiet A' }, domain: 'wissen-a', icon: 'gebiet-a.svg' },
     ],
     'relations.json': [
       { id: 'typ-a', forward: { de: 'vor' }, backward: { de: 'zurück' } },
@@ -93,12 +94,13 @@ describe('Schema', () => {
 
   it('prüft jede Art von Inhaltsdatei gegen ihr Schema', () => {
     const inhalt = grundinhalt();
-    for (const pfad of ['topics.json', 'relations.json', 'limits.json', 'worlds/welt-a/world.json']) {
+    for (const pfad of ['domains.json', 'topics.json', 'relations.json', 'limits.json', 'worlds/welt-a/world.json']) {
       inhalt[pfad] = { falsch: true };
     }
     (inhalt['worlds/welt-a/scenes/szene-b.json'] as Daten).type = 'unbekannt';
     expect(fehler(inhalt)).toEqual(
       expect.arrayContaining([
+        'domains.json schema',
         'topics.json schema',
         'relations.json schema',
         'limits.json schema',
@@ -116,12 +118,14 @@ describe('Schema', () => {
 
   it('meldet fehlende Pflichtdateien', () => {
     const inhalt = grundinhalt();
+    delete inhalt['domains.json'];
     delete inhalt['topics.json'];
     delete inhalt['relations.json'];
     delete inhalt['limits.json'];
     delete inhalt['worlds/welt-a/world.json'];
     expect(fehler(inhalt)).toEqual(
       expect.arrayContaining([
+        'domains.json datei-fehlt',
         'topics.json datei-fehlt',
         'relations.json datei-fehlt',
         'limits.json datei-fehlt',
@@ -200,11 +204,12 @@ describe('IDs', () => {
     expect(fehler(inhalt)).toEqual(['worlds/welt-b/scenes/szene-b.json doppelte-id']);
   });
 
-  it('meldet doppelte IDs unter den Themengebieten und den Beziehungstypen', () => {
+  it('meldet doppelte IDs unter den Wissensgebieten, den Themengebieten und den Beziehungstypen', () => {
     const inhalt = grundinhalt();
+    (inhalt['domains.json'] as Daten[]).push((inhalt['domains.json'] as Daten[])[0]);
     (inhalt['topics.json'] as Daten[]).push((inhalt['topics.json'] as Daten[])[0]);
     (inhalt['relations.json'] as Daten[]).push((inhalt['relations.json'] as Daten[])[0]);
-    expect(fehler(inhalt)).toEqual(['relations.json doppelte-id', 'topics.json doppelte-id']);
+    expect(fehler(inhalt)).toEqual(['domains.json doppelte-id', 'relations.json doppelte-id', 'topics.json doppelte-id']);
   });
 
   it('erlaubt dieselbe ID für eine Karte und eine Szene', () => {
@@ -283,6 +288,24 @@ describe('Verweise', () => {
     const inhalt = grundinhalt();
     (inhalt['cards/karte-a.json'] as Daten).topic = 'gebiet-x';
     expect(fehler(inhalt)).toEqual(['cards/karte-a.json themengebiet']);
+  });
+
+  it('meldet ein Themengebiet, dessen Wissensgebiet es nicht gibt', () => {
+    const inhalt = grundinhalt();
+    (inhalt['topics.json'] as Daten[]).push({ id: 'gebiet-b', title: { de: 'Gebiet B' }, domain: 'wissen-x', icon: 'gebiet-b.svg' });
+    expect(pruefe(inhalt).fehler).toEqual([
+      {
+        datei: 'topics.json',
+        regel: 'wissensgebiet',
+        text: 'Das Themengebiet „gebiet-b“ nennt das Wissensgebiet „wissen-x“, das es nicht gibt.',
+      },
+    ]);
+  });
+
+  it('meldet kein unbekanntes Wissensgebiet, wenn domains.json nur am Schema scheitert', () => {
+    const inhalt = grundinhalt();
+    (inhalt['domains.json'] as Daten[])[0].color = 'grau';
+    expect(fehler(inhalt)).toEqual(['domains.json schema']);
   });
 
   it('meldet eine Beziehung mit unbekanntem Typ', () => {
@@ -525,11 +548,12 @@ describe('Inhaltsverzeichnis (F35)', () => {
     expect(pruefe(inhalt).verzeichnis.cards[0]!.title).toEqual({ de: 'Titel karte-a', en: 'Title karte-a' });
   });
 
-  it('enthält Themengebiete und Beziehungstypen mit ausgeschriebenem symmetric, aber ohne acyclic', () => {
+  it('enthält Wissensgebiete, Themengebiete und Beziehungstypen mit ausgeschriebenem symmetric, aber ohne acyclic', () => {
     const inhalt = grundinhalt();
     (inhalt['relations.json'] as Daten[])[0].acyclic = true;
-    const { topics, relations } = pruefe(inhalt).verzeichnis;
-    expect(topics).toEqual([{ id: 'gebiet-a', title: { de: 'Gebiet A' }, color: '#112233', icon: 'gebiet-a.svg' }]);
+    const { domains, topics, relations } = pruefe(inhalt).verzeichnis;
+    expect(domains).toEqual([{ id: 'wissen-a', title: { de: 'Wissen A' }, color: '#112233' }]);
+    expect(topics).toEqual([{ id: 'gebiet-a', title: { de: 'Gebiet A' }, domain: 'wissen-a', icon: 'gebiet-a.svg' }]);
     expect(relations).toEqual([
       { id: 'typ-a', symmetric: false, forward: { de: 'vor' }, backward: { de: 'zurück' } },
       { id: 'typ-b', symmetric: true, forward: { de: 'neben' } },

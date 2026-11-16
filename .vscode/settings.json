@@ -3,6 +3,7 @@
     { "fileMatch": ["**/content/worlds/*/world.json"], "url": "./content/schema/world.schema.json" },
     { "fileMatch": ["**/content/worlds/*/scenes/*.json"], "url": "./content/schema/scene.schema.json" },
     { "fileMatch": ["**/content/cards/*.json"], "url": "./content/schema/card.schema.json" },
+    { "fileMatch": ["**/content/domains.json"], "url": "./content/schema/domains.schema.json" },
     { "fileMatch": ["**/content/topics.json"], "url": "./content/schema/topics.schema.json" },
     { "fileMatch": ["**/content/relations.json"], "url": "./content/schema/relations.schema.json" },
     { "fileMatch": ["**/content/limits.json"], "url": "./content/schema/limits.schema.json" }

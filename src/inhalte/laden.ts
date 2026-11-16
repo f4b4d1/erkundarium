@@ -83,5 +83,5 @@ function pruefeId(id: string): string {
 function istVerzeichnis(daten: unknown): daten is Inhaltsverzeichnis {
   if (typeof daten !== 'object' || daten === null) return false;
   const v = daten as Record<string, unknown>;
-  return ['worlds', 'scenes', 'cards', 'topics', 'relations'].every((feld) => Array.isArray(v[feld]));
+  return ['worlds', 'scenes', 'cards', 'topics', 'domains', 'relations'].every((feld) => Array.isArray(v[feld]));
 }

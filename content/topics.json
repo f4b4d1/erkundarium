@@ -2,25 +2,25 @@
   {
     "id": "elektroinstallation",
     "title": { "de": "Elektroinstallation" },
-    "color": "#1F78C1",
+    "domain": "technik",
     "icon": "elektroinstallation.svg"
   },
   {
     "id": "robotik",
     "title": { "de": "Robotik" },
-    "color": "#6A4C93",
+    "domain": "technik",
     "icon": "robotik.svg"
   },
   {
     "id": "antriebstechnik",
     "title": { "de": "Antriebstechnik" },
-    "color": "#FF7A1A",
+    "domain": "technik",
     "icon": "antriebstechnik.svg"
   },
   {
     "id": "maschinensicherheit",
     "title": { "de": "Maschinensicherheit" },
-    "color": "#E4572E",
+    "domain": "technik",
     "icon": "maschinensicherheit.svg"
   }
 ]

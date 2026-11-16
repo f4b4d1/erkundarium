@@ -5,7 +5,8 @@
 
 import type { CSSProperties, TargetedMouseEvent } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import type { Themengebiet } from '../logik/inhaltsverzeichnis.ts';
+import { gebietsfarbe } from '../logik/gebietsfarbe.ts';
+import type { Themengebiet, Wissensgebiet } from '../logik/inhaltsverzeichnis.ts';
 import type { Kartendatei, Kartentext } from '../logik/kartendatei.ts';
 import { text as textAus, waehleFassung } from '../logik/textfassung.ts';
 import { kartenbildPfad, ladeKarte, symbolPfad } from '../inhalte/laden.ts';
@@ -17,6 +18,7 @@ interface Eigenschaften {
   /** Erster Fund: Die verdeckte Karte dreht sich zur Vorderseite. */
   aufdecken: boolean;
   themengebiete: readonly Themengebiet[];
+  wissensgebiete: readonly Wissensgebiet[];
   fassung: string;
   onSchliessen: () => void;
 }
@@ -26,13 +28,10 @@ type Ladezustand =
   | { art: 'fehler'; detail?: string }
   | { art: 'bereit'; datei: Kartendatei; text: Kartentext };
 
-/** Farbe, wenn das Themengebiet fehlt oder keine gültige Farbe hat: Metall mittel. */
-const NEUTRALE_FARBE = '#6B7785';
-const FARBE = /^#[0-9a-fA-F]{6}$/;
 /** Endet die Aufdeck-Animation nicht von selbst, etwa weil Animationen abgeschaltet sind. */
 const AUFDECKEN_HOECHSTENS_MS = 2500;
 
-export function Kartenansicht({ karte, aufdecken, themengebiete, fassung, onSchliessen }: Eigenschaften) {
+export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete, fassung, onSchliessen }: Eigenschaften) {
   const dialog = useRef<HTMLDialogElement>(null);
   const schliessen = useRef<HTMLButtonElement>(null);
   const [laden, setLaden] = useState<Ladezustand>({ art: 'laedt' });
@@ -128,6 +127,7 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, fassung, onSchl
             datei={laden.datei}
             text={laden.text}
             gebiet={gebiet(laden.datei.topic, themengebiete, fassung)}
+            farbe={gebietsfarbe(laden.datei.topic, themengebiete, wissensgebiete)}
             deckeAuf={deckeAuf}
             gewendet={gewendet}
             onKlick={beimKlickAufKarte}
@@ -166,21 +166,23 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, fassung, onSchl
 interface Karteneigenschaften {
   datei: Kartendatei;
   text: Kartentext;
-  gebiet: Kartengebiet & { farbe: string };
+  gebiet: Kartengebiet;
+  /** Farbe des Wissensgebiets; fehlt sie, setzt die Karte keine Farbe. */
+  farbe: string | undefined;
   deckeAuf: boolean;
   gewendet: boolean;
   onKlick: (e: TargetedMouseEvent<HTMLDivElement>) => void;
   onAufgedeckt: () => void;
 }
 
-function Karte({ datei, text, gebiet, deckeAuf, gewendet, onKlick, onAufgedeckt }: Karteneigenschaften) {
+function Karte({ datei, text, gebiet, farbe, deckeAuf, gewendet, onKlick, onAufgedeckt }: Karteneigenschaften) {
   const bild = datei.image === undefined ? undefined : kartenbildPfad(datei.image);
   const seite = { datei, text, gebiet, ...(bild === undefined ? {} : { bild }) };
   const klassen = ['karte', deckeAuf && 'karte-aufdecken', gewendet && 'karte-gewendet'].filter(Boolean).join(' ');
   return (
     <div
       class={deckeAuf ? 'karte-halter karte-halter-aufdecken' : 'karte-halter'}
-      style={{ '--themenfarbe': gebiet.farbe } as CSSProperties}
+      style={farbe === undefined ? undefined : ({ '--gebietsfarbe': farbe } as CSSProperties)}
     >
       <div class={klassen} onClick={onKlick} onAnimationEnd={onAufgedeckt}>
         <section class="kartenseite kartenseite-vorne" aria-label={TEXTE.karte.vorderseite} inert={gewendet}>
@@ -199,15 +201,11 @@ function Karte({ datei, text, gebiet, deckeAuf, gewendet, onKlick, onAufgedeckt 
   );
 }
 
-function gebiet(id: string, themengebiete: readonly Themengebiet[], fassung: string): Kartengebiet & { farbe: string } {
+function gebiet(id: string, themengebiete: readonly Themengebiet[], fassung: string): Kartengebiet {
   const eintrag = themengebiete.find((t) => t.id === id);
-  if (eintrag === undefined) return { name: '', farbe: NEUTRALE_FARBE };
+  if (eintrag === undefined) return { name: '' };
   const symbol = symbolPfad(eintrag.icon);
-  return {
-    name: textAus(eintrag.title, fassung),
-    farbe: FARBE.test(eintrag.color) ? eintrag.color : NEUTRALE_FARBE,
-    ...(symbol === undefined ? {} : { symbol }),
-  };
+  return { name: textAus(eintrag.title, fassung), ...(symbol === undefined ? {} : { symbol }) };
 }
 
 function SymbolWenden() {

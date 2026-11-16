@@ -54,7 +54,8 @@ export function testverzeichnis(b: Verzeichnisbeschreibung): Inhaltsverzeichnis 
       topic: 'gebiet-a',
       relations: beziehungen.filter(([von]) => von === id).map(([, type, card]) => ({ type, card })),
     })),
-    topics: [{ id: 'gebiet-a', title: { de: 'Gebiet A' }, color: '#112233', icon: 'gebiet-a.svg' }],
+    topics: [{ id: 'gebiet-a', title: { de: 'Gebiet A' }, domain: 'wissen-a', icon: 'gebiet-a.svg' }],
+    domains: [{ id: 'wissen-a', title: { de: 'Wissen A' }, color: '#112233' }],
     relations: Object.entries(b.typen ?? {}).map(([id, art]) =>
       art === 'symmetrisch'
         ? { id, symmetric: true, forward: { de: `${id} mit` } }

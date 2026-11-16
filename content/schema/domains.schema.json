@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Wissensgebiete",
+  "description": "domains.json. Jedes Themengebiet gehört genau einem Wissensgebiet; das Wissensgebiet bestimmt die Farbe der Karte.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "title", "color"],
+    "properties": {
+      "id": { "$ref": "common.schema.json#/$defs/id" },
+      "title": { "$ref": "common.schema.json#/$defs/texte" },
+      "color": {
+        "description": "Farbe als #RRGGBB.",
+        "type": "string",
+        "pattern": "^#[0-9A-Fa-f]{6}$"
+      }
+    },
+    "additionalProperties": false
+  }
+}

@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { abgehakteHotspots, hinweisinhalt } from '../logik/hinweis.ts';
-import type { Themengebiet } from '../logik/inhaltsverzeichnis.ts';
+import type { Themengebiet, Wissensgebiet } from '../logik/inhaltsverzeichnis.ts';
 import { oeffneKarte } from '../logik/karte-oeffnen.ts';
 import type { Speicherschicht } from '../logik/speicherschicht.ts';
 import { aktiveEinstellungen, einlesen, gefundeneKarten, type Spielstand } from '../logik/spielstand.ts';
@@ -22,7 +22,12 @@ const FASSUNG = STANDARDFASSUNG;
 type Ladezustand =
   | { art: 'laedt' }
   | { art: 'fehler'; meldung: string; detail?: string }
-  | { art: 'bereit'; szene: GeladeneSzene; themengebiete: readonly Themengebiet[] };
+  | {
+      art: 'bereit';
+      szene: GeladeneSzene;
+      themengebiete: readonly Themengebiet[];
+      wissensgebiete: readonly Wissensgebiet[];
+    };
 
 interface OffenerHinweis {
   hotspot: string;
@@ -51,7 +56,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 
   useEffect(() => {
     starte().then(
-      ({ szene, themengebiete }) => setLadezustand({ art: 'bereit', szene, themengebiete }),
+      (geladen) => setLadezustand({ art: 'bereit', ...geladen }),
       (fehler: unknown) => setLadezustand(alsFehlerzustand(fehler)),
     );
   }, []);
@@ -90,7 +95,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   }
 
   const { datei, svg } = ladezustand.szene;
-  const { themengebiete } = ladezustand;
+  const { themengebiete, wissensgebiete } = ladezustand;
   const finde = (id: string): Hotspot | undefined => datei.hotspots.find((h) => h.id === id);
 
   function loeseAus(hotspot: Hotspot): void {
@@ -190,6 +195,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           karte={offeneKarte.karte}
           aufdecken={offeneKarte.aufdecken}
           themengebiete={themengebiete}
+          wissensgebiete={wissensgebiete}
           fassung={FASSUNG}
           onSchliessen={schliesseKarte}
         />
@@ -201,13 +207,17 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 class Startfehler extends Error {}
 
 /** Lädt das Inhaltsverzeichnis und die Startszene der ersten Welt. */
-async function starte(): Promise<{ szene: GeladeneSzene; themengebiete: readonly Themengebiet[] }> {
+async function starte(): Promise<{
+  szene: GeladeneSzene;
+  themengebiete: readonly Themengebiet[];
+  wissensgebiete: readonly Wissensgebiet[];
+}> {
   const verzeichnis = await ladeInhaltsverzeichnis();
   const welt = verzeichnis.worlds[0];
   if (welt === undefined) throw new Startfehler(TEXTE.keineWelt);
   const eintrag = verzeichnis.scenes.find((s) => s.id === welt.start);
   if (eintrag === undefined) throw new Startfehler(TEXTE.startszeneFehlt);
-  return { szene: await ladeSzene(eintrag), themengebiete: verzeichnis.topics };
+  return { szene: await ladeSzene(eintrag), themengebiete: verzeichnis.topics, wissensgebiete: verzeichnis.domains };
 }
 
 function alsFehlerzustand(fehler: unknown): Ladezustand {

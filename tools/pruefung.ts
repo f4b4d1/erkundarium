@@ -8,6 +8,7 @@ import type {
   Szeneneintrag,
   Themengebiet,
   Texte,
+  Wissensgebiet,
 } from '../src/logik/inhaltsverzeichnis.ts';
 import { ERLAUBTE_ELEMENTE } from '../src/logik/erlaubte-svg.ts';
 import type { Schemapruefung, SchemaName } from './schema.ts';
@@ -63,7 +64,7 @@ const SZENEN_SVG = /^worlds\/([^/]+)\/scenes\/([^/]+)\.svg$/;
 
 // Spec Abschnitt 6, Ordner. schema/ prüft das Prüfskript nicht.
 const ERWARTET: RegExp[] = [
-  /^(topics|relations|limits)\.json$/,
+  /^(domains|topics|relations|limits)\.json$/,
   /^schema\//,
   /^topics\/[^/]+\.svg$/,
   /^cards\/[^/]+\.(json|svg)$/,
@@ -168,6 +169,7 @@ export function pruefeInhalte(
     }
   }
 
+  const wissensgebiete = lade<Wissensgebiet[]>('domains.json', 'domains')?.daten ?? [];
   const themengebiete = lade<Themengebiet[]>('topics.json', 'topics')?.daten ?? [];
   const beziehungstypen = lade<RohBeziehungstyp[]>('relations.json', 'relations')?.daten ?? [];
   lade('limits.json', 'limits');
@@ -213,6 +215,7 @@ export function pruefeInhalte(
   }
   meldeDoppelte(karten.map(({ pfad, daten }) => ({ pfad, id: daten.id })), 'Die Karten-ID');
   meldeDoppelte(szenen.map(({ pfad, daten }) => ({ pfad, id: daten.id })), 'Die Szenen-ID');
+  meldeDoppelte(wissensgebiete.map(({ id }) => ({ pfad: 'domains.json', id })), 'Das Wissensgebiet');
   meldeDoppelte(themengebiete.map(({ id }) => ({ pfad: 'topics.json', id })), 'Das Themengebiet');
   meldeDoppelte(beziehungstypen.map(({ id }) => ({ pfad: 'relations.json', id })), 'Der Beziehungstyp');
   for (const { pfad, daten } of szenen) {
@@ -222,6 +225,7 @@ export function pruefeInhalte(
   // Verweise. Karten und Szenen haben getrennte ID-Räume.
   const kartenIds = bekannteIds('card');
   const szenenIds = bekannteIds('scene');
+  const wissensgebietIds = bekannteIds('domains');
   const themengebietIds = bekannteIds('topics');
   const beziehungstypIds = bekannteIds('relations');
 
@@ -242,6 +246,11 @@ export function pruefeInhalte(
       if (h.action === 'scene' && !szenenIds.has(h.target!)) {
         meldeFehler(pfad, 'hotspot-ziel', `Der Hotspot „${h.id}“ zeigt auf die Szene „${h.target}“, die es nicht gibt.`);
       }
+    }
+  }
+  for (const { id, domain } of themengebiete) {
+    if (!wissensgebietIds.has(domain)) {
+      meldeFehler('topics.json', 'wissensgebiet', `Das Themengebiet „${id}“ nennt das Wissensgebiet „${domain}“, das es nicht gibt.`);
     }
   }
   for (const { pfad, daten } of karten) {
@@ -327,6 +336,7 @@ export function pruefeInhalte(
       relations: k.relations ?? [],
     })),
     topics: themengebiete,
+    domains: wissensgebiete,
     relations: beziehungstypen.map(({ acyclic: _, ...t }) => ({ ...t, symmetric: t.symmetric ?? false })),
   };
 

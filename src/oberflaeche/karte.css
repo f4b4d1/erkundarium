@@ -1,6 +1,6 @@
 /* Kartenansicht. Stil wie die Szenen (design-guidelines.md Abschnitt 3 und 4): dunkle Kontur,
    satte einfarbige Flächen, gerundete Ecken, harter flacher Schatten, keine Verläufe.
-   Die Farbe des Themengebiets setzt die Anwendung als --themenfarbe aus topics.json.
+   Die Farbe des Wissensgebiets setzt die Anwendung als --gebietsfarbe aus domains.json (ADR 0005).
    Alle Maße innerhalb der Karte stehen in em und wachsen mit der Kartenbreite, damit die Karte bei
    jeder Fenstergröße gleich umbricht. */
 
@@ -14,7 +14,7 @@
   --karte-text-leise: rgb(38 38 46 / 0.72);
   --karte-abdunklung: rgb(24 24 32 / 0.66);
   --karte-schatten: rgb(0 0 0 / 0.38);
-  /* Anteil der Themenfarbe in hellen Flächen (Bildfeld, Kopfzeile der Tabelle, Merkpunkte) */
+  /* Anteil der Gebietsfarbe in hellen Flächen (Bildfeld, Kopfzeile der Tabelle, Merkpunkte) */
   --karte-toenung: 20%;
 
   /* Format und Größe */
@@ -37,6 +37,9 @@
   --karte-blatt-ecke: 0.6em;
   --karte-innenabstand: 0.85em 1em;
   --karte-bausteinabstand: 0.7em;
+  /* Vorderseite: Anteile von Bildfeld und Kurztext an der Fläche unter dem Titel */
+  --karte-anteil-bild: 1;
+  --karte-anteil-text: 1;
   --karte-schattenversatz: 0.32em;
 
   /* Schrift: nur Schriften des Systems, nichts von außen */
@@ -285,7 +288,7 @@
   flex-direction: column;
   padding: var(--karte-rahmen);
   padding-top: 0;
-  background: var(--themenfarbe);
+  background: var(--gebietsfarbe);
   border: var(--karte-konturstaerke) solid var(--karte-kontur);
   border-radius: var(--karte-ecke);
   box-shadow: var(--karte-schattenversatz) var(--karte-schattenversatz) 0 var(--karte-schatten);
@@ -439,18 +442,18 @@
 
 .bildfeld {
   position: relative;
-  flex: 1 1 9em;
+  flex: var(--karte-anteil-bild) 1 0;
   min-height: 7em;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--themenfarbe) var(--karte-toenung), var(--karte-papier));
+  background: color-mix(in srgb, var(--gebietsfarbe) var(--karte-toenung), var(--karte-papier));
   border: 0.12em solid var(--karte-kontur);
   border-radius: 0.5em;
   overflow: hidden;
 }
 
 .bildfeld .muster-raute {
-  fill: var(--themenfarbe);
+  fill: var(--gebietsfarbe);
   fill-opacity: 0.3;
 }
 
@@ -481,9 +484,10 @@
   height: 1.5em;
 }
 
-/* Der Inhalt passt bei erlaubten Längen auf die Karte; nur als letzte Rückfallebene scrollt er. */
+/* Der Inhalt passt bei erlaubten Längen auf die Karte; nur als letzte Rückfallebene scrollt er.
+   Auf der Vorderseite teilen sich Bildfeld und Kurztext die Fläche unter dem Titel. */
 .bausteine {
-  flex: 0 1 auto;
+  flex: var(--karte-anteil-text) 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -542,7 +546,7 @@
   margin: 0;
   padding: 0.35em 0.6em;
   list-style: none;
-  background: color-mix(in srgb, var(--themenfarbe) var(--karte-toenung), var(--karte-papier));
+  background: color-mix(in srgb, var(--gebietsfarbe) var(--karte-toenung), var(--karte-papier));
   border: 0.11em solid var(--karte-kontur);
   border-radius: 0.5em;
   hyphens: auto;
@@ -566,7 +570,7 @@
   width: 0.55em;
   height: 0.55em;
   box-sizing: border-box;
-  background: var(--themenfarbe);
+  background: var(--gebietsfarbe);
   border: 0.1em solid var(--karte-kontur);
   border-radius: 0.12em;
   transform: rotate(45deg);
@@ -594,7 +598,7 @@
 }
 
 .baustein-tabelle th {
-  background: color-mix(in srgb, var(--themenfarbe) calc(2 * var(--karte-toenung)), var(--karte-papier));
+  background: color-mix(in srgb, var(--gebietsfarbe) calc(2 * var(--karte-toenung)), var(--karte-papier));
   border-bottom: 0.11em solid var(--karte-kontur);
   font-weight: 700;
 }
@@ -713,7 +717,7 @@
   margin-top: var(--karte-rahmen);
   display: grid;
   place-items: center;
-  background: var(--themenfarbe);
+  background: var(--gebietsfarbe);
   border: 0.12em solid var(--karte-kontur);
   border-radius: var(--karte-blatt-ecke);
   overflow: hidden;

@@ -24,7 +24,8 @@ function legeAn(dateien: Record<string, unknown>): string {
 }
 
 const grundinhalt = {
-  'topics.json': [{ id: 'gebiet-a', title: { de: 'Gebiet A' }, color: '#112233', icon: 'gebiet-a.svg' }],
+  'domains.json': [{ id: 'wissen-a', title: { de: 'Wissen A' }, color: '#112233' }],
+  'topics.json': [{ id: 'gebiet-a', title: { de: 'Gebiet A' }, domain: 'wissen-a', icon: 'gebiet-a.svg' }],
   'relations.json': [],
   'limits.json': { maxTitleLength: 40, maxTextLength: 300, maxItemLength: 100, maxBlocksPerSide: 4 },
   'worlds/welt-a/world.json': { id: 'welt-a', title: { de: 'Welt A' }, start: 'szene-a' },

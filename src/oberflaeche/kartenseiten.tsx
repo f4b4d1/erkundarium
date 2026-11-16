@@ -7,7 +7,7 @@ import type { Baustein, Kartendatei, Kartentext } from '../logik/kartendatei.ts'
 import { KONTUR, WEISS } from '../szene/haken.ts';
 import { TEXTE } from './texte.ts';
 
-/** Was die Karte vom Themengebiet zeigt. Die Farbe setzt die Kartenansicht als CSS-Variable. */
+/** Was die Karte vom Themengebiet zeigt. Die Farbe des Wissensgebiets setzt die Kartenansicht als CSS-Variable. */
 export interface Kartengebiet {
   name: string;
   /** Pfad der Symbol-Datei; fehlt, wenn das Themengebiet unbekannt ist. */
