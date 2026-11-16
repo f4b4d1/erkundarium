@@ -13,8 +13,12 @@ Die Gesamtheit aller Karten des Spiels, unabhängig von Welten.
 _Avoid_: Kartenpool, Deck
 
 **Themengebiet**:
-Ein Fachgebiet, dem jede Karte genau einmal zugeordnet ist und das Farbe und Kartendesign bestimmt, zum Beispiel Antriebstechnik. Themengebiete gehören keiner Welt. In Daten: `topic`.
+Ein Fachgebiet, dem jede Karte genau einmal zugeordnet ist und das Name und Symbol im Schild der Karte bestimmt, zum Beispiel Antriebstechnik. Jedes Themengebiet gehört genau einem Wissensgebiet. Themengebiete gehören keiner Welt. In Daten: `topic`.
 _Avoid_: Kategorie, Thema, Fach
+
+**Wissensgebiet**:
+Eine große Gruppe von Themengebieten, die die Farbe der Karte bestimmt, zum Beispiel Technik. Es gibt nur wenige. In Daten: `domain`.
+_Avoid_: Bereich (das ist ein Teil einer Szene), Obergebiet, Kategorie
 
 **Gefunden**:
 Zustand einer Karte im Spielstand, sobald sie einmal aufgedeckt wurde. Gilt für die Karte, nicht für den Hotspot: Alle Hotspots einer gefundenen Karte sind abgehakt.

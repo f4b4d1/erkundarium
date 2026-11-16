@@ -62,6 +62,7 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
 | action | Aktion: `card`, `scene` oder `info` |
 | card | Karte |
 | topic | Themengebiet |
+| domain | Wissensgebiet |
 | relation | Beziehung |
 | texts | Textfassungen |
 | save | Spielstand |
@@ -94,7 +95,7 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
 
 - F6: Ein Hotspot mit Aktion `card` deckt beim ersten Auslösen die Karte mit Animation auf, markiert sie als gefunden und erhöht den Zähler.
 - F7: Jedes weitere Auslösen öffnet die Karte ohne Aufdeck-Animation. Das gilt für jeden Hotspot derselben Karte in jeder Szene.
-- F8: Eine Karte lässt sich wenden. Die Vorderseite zeigt Titel, Bild und Kurztext; die Rückseite Vertiefung, Quellen und Link. Rahmen und Farbe kommen vom Themengebiet. Fehlt das Bild, zeigt die Karte das Symbol des Themengebiets.
+- F8: Eine Karte lässt sich wenden. Die Vorderseite zeigt Titel, Bild und Kurztext; die Rückseite Vertiefung, Quellen und Link. Die Farbe kommt vom Wissensgebiet des Themengebiets (ADR 0005), Name und Symbol im Schild vom Themengebiet. Fehlt das Bild, zeigt die Karte das Symbol des Themengebiets.
 - F9: Das Infofeld rendert die Bausteine `text`, `list`, `facts`, `table` und `funfact`.
 - F10: Der Link öffnet in einem neuen Tab.
 - F30: Beim ersten Betreten einer Szene mit Eintrittskarte läuft erst der Zoom, dann deckt sich die Karte in der neuen Szene von selbst auf und gilt als gefunden.
@@ -130,12 +131,13 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
   - Kreise im Szenennetz und Szenen, die von der Startszene nicht erreichbar sind
   - Beziehungen mit unbekanntem Typ oder Ziel, symmetrische Beziehungen an beiden Karten, Kreise bei Typen mit `acyclic`
   - `info`-Hotspots ohne `hint`
+  - Karten mit unbekanntem Themengebiet und Themengebiete mit unbekanntem Wissensgebiet
   - verbotene Elemente in Szenen-SVGs und Kartenbildern nach `design-guidelines.md` Abschnitt 1 Regel 2, dazu `aria-label`, das Attribut `style`, Ereignis-Attribute wie `onclick` und Verweise nach außen
   - jedes Element außerhalb der Erlaubnisliste: `svg`, `g`, `defs`, `clipPath`, `use`, `path`, `rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`. Die Anwendung lässt beim Einbetten ebenfalls nur diese Elemente und eine feste Liste von Attributen durch.
   - Szenen-SVGs ohne Szenendatei und Dateien an unerwarteter Stelle im Inhaltsordner
   - Hotspot-Dichte außerhalb der Vorgabe für den Szenentyp (Warnung)
 - F34: Das Prüfskript hat zwei Stufen. Beim Entwickeln ist der Prüfstatus `entwurf` eine Warnung, und die Karte ist im Spiel als Entwurf gekennzeichnet. Beim Veröffentlichen ist `entwurf` ein Fehler, und der Build bricht ab.
-- F35: Das Prüfskript erzeugt das Inhaltsverzeichnis: alle Welten, Szenen mit ihren Hotspots (ID, Aktion, Ziel), Karten, Themengebiete und Beziehungstypen; je Karte ID, Themengebiet, Titel je Textfassung und Beziehungen. Es enthält keine weiteren Texte. Der Entwicklungsserver erzeugt es bei jeder Inhaltsänderung neu.
+- F35: Das Prüfskript erzeugt das Inhaltsverzeichnis: alle Welten, Szenen mit ihren Hotspots (ID, Aktion, Ziel), Karten, Themengebiete, Wissensgebiete und Beziehungstypen; je Karte ID, Themengebiet, Titel je Textfassung und Beziehungen. Es enthält keine weiteren Texte. Der Entwicklungsserver erzeugt es bei jeder Inhaltsänderung neu.
 
 ## 5 Qualitätsanforderungen
 
@@ -154,6 +156,7 @@ IDs bestehen aus Kleinbuchstaben, Ziffern und Bindestrichen. Karten-IDs sind üb
 
 ```text
 content/
+  domains.json
   topics.json
   relations.json
   limits.json
@@ -279,16 +282,26 @@ Welche Szenen zur Welt gehören, ergibt sich aus dem Ordner; welche Karten, aus 
 
 Schalter je Typ: `symmetric` (gilt in beide Richtungen) und `acyclic` (darf keinen Kreis bilden). Beide sind freiwillig und sonst falsch. Bei einem symmetrischen Typ ist `backward` verboten, sonst Pflicht.
 
+**domains.json**
+
+```json
+[
+  { "id": "technik", "title": { "de": "Technik" }, "color": "#6B7785" }
+]
+```
+
+`color` hat die Form `#RRGGBB`.
+
 **topics.json**
 
 ```json
 [
   { "id": "antriebstechnik", "title": { "de": "Antriebstechnik" },
-    "color": "#FF7A1A", "icon": "antriebstechnik.svg" }
+    "domain": "technik", "icon": "antriebstechnik.svg" }
 ]
 ```
 
-`icon` nennt eine SVG-Datei in `content/topics/`, ohne Pfad. `color` hat die Form `#RRGGBB`.
+`domain` nennt ein Wissensgebiet aus `domains.json`. `icon` nennt eine SVG-Datei in `content/topics/`, ohne Pfad.
 
 **Spielstand**
 
@@ -344,7 +357,7 @@ Keine davon blockiert M1.
 | Nr. | Frage | Fällig |
 | --- | --- | --- |
 | N1 | Wie sieht die Musterkarte aus, und welche Längenvorgaben und Bausteinzahlen ergeben sich? Welches Format haben Kartenbilder? | M2 |
-| N2 | Welche Themengebiete hat die Fabrik, mit welcher Farbe und welchem Symbol? | M1 für die Durchstich-Karten, M2 vollständig |
+| N2 | Welche Themengebiete hat die Fabrik, mit welchem Symbol? Die Farbe kommt vom Wissensgebiet (ADR 0005). | M1 für die Durchstich-Karten, M2 vollständig |
 | N3 | Welche Beziehungen bekommen die Karten der Fabrik? Braucht es weitere Typen? | M1 für mindestens 2, M2 vollständig |
 | N4 | Wo wird gehostet, und darf die Seite öffentlich erreichbar sein? | M3 |
 | N5 | Wie verhält sich die Szene auf dem Handy im Hochformat? | M3 |
