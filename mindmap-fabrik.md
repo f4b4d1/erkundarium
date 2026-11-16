@@ -82,7 +82,7 @@ Legende der Typen:
 - Durchstich (Meilenstein M1): `fabrikhalle` → `roboterzelle` → `robotergelenk` mit zwölf Karten. Die Karte `motorleitung` hängt dabei in Halle und Roboterzelle.
 - In M1 gibt es die Szene `servomotor` noch nicht. Die Karte `servomotor` hängt bis dahin an einem gewöhnlichen Hotspot in `robotergelenk` und wird in M2 zur Eintrittskarte.
 - Der Not-Halt-Taster in der Halle zeigt nur einen Hinweis. Die Karte `not-halt-und-zaun` gibt es nur in der Roboterzelle.
-- Der Roboter steht in der Halle hinter einem niedrigen Schutzzaun, der wenig vom Roboter verdeckt. In der Roboterzelle ist der Zaun nur im Hintergrund zu sehen.
+- Der Roboter steht in der Halle hinter einem niedrigen Schutzzaun (1,4 m) mit Schutztür, der wenig vom Roboter verdeckt. Die Roboterzelle ist eine Zoom-Ansicht der Halle und zeigt den Zaun ebenso, mit mehr Details. Der Zoom zu `robotergelenk` sitzt an Achse 3.
 - Der Servomotor kommt später auch am Förderband vor; die Szene `servomotor` wird dann von zwei Zoom-Hotspots erreicht. Die Eintrittskarte wird trotzdem nur einmal gefunden.
 - Fundorte („zu finden in“) ergeben sich aus diesem Baum und werden nicht gepflegt (ADR 0003).
 - Beziehungen zwischen den Karten sind noch nicht festgelegt. Starttypen: `steuert`, `misst`, `verwandt`. Kandidaten: Servoregler steuert Servomotor, Encoder misst Servomotor, Frequenzumrichter steuert Asynchronmotor, SPS (CPU) steuert Servoregler, Asynchronmotor verwandt mit Servomotor.

@@ -17,10 +17,10 @@ Beispiel für eine Ansicht dieser Welt: `erkundarium-referenzszene-b-plus-v3.svg
 | Rot `#E4572E` | Leistung und Motorleitung; dazu Gefahr, Not-Halt, Brandschutz |
 | Grün `#3BB273` | Geber und Messsignal; „in Ordnung“; Erste Hilfe |
 | Violett `#8E6FD8` | Feldbus und Daten; Sensorgehäuse |
-| Gelb `#F6C945` | Warnung, Leuchten, Helm, Gehäuse von Not-Halt-Tastern |
+| Gelb `#F6C945` | Warnung, Leuchten, Helm, Gehäuse von Not-Halt-Tastern, Pfosten und Rahmen des Schutzzauns |
 | Türkis `#19A7B8` | Steuerung: SPS-Baugruppen |
 | Orange `#FF7A1A` | Roboter und bewegte Maschinenteile |
-| Blau `#1F78C1` | Arbeitskleidung |
+| Blau `#1F78C1` | Arbeitskleidung; Quittiertaster |
 
 ## Ortsfarben
 
@@ -52,6 +52,7 @@ Beispiel für eine Ansicht dieser Welt: `erkundarium-referenzszene-b-plus-v3.svg
 | Leistungskabel | 5,2 |
 | Signal- und Buskabel | 4,3 |
 | Schlauchpaket am Roboter | 3,6 (Unterlage 8,2) |
+| Druckluftschlauch (Metall mittel `#6B7785`) | 3 |
 | Rohr | 13,8 |
 | Roboterglied | 40 / 31 / 19 von Sockel zur Hand |
 
@@ -71,6 +72,7 @@ Warnschild, Signalsäule, Bodenmarkierung, Hallenleuchte, Steckdosenverteiler.
 
 - Schaltschrank von oben nach unten: Einspeisung und Schutz, Steuerung, Antriebe, Klemmen. Verdrahtungskanäle zwischen den Reihen.
 - Ein 6-Achs-Roboter zeigt in der Seitenansicht mindestens Achse 2, 3 und 5 als Gelenke.
+- Schutzzaun einer Roboterzelle mindestens 1,4 m hoch: Niedrigere Schutzeinrichtungen nur mit zusätzlichen Maßnahmen, unter 1 m gar nicht (DIN EN ISO 13857). Zugang durch eine Schutztür mit Türschalter. Gitter aus Metall dunkel als feine Linien, damit der Roboter dahinter sichtbar bleibt.
 - Leitungen zum Feld verlassen den Schrank unten über die Klemmenreihe.
 - Schema-Szenen verwenden Schaltzeichen nach DIN EN 60617.
 - Häufige Fehler: Kabel ohne Ziel, Sensor ohne Leitung, Motor ohne Geberleitung, Schutzeinrichtung fehlt an der Roboterzelle.

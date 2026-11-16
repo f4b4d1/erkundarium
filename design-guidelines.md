@@ -118,7 +118,7 @@ Jede Szene ist genau einer dieser drei Typen. Den Typ legt die Szenendatei fest.
 
 | Typ | Wofür | Aufbau |
 | --- | --- | --- |
-| Ansicht | Raum, Gebäude, Landschaft, Straße | Schnitt von der Seite, keine Perspektive. Standlinie waagerecht im unteren Bilddrittel. Darunter optional ein Untergrund-Band, darüber optional ein Himmel-Band. Fester Maßstab aus dem Stilprofil. |
+| Ansicht | Raum, Gebäude, Landschaft, Straße | Schnitt von der Seite, keine Perspektive. Standlinie waagerecht im unteren Bilddrittel. Darunter optional ein Untergrund-Band, darüber optional ein Himmel-Band. Fester Maßstab aus dem Stilprofil; Ausnahme Zoom-Ansicht (unten). |
 | Objekt | Ein Ding von nahe: Maschine, Tier, Pflanze, Gerät | Hauptobjekt füllt 50–70 % der Bildhöhe, wo sinnvoll aufgeschnitten. Ruhiger Hintergrund aus der Ansicht darüber, vereinfacht und aufgehellt. |
 | Schema | Unsichtbares oder Abstraktes: Schaltung, Kreislauf, Kraftfluss, Zellinneres | Heller, einfarbiger Hintergrund. Gleiche Kontur und Farben wie sonst; Normsymbole des Fachs sind erlaubt und gehen vor freier Erfindung. Flussrichtung von links nach rechts oder von oben nach unten. |
 
@@ -131,6 +131,7 @@ Für alle Typen:
 - Dichte: Ansicht 20–35 Hotspots, Objekt und Schema 8–20.
 - Pro Ansicht mindestens ein Ding außerhalb des Hauptthemas (Tier, Fossil, Fahrzeug, Pflanze) für Sammelobjekte und Easter Eggs.
 - Was zoombar ist, ist in der übergeordneten Szene schon erkennbar: gleiche Farben, gleiche Grundform, im Zoom nur mehr Details.
+- Zoom-Ansicht: Eine Ansicht, in die aus einer Ansicht gezoomt wird, zeigt genau den Endausschnitt des Zooms in der Elternszene. Zoomfaktor und Ausschnitt ergeben sich aus der Begrenzungsbox des Zoom-Hotspots (die Anwendung füllt damit 80 % von Breite oder Höhe). Der Maßstab ist Elternmaßstab × Zoomfaktor. Lage, Form und Farbe von allem, was in der Elternszene sichtbar ist, bleiben gleich; dazu kommen Details. Konturen bleiben bei Abschnitt 3. Ändert sich die Begrenzungsbox des Zoom-Hotspots, muss die Zoom-Ansicht nachgezogen werden.
 
 ## 6 Menschen
 
