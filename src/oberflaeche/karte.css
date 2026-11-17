@@ -64,6 +64,7 @@
   --karte-dauer-wenden: 0.6s;
   --karte-dauer-aufdecken: 1.35s;
   --karte-dauer-oeffnen: 0.3s;
+  --karte-dauer-schliessen: 0.2s;
 }
 
 /* ---------- Dialog und Anordnung ---------- */
@@ -112,6 +113,29 @@
 @keyframes kartenansicht-einblenden {
   from {
     background-color: transparent;
+  }
+}
+
+/* Beim Schließen blenden Abdunklung, Karte und Knöpfe aus; Eingaben gehen ins Leere. Ohne
+   Bewegung schließt die Kartenansicht sofort, die Klasse kommt dann gar nicht erst. */
+.kartenansicht-schliesst {
+  animation: kartenansicht-ausblenden var(--karte-dauer-schliessen) ease-in both;
+  pointer-events: none;
+}
+
+.kartenansicht-schliesst .kartenansicht-flaeche {
+  animation: flaeche-ausblenden var(--karte-dauer-schliessen) ease-in both;
+}
+
+@keyframes kartenansicht-ausblenden {
+  to {
+    background-color: transparent;
+  }
+}
+
+@keyframes flaeche-ausblenden {
+  to {
+    opacity: 0;
   }
 }
 
@@ -303,6 +327,18 @@
 @keyframes karte-oeffnen {
   from {
     opacity: 0;
+    transform: translateY(4%) scale(0.9);
+  }
+}
+
+/* Das Öffnen rückwärts; die Deckkraft nimmt die Fläche mit den Knöpfen. Ersetzt eine noch
+   laufende Öffnen- oder Einblend-Animation des Halters. */
+.kartenansicht-schliesst .karte-halter {
+  animation: karte-schliessen var(--karte-dauer-schliessen) ease-in both;
+}
+
+@keyframes karte-schliessen {
+  to {
     transform: translateY(4%) scale(0.9);
   }
 }

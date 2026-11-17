@@ -17,6 +17,7 @@ import { Kartenansicht } from './kartenansicht.tsx';
 import { Pfadanzeige, type Ebene } from './pfadanzeige.tsx';
 import { Szenenansicht } from './szenenansicht.tsx';
 import { deuteTaste } from './tasten.ts';
+import { wenigerBewegung } from './bewegung.ts';
 import { TEXTE } from './texte.ts';
 
 /** Die Textfassung. Die Auswahl durch den Spieler kommt mit dem Startbildschirm hierher. */
@@ -548,10 +549,6 @@ const ZOOM_DAUER_MS = 450;
 /** So viel der Szene füllt das Ziel am Ende des Zooms, höchstens. */
 const ZOOM_FUELLUNG = 0.8;
 const ZOOM_MAXIMUM = 6;
-
-function wenigerBewegung(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
 
 /** Der Endzustand des Zooms auf die Begrenzungsbox `lage` (in Bildschirmpixeln), als `transform` der Szene. */
 function zoomEndzustand(szene: HTMLElement, lage: Rechteck): string {

@@ -1,7 +1,7 @@
 // Die Kartenansicht: ein modaler Dialog über der Szene (F6 bis F10, F34). Sie lädt die Kartendatei
 // erst beim Öffnen, deckt die Karte beim ersten Fund mit einer Drehung auf, öffnet eine schon
-// gefundene mit einer kurzen Animation und lässt sie wenden.
-// Solange sie offen ist, ist die Szene dahinter gesperrt; den Fokus zurück zum Hotspot legt der
+// gefundene mit einer kurzen Animation und lässt sie wenden. Beim Schließen blendet sie aus und
+// meldet sich erst danach beim Aufrufer. Solange sie offen ist, ist die Szene dahinter gesperrt; den Fokus zurück zum Hotspot legt der
 // Aufrufer nach dem Schließen.
 
 import type { CSSProperties, TargetedMouseEvent, TargetedPointerEvent } from 'preact';
@@ -11,6 +11,7 @@ import type { Themengebiet, Wissensgebiet } from '../logik/inhaltsverzeichnis.ts
 import type { Kartendatei, Kartentext } from '../logik/kartendatei.ts';
 import { text as textAus, waehleFassung } from '../logik/textfassung.ts';
 import { kartenbildPfad, ladeKarte, symbolPfad } from '../inhalte/laden.ts';
+import { wenigerBewegung } from './bewegung.ts';
 import { Deckblatt, Rueckseite, Vorderseite, type Kartengebiet } from './kartenseiten.tsx';
 import { TEXTE } from './texte.ts';
 
@@ -31,6 +32,8 @@ type Ladezustand =
 
 /** Endet die Aufdeck-Animation nicht von selbst, etwa weil Animationen abgeschaltet sind. */
 const AUFDECKEN_HOECHSTENS_MS = 2500;
+/** Endet die Schließ-Animation nicht von selbst, etwa weil der Dialog schon verborgen ist. */
+const SCHLIESSEN_HOECHSTENS_MS = 500;
 
 export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete, fassung, onSchliessen }: Eigenschaften) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -39,6 +42,11 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
   const [deckeAuf, setDeckeAuf] = useState(aufdecken);
   const [gewendet, setGewendet] = useState(false);
   const druckNebenKarte = useRef(false);
+  const [schliesst, setSchliesst] = useState(false);
+  // Der Aufrufer gibt bei jedem Rendern eine neue Funktion; der Zeitgeber soll trotzdem nur einmal laufen.
+  const aufrufer = useRef(onSchliessen);
+  aufrufer.current = onSchliessen;
+  const gemeldet = useRef(false);
 
   useLayoutEffect(() => {
     const element = dialog.current;
@@ -77,7 +85,28 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
     return () => clearTimeout(zeitgeber);
   }, [bereit, deckeAuf]);
 
+  useEffect(() => {
+    if (!schliesst) return;
+    const zeitgeber = setTimeout(meldeGeschlossen, SCHLIESSEN_HOECHSTENS_MS);
+    return () => clearTimeout(zeitgeber);
+  }, [schliesst]);
+
+  /** Blendet aus und meldet erst danach das Schließen; ohne Bewegung sofort. */
+  function schliesse(): void {
+    if (schliesst) return;
+    if (wenigerBewegung()) meldeGeschlossen();
+    else setSchliesst(true);
+  }
+
+  /** Meldet das Schließen dem Aufrufer, nur einmal: Ende der Animation, Zeitgeber und Browser können zusammentreffen. */
+  function meldeGeschlossen(): void {
+    if (gemeldet.current) return;
+    gemeldet.current = true;
+    aufrufer.current();
+  }
+
   function wende(): void {
+    if (schliesst) return;
     // Wer während des Aufdeckens wendet, überspringt nur die Animation.
     if (deckeAuf) setDeckeAuf(false);
     else setGewendet((g) => !g);
@@ -90,7 +119,7 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
   function beimKlick(e: TargetedMouseEvent<HTMLDialogElement>): void {
     // Klick oder Tippen neben die Karte schließt. Wer auf der Karte Text markiert und neben ihr
     // loslässt, löst einen Klick auf einem gemeinsamen Vorfahren aus; der schließt nicht.
-    if (druckNebenKarte.current && nebenKarte(e.target)) onSchliessen();
+    if (druckNebenKarte.current && nebenKarte(e.target)) schliesse();
   }
 
   function beimKlickAufKarte(e: TargetedMouseEvent<HTMLDivElement>): void {
@@ -107,12 +136,19 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
   return (
     <dialog
       ref={dialog}
-      class="kartenansicht"
+      class={schliesst ? 'kartenansicht kartenansicht-schliesst' : 'kartenansicht'}
       aria-label={titel}
       onCancel={(e) => {
-        // Escape schließt; der Aufrufer nimmt den Dialog dann aus der Seite.
+        // Escape schließt; der Aufrufer nimmt den Dialog nach dem Ausblenden aus der Seite.
         e.preventDefault();
-        onSchliessen();
+        schliesse();
+      }}
+      onAnimationEnd={(e) => {
+        if (schliesst && e.target === e.currentTarget && e.animationName === 'kartenansicht-ausblenden') meldeGeschlossen();
+      }}
+      onClose={() => {
+        // Ein zweites Escape während des Ausblendens schließt den Dialog im Browser selbst; dann nicht warten.
+        if (schliesst) meldeGeschlossen();
       }}
       onPointerDown={beimDruecken}
       onClick={beimKlick}
@@ -157,7 +193,7 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
               <span aria-hidden="true">{TEXTE.karte.wenden}</span>
             </button>
           )}
-          <button ref={schliessen} type="button" class="kartenknopf" onClick={onSchliessen}>
+          <button ref={schliessen} type="button" class="kartenknopf" onClick={schliesse}>
             <SymbolSchliessen />
             <span>{TEXTE.karte.schliessen}</span>
           </button>
