@@ -39,6 +39,8 @@
   /* Platz unter den Knöpfen, damit die Blöcke unter der Karte (Fundorte, Beziehungen) schon
      zu sehen sind; der Rest scrollt. Nur mit Blöcken gesetzt, sonst 0. */
   --karte-umfeldzone: 0px;
+  /* Mindesthöhe der Blöcke: Karte und Blöcke bleiben als Gruppe mittig und springen beim Laden nicht. */
+  --karte-umfeldhoehe: 190px;
   /* Grundschrift der Karte als Bruchteil der Kartenbreite: Breite / 28 */
   --karte-schriftteiler: 28;
 
@@ -168,12 +170,6 @@
   gap: var(--karte-knopfabstand);
 }
 
-/* Mit Blöcken beginnt die Fläche oben: Während des Ladens fehlt die Zeile der Blöcke, und zentriert
-   würden die Knöpfe nach dem Laden nach oben springen. */
-.kartenansicht-mit-umfeld .kartenansicht-flaeche {
-  align-content: start;
-}
-
 @media (orientation: landscape) {
   .kartenansicht-flaeche {
     grid-template-columns: auto auto;
@@ -243,6 +239,7 @@
 /* ---------- Blöcke unter der Karte: Fundorte und Beziehungen (F16) ---------- */
 .kartenumfeld {
   box-sizing: border-box;
+  min-height: var(--karte-umfeldhoehe);
   width: var(--karte-breite);
   padding: 12px 16px;
   background: var(--karte-papier);

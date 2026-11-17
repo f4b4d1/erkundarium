@@ -258,8 +258,9 @@ export function Kartenansicht({
             <span>{TEXTE.karte.schliessen}</span>
           </button>
         </div>
-        {laden.art !== 'laedt' && hatUmfeld && (
-          <Umfeldbloecke umfeld={umfeld} verdeckt={deckeAuf} onOeffne={(id) => zeigeVerlauf([...verlauf, id])} />
+        {/* Von Anfang an da, damit der Platz stimmt; sichtbar erst mit der geladenen Karte. */}
+        {hatUmfeld && (
+          <Umfeldbloecke umfeld={umfeld} verdeckt={deckeAuf || laden.art === 'laedt'} onOeffne={(id) => zeigeVerlauf([...verlauf, id])} />
         )}
         {/* Die Region steht von Anfang an da; nur ein später gesetzter Text wird vorgelesen. */}
         <p class="nur-vorlesen" role="status">
