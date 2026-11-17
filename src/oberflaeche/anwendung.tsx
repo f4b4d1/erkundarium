@@ -323,8 +323,9 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     stoppeSchliesstimer();
     schliesstimer.current = window.setTimeout(() => {
       schliesstimer.current = undefined;
-      // Solange der Fokus im Kartenknopf liegt, bleibt der Hinweis offen.
+      // Solange der Fokus im Kartenknopf liegt oder der Zeiger im Hinweis ist, bleibt der Hinweis offen.
       if (hinweisknopfRef.current !== null && document.activeElement === hinweisknopfRef.current) return;
+      if (document.querySelector('.hinweis:hover') !== null) return;
       setOffen((bisher) => (bisher?.hotspot === hotspot ? undefined : bisher));
     }, SCHLIESS_VERZOEGERUNG_MS);
   }

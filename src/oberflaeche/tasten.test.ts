@@ -64,6 +64,20 @@ describe('Tab', () => {
   });
 });
 
+describe('weitere Fälle', () => {
+  it('lässt Tab am Kartenknopf ohne offenen Hinweis unberührt', () => {
+    expect(deuteTaste(lage({ taste: 'Tab', hatKartenknopf: true, fokus: 'kartenknopf' }))).toBe('nichts');
+  });
+
+  it('lässt Shift+Tab außerhalb von Hotspot und Knopf unberührt', () => {
+    expect(deuteTaste(lage({ taste: 'Tab', umschalt: true, hinweisOffen: true, hatKartenknopf: true, fokus: 'sonst' }))).toBe('nichts');
+  });
+
+  it('lässt Escape bei offener Karte der Karte, auch mit Kartenknopf', () => {
+    expect(deuteTaste(lage({ karteOffen: true, hinweisOffen: true, hatKartenknopf: true, fokus: 'kartenknopf' }))).toBe('nichts');
+  });
+});
+
 describe('andere Tasten', () => {
   it('bleiben unberührt', () => {
     expect(deuteTaste(lage({ taste: 'Enter', hinweisOffen: true }))).toBe('nichts');
