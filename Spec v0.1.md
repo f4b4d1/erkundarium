@@ -75,13 +75,13 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
 - F2: Die Szenen-SVG wird in die Seite eingebettet. Jedes Element mit `data-hotspot` und passendem Eintrag in der Szenendatei ist klickbar, antippbar und per Tastatur erreichbar. Die Anwendung setzt `aria-label` aus `label`.
 - F3: Ein Hotspot mit Aktion `scene` zoomt auf das angeklickte Element und wechselt dann in die Zielszene. Der Klick auf das Ding ist immer der Zoom.
 - F4: Die Pfadanzeige zeigt den gegangenen Weg von der Startszene bis zur aktuellen Szene. Ein Klick auf eine Ebene kürzt den Weg bis dorthin.
-- F4a: Zurück in eine frühere Ebene geht es über die Pfadanzeige oder mit der Escape-Taste. Escape wirkt nur, wenn weder Karte noch Hinweis offen ist, und geht genau eine Ebene zurück. Dabei zoomt jede Ebene auf dem Weg nacheinander aus dem Hotspot heraus, über den der Weg weiterführte: Sie erscheint im Endausschnitt des Zooms (F3) und zoomt auf die volle Ansicht. Erst werden alle Szenen des Rückwegs geladen; scheitert eine, bleibt die aktuelle Szene stehen. Danach liegt der Fokus auf dem Hotspot, über den die Zielebene verlassen wurde. Eintrittskarten decken sich dabei nicht auf.
+- F4a: Zurück in eine frühere Ebene geht es über die Pfadanzeige oder mit der Escape-Taste. Escape schließt zuerst eine offene Karte oder einen offenen Hinweis (F8a, F21); erst wenn beides zu ist, geht Escape genau eine Ebene zurück. Dabei zoomt jede Ebene auf dem Weg nacheinander aus dem Hotspot heraus, über den der Weg weiterführte: Sie erscheint im Endausschnitt des Zooms (F3) und zoomt auf die volle Ansicht. Erst werden alle Szenen des Rückwegs geladen; scheitert eine, bleibt die aktuelle Szene stehen. Danach liegt der Fokus auf dem Hotspot, über den die Zielebene verlassen wurde. Eintrittskarten decken sich dabei nicht auf.
 - F5: Jede Szene wird erst beim Betreten geladen.
 - F25: Die Szene skaliert mit festem Seitenverhältnis 16:9 auf die verfügbare Fläche; bei anderen Bildschirmen bleiben Ränder.
 
 **Hinweis und Hervorhebung**
 
-- F21: Jeder Hotspot zeigt einen Hinweis: beim Überfahren mit der Maus, bei Tastaturfokus und beim ersten Tippen auf Touch.
+- F21: Jeder Hotspot zeigt einen Hinweis: beim Überfahren mit der Maus, bei Tastaturfokus und beim ersten Tippen auf Touch. Mit der Maus öffnet er sich einmal beim Betreten des Hotspots am Eintrittspunkt und bewegt sich danach nicht; er schließt beim Verlassen, außer die Maus fährt in den Hinweis. Escape schließt einen offenen Hinweis.
 - F22: Der Hinweis kommt aus den Feldern `label` und `hint` der Szenendatei. `label` erscheint immer. `hint` erscheint bei `info` und `scene` immer, bei `card` erst, wenn die Karte gefunden ist. `hint` ist bei `info` Pflicht, sonst freiwillig, und enthält nie eine Bedienanweisung.
 - F23: Die Anwendung zeichnet den Hinweis selbst. Er enthält Name, gegebenenfalls Erklärung, Stand und das Symbol der Aktion (Karte, Lupe, Info). `<title>` und `aria-label` sind in Szenen-SVGs verboten.
 - F24: Ein Hotspot mit Aktion `info` hat nur einen Hinweis und weder Karte noch Zoom, etwa ein einzelnes Kabel.
@@ -102,7 +102,7 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
 - F10: Der Link öffnet in einem neuen Tab.
 - F30: Beim ersten Betreten einer Szene mit Eintrittskarte läuft erst der Zoom, dann deckt sich die Karte in der neuen Szene von selbst auf und gilt als gefunden.
 - F31: In jeder Szene mit Eintrittskarte steht am Szenentitel in der Pfadanzeige ein Kartenknopf, der die Eintrittskarte öffnet.
-- F32: Der Hinweis eines Zoom-Hotspots trägt einen Kartenknopf, sobald die Eintrittskarte der Zielszene gefunden ist. Der Hinweis bleibt offen, während die Maus vom Hotspot hinein fährt.
+- F32: Der Hinweis eines Zoom-Hotspots trägt einen Kartenknopf, sobald die Eintrittskarte der Zielszene gefunden ist. Der Hinweis bleibt offen, während die Maus vom Hotspot hinein fährt. Per Tastatur ist der Kartenknopf mit Tab vom fokussierten Hotspot aus erreichbar; Shift+Tab und Escape führen zum Hotspot zurück.
 
 **Markierung und Fortschritt**
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ANKERVERSATZ, ANKERVERSATZ_UNTEN, platziereAmAnker, platziereHinweis, sollNeuAnkern } from './platzierung.ts';
+import { ANKERVERSATZ, ANKERVERSATZ_UNTEN, platziereAmAnker, platziereHinweis } from './platzierung.ts';
 
 const bereich = { links: 0, oben: 0, breite: 1000, hoehe: 600 };
 const hinweis = { breite: 200, hoehe: 80 };
@@ -115,17 +115,5 @@ describe('platziereAmAnker', () => {
 
   it('hält den Hinweis im Bereich, auch wenn er größer ist', () => {
     expect(platziereAmAnker({ x: 400, y: 300 }, { breite: 1200, hoehe: 700 }, bereich)).toEqual({ links: 0, oben: 0 });
-  });
-});
-
-describe('sollNeuAnkern', () => {
-  it('bleibt am Anker, solange der Zeiger nah ist', () => {
-    expect(sollNeuAnkern({ x: 100, y: 100 }, { x: 150, y: 150 })).toBe(false);
-    expect(sollNeuAnkern({ x: 100, y: 100 }, { x: 220, y: 100 })).toBe(false);
-  });
-
-  it('ankert neu, sobald der Zeiger mehr als 120 px entfernt ist', () => {
-    expect(sollNeuAnkern({ x: 100, y: 100 }, { x: 221, y: 100 })).toBe(true);
-    expect(sollNeuAnkern({ x: 100, y: 100 }, { x: 190, y: 190 })).toBe(true);
   });
 });

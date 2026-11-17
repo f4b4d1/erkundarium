@@ -52,8 +52,6 @@ export const ANKERVERSATZ = 12;
  * als der Versatz oben: Platz für die Zeigerhand, die von der Spitze (Anker) nach unten ragt.
  */
 export const ANKERVERSATZ_UNTEN = 32;
-/** Entfernt sich der Zeiger weiter vom Anker, setzt sich der Anker an den Zeiger. */
-export const NEU_ANKERN_AB = 120;
 
 /**
  * Lage des Hinweises an einem Ankerpunkt (dem Zeiger): waagrecht mittig, bevorzugt über dem Anker.
@@ -69,11 +67,6 @@ export function platziereAmAnker(anker: Punkt, hinweis: Groesse, bereich: Rechte
   const geschobenUnten = inDenBereich(unten, hinweis, bereich);
   const ueberlauf = (roh: Lage, geschoben: Lage) => Math.abs(geschoben.oben - roh.oben);
   return ueberlauf(unten, geschobenUnten) < ueberlauf(oben, geschobenOben) ? geschobenUnten : geschobenOben;
-}
-
-/** Ob sich der Anker an den Zeiger setzen soll, weil dieser sich weit genug entfernt hat. */
-export function sollNeuAnkern(anker: Punkt, zeiger: Punkt, schwelle = NEU_ANKERN_AB): boolean {
-  return Math.hypot(zeiger.x - anker.x, zeiger.y - anker.y) > schwelle;
 }
 
 /** Schiebt die Lage so, dass der Hinweis im Bereich liegt; ist er größer, an dessen linke obere Ecke. */

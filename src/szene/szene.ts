@@ -37,8 +37,6 @@ export interface Darstellung {
 export type Szenenereignis =
   /** `zeiger`: wo Maus oder Finger den Hotspot getroffen haben; fehlt bei Tastatur und Screenreader. */
   | { art: 'betreten' | 'ausgeloest'; hotspot: string; lage: Rechteck; zeiger?: Punkt }
-  /** Die Maus bewegt sich innerhalb des Hotspots, den sie zuletzt betreten hat. */
-  | { art: 'bewegt'; hotspot: string; zeiger: Punkt }
   | { art: 'verlassen'; hotspot: string }
   | { art: 'daneben' };
 
@@ -48,6 +46,8 @@ export interface Szene {
   lageVon(hotspot: string): Rechteck | undefined;
   /** Legt den Tastaturfokus auf den Hotspot, etwa wenn eine darüber geöffnete Ansicht schließt. */
   fokussiere(hotspot: string): void;
+  /** Ob der Tastaturfokus gerade auf dem Hotspot liegt. */
+  hatFokus(hotspot: string): boolean;
   /** Legt den Fokus auf die Szene selbst, ohne einen Hotspot hervorzuheben; Tab führt dann zum ersten Hotspot. */
   fokussiereSzene(): void;
   abbauen(): void;
@@ -128,9 +128,7 @@ export function baueSzene(
   svg.addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse') return;
     const zeiger = { x: e.clientX, y: e.clientY };
-    const hotspot = getroffen(e.target);
-    if (hotspot !== undefined && hotspot === unterDerMaus) melde({ art: 'bewegt', hotspot, zeiger });
-    else zeigeAuf(hotspot, zeiger);
+    zeigeAuf(getroffen(e.target), zeiger);
   });
   svg.addEventListener('pointerleave', (e) => {
     if (e.pointerType === 'mouse') zeigeAuf(undefined, { x: e.clientX, y: e.clientY });
@@ -177,6 +175,10 @@ export function baueSzene(
     lageVon,
     fokussiere(hotspot) {
       elemente.get(hotspot)?.focus({ preventScroll: true });
+    },
+    hatFokus(hotspot) {
+      const element = elemente.get(hotspot);
+      return element !== undefined && document.activeElement === element;
     },
     fokussiereSzene() {
       svg.focus({ preventScroll: true });

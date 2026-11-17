@@ -2,6 +2,7 @@
 // nur als Text im Markup, nie als HTML. Er ist bedienbar (F32): Er fängt Klicks ab und trägt bei
 // einem Zoom-Hotspot mit gefundener Eintrittskarte einen Kartenknopf.
 
+import type { Ref } from 'preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import type { Hinweisinhalt } from '../logik/hinweis.ts';
 import { KONTUR, WEISS } from '../szene/haken.ts';
@@ -23,9 +24,22 @@ interface Eigenschaften {
   onMausEin: () => void;
   onMausAus: () => void;
   onOeffneKarte: (karte: string) => void;
+  /** Der Kartenknopf, damit die Anwendung ihm per Tab den Fokus geben kann. */
+  kartenknopfRef: Ref<HTMLButtonElement>;
+  /** Der Kartenknopf hat den Fokus verloren. */
+  onKartenknopfFokusVerloren: () => void;
 }
 
-export function Hinweis({ inhalt, ziel, anker, onMausEin, onMausAus, onOeffneKarte }: Eigenschaften) {
+export function Hinweis({
+  inhalt,
+  ziel,
+  anker,
+  onMausEin,
+  onMausAus,
+  onOeffneKarte,
+  kartenknopfRef,
+  onKartenknopfFokusVerloren,
+}: Eigenschaften) {
   const feld = useRef<HTMLDivElement>(null);
 
   // Erst messen, dann setzen; beides vor dem Zeichnen, damit der Hinweis nicht springt.
@@ -74,10 +88,12 @@ export function Hinweis({ inhalt, ziel, anker, onMausEin, onMausAus, onOeffneKar
           <button
             type="button"
             class="hinweis-karte"
+            ref={kartenknopfRef}
             aria-label={TEXTE.eintrittskarteOeffnen}
-            // Aus der Tab-Reihenfolge, bis die Tastaturbedienung des Hinweises da ist (Konzeptplan 1a):
-            // Sonst käme der Fokus hierher und der Hinweis schlösse sich unter ihm.
+            // Nicht in der Tab-Reihenfolge: Die Anwendung führt den Fokus vom Hotspot hierher und von
+            // hier zurück (F32), sonst käme Tab vom letzten Hotspot hierher statt aus der Szene.
             tabindex={-1}
+            onBlur={onKartenknopfFokusVerloren}
             onClick={() => onOeffneKarte(inhalt.eintrittskarte!)}
           >
             <SymbolKarte gefunden />

@@ -15,8 +15,8 @@ import { pruefeSvg, type Punkt, type Rechteck, type Szene, type Szenenereignis }
 import { Hinweis } from './hinweis.tsx';
 import { Kartenansicht } from './kartenansicht.tsx';
 import { Pfadanzeige, type Ebene } from './pfadanzeige.tsx';
-import { sollNeuAnkern } from './platzierung.ts';
 import { Szenenansicht } from './szenenansicht.tsx';
+import { deuteTaste } from './tasten.ts';
 import { TEXTE } from './texte.ts';
 
 /** Die Textfassung. Die Auswahl durch den Spieler kommt mit dem Startbildschirm hierher. */
@@ -73,13 +73,17 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const szeneRef = useRef<Szene | undefined>(undefined);
   const buehneRef = useRef<HTMLElement>(null);
   const kartenknopfRef = useRef<HTMLButtonElement>(null);
+  /** Der Kartenknopf im Hinweis, falls einer offen ist und einen trägt. */
+  const hinweisknopfRef = useRef<HTMLButtonElement>(null);
+  /** Solange der Fokus von der Anwendung zurück an einen Hotspot gelegt wird, öffnet das keinen Hinweis. */
+  const fokusOhneHinweis = useRef(false);
   /** Solange ein Wechsel läuft, löst nichts weiteres aus. */
   const wechselt = useRef(false);
   const zoom = useRef<Animation | undefined>(undefined);
   /** Läuft, sobald die nächste Szene gebaut ist und noch bevor sie gezeichnet wird (Herauszoomen). */
   const nachDarstellung = useRef<(() => void) | undefined>(undefined);
-  /** Escape geht eine Ebene zurück; der Handler sieht immer den aktuellen Zustand. */
-  const beiEscape = useRef<(e: KeyboardEvent) => void>(() => {});
+  /** Escape und Tab; der Handler sieht immer den aktuellen Zustand. */
+  const beiTaste = useRef<(e: KeyboardEvent) => void>(() => {});
   const fokusAufSzene = useRef(false);
   const schliesstimer = useRef<number | undefined>(undefined);
   const [wechselFehler, setWechselFehler] = useState(false);
@@ -97,9 +101,9 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   }, []);
 
   useEffect(() => {
-    const beiTaste = (e: KeyboardEvent) => beiEscape.current(e);
-    window.addEventListener('keydown', beiTaste);
-    return () => window.removeEventListener('keydown', beiTaste);
+    const beiKeydown = (e: KeyboardEvent) => beiTaste.current(e);
+    window.addEventListener('keydown', beiKeydown);
+    return () => window.removeEventListener('keydown', beiKeydown);
   }, []);
 
   // Ein ausstehendes Schließen darf nach dem Abbau nichts mehr setzen.
@@ -319,6 +323,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     stoppeSchliesstimer();
     schliesstimer.current = window.setTimeout(() => {
       schliesstimer.current = undefined;
+      // Solange der Fokus im Kartenknopf liegt, bleibt der Hinweis offen.
+      if (hinweisknopfRef.current !== null && document.activeElement === hinweisknopfRef.current) return;
       setOffen((bisher) => (bisher?.hotspot === hotspot ? undefined : bisher));
     }, SCHLIESS_VERZOEGERUNG_MS);
   }
@@ -337,26 +343,9 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   function beimEreignis(ereignis: Szenenereignis): void {
     switch (ereignis.art) {
       case 'betreten':
-        if (wechselt.current) break;
+        if (wechselt.current || fokusOhneHinweis.current) break;
         oeffneHinweis(ereignis.hotspot, ereignis.lage, ereignis.zeiger);
         break;
-      case 'bewegt': {
-        // Der Hinweis läuft nicht mit; erst weit weg vom Anker setzt er sich an den Zeiger.
-        // Ist keiner für diesen Hotspot offen (etwa nach einer Lageänderung oder einer Karte), öffnet
-        // die Bewegung ihn am Zeiger; bloßes Schließen der Karte öffnet ihn nicht.
-        const { hotspot, zeiger } = ereignis;
-        const lage = szeneRef.current?.lageVon(hotspot);
-        if (wechselt.current || offeneKarte !== undefined || lage === undefined) break;
-        stoppeSchliesstimer();
-        setOffen((bisher) =>
-          bisher?.hotspot !== hotspot
-            ? { hotspot, lage, anker: zeiger }
-            : bisher.anker !== undefined && sollNeuAnkern(bisher.anker, zeiger)
-              ? { ...bisher, anker: zeiger }
-              : bisher,
-        );
-        break;
-      }
       case 'verlassen':
         // Die Maus kann in den Hinweis fahren; erst nach kurzer Verzögerung schließt er.
         planeSchliessen(ereignis.hotspot);
@@ -389,11 +378,62 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     });
   }
 
-  beiEscape.current = (e) => {
-    // Bei offener Karte (sie schließt selbst) oder offenem Hinweis bleibt Escape hier wirkungslos.
-    if (e.key !== 'Escape' || e.defaultPrevented || offeneKarte !== undefined || offen !== undefined) return;
-    const davor = pfad[pfad.length - 2];
-    if (davor !== undefined) void geheZurEbene(davor.szene);
+  /** Legt den Fokus an den Hotspot; `mitHinweis` öffnet dabei dessen Hinweis, sonst bleibt er zu. */
+  function fokussiereHotspot(id: string, mitHinweis: boolean): void {
+    fokusOhneHinweis.current = !mitHinweis;
+    try {
+      szeneRef.current?.fokussiere(id);
+    } finally {
+      fokusOhneHinweis.current = false;
+    }
+  }
+
+  beiTaste.current = (e) => {
+    if (e.defaultPrevented) return;
+    const knopf = hinweisknopfRef.current;
+    const aktion = deuteTaste({
+      taste: e.key,
+      umschalt: e.shiftKey,
+      karteOffen: offeneKarte !== undefined,
+      hinweisOffen: offen !== undefined,
+      hatKartenknopf: knopf !== null,
+      fokus:
+        knopf !== null && document.activeElement === knopf
+          ? 'kartenknopf'
+          : offen !== undefined && szeneRef.current?.hatFokus(offen.hotspot)
+            ? 'hotspot'
+            : 'sonst',
+    });
+    switch (aktion) {
+      case 'nichts':
+        break;
+      case 'ebene-zurueck': {
+        const davor = pfad[pfad.length - 2];
+        if (davor !== undefined) void geheZurEbene(davor.szene);
+        break;
+      }
+      case 'hinweis-schliessen':
+        stoppeSchliesstimer();
+        setOffen(undefined);
+        break;
+      case 'hinweis-schliessen-fokus-zum-hotspot':
+        stoppeSchliesstimer();
+        if (offen !== undefined) fokussiereHotspot(offen.hotspot, false);
+        setOffen(undefined);
+        break;
+      case 'zum-kartenknopf':
+        e.preventDefault();
+        knopf?.focus();
+        break;
+      case 'vom-kartenknopf-weiter':
+        // Ohne preventDefault: Tab geht vom Hotspot aus zum nächsten.
+        if (offen !== undefined) fokussiereHotspot(offen.hotspot, true);
+        break;
+      case 'vom-kartenknopf-zurueck':
+        e.preventDefault();
+        if (offen !== undefined) fokussiereHotspot(offen.hotspot, true);
+        break;
+    }
   };
 
   const offenerHotspot = offen && finde(offen.hotspot);
@@ -451,6 +491,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           onOeffneKarte={(karte) => {
             if (!wechselt.current) zeigeKarte(karte, { art: 'hotspot', id: offen.hotspot });
           }}
+          kartenknopfRef={hinweisknopfRef}
+          onKartenknopfFokusVerloren={() => planeSchliessen(offen.hotspot)}
         />
       )}
       {offeneKarte && (
