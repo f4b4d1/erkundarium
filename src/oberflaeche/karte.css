@@ -63,6 +63,7 @@
   /* Bewegung */
   --karte-dauer-wenden: 0.6s;
   --karte-dauer-aufdecken: 1.35s;
+  --karte-dauer-oeffnen: 0.3s;
 }
 
 /* ---------- Dialog und Anordnung ---------- */
@@ -294,6 +295,18 @@
   }
 }
 
+/* Eine schon gefundene Karte steigt leicht auf, wächst und blendet ein; sie dreht sich nicht. */
+.karte-halter-oeffnen {
+  animation: karte-oeffnen var(--karte-dauer-oeffnen) cubic-bezier(0.3, 0.1, 0.25, 1) backwards;
+}
+
+@keyframes karte-oeffnen {
+  from {
+    opacity: 0;
+    transform: translateY(4%) scale(0.9);
+  }
+}
+
 .kartenseite {
   position: absolute;
   inset: 0;
@@ -328,7 +341,8 @@
     transition: none;
   }
 
-  .karte-aufdecken {
+  .karte-aufdecken,
+  .karte-halter-oeffnen {
     animation: none;
   }
 

@@ -1,5 +1,6 @@
 // Die Kartenansicht: ein modaler Dialog über der Szene (F6 bis F10, F34). Sie lädt die Kartendatei
-// erst beim Öffnen, deckt die Karte beim ersten Fund mit einer Drehung auf und lässt sie wenden.
+// erst beim Öffnen, deckt die Karte beim ersten Fund mit einer Drehung auf, öffnet eine schon
+// gefundene mit einer kurzen Animation und lässt sie wenden.
 // Solange sie offen ist, ist die Szene dahinter gesperrt; den Fokus zurück zum Hotspot legt der
 // Aufrufer nach dem Schließen.
 
@@ -136,6 +137,7 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
             gebiet={gebiet(laden.datei.topic, themengebiete, fassung)}
             farbe={gebietsfarbe(laden.datei.topic, themengebiete, wissensgebiete)}
             deckeAuf={deckeAuf}
+            oeffnen={!aufdecken}
             gewendet={gewendet}
             onKlick={beimKlickAufKarte}
             onAufgedeckt={() => setDeckeAuf(false)}
@@ -176,18 +178,23 @@ interface Karteneigenschaften {
   /** Farbe des Wissensgebiets; fehlt sie, gilt der Vorgabewert aus karte.css und die Karte bleibt farblos. */
   farbe: string | undefined;
   deckeAuf: boolean;
+  /** Schon gefunden: Die Karte erscheint mit der kurzen Öffnen-Animation (F7). */
+  oeffnen: boolean;
   gewendet: boolean;
   onKlick: (e: TargetedMouseEvent<HTMLDivElement>) => void;
   onAufgedeckt: () => void;
 }
 
-function Karte({ datei, text, gebiet, farbe, deckeAuf, gewendet, onKlick, onAufgedeckt }: Karteneigenschaften) {
+function Karte({ datei, text, gebiet, farbe, deckeAuf, oeffnen, gewendet, onKlick, onAufgedeckt }: Karteneigenschaften) {
   const bild = datei.image === undefined ? undefined : kartenbildPfad(datei.image);
   const seite = { datei, text, gebiet, ...(bild === undefined ? {} : { bild }) };
   const klassen = ['karte', deckeAuf && 'karte-aufdecken', gewendet && 'karte-gewendet'].filter(Boolean).join(' ');
+  const halter = ['karte-halter', deckeAuf && 'karte-halter-aufdecken', oeffnen && 'karte-halter-oeffnen']
+    .filter(Boolean)
+    .join(' ');
   return (
     <div
-      class={deckeAuf ? 'karte-halter karte-halter-aufdecken' : 'karte-halter'}
+      class={halter}
       style={farbe === undefined ? undefined : ({ '--gebietsfarbe': farbe } as CSSProperties)}
     >
       <div class={klassen} onClick={onKlick} onAnimationEnd={onAufgedeckt}>
