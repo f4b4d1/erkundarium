@@ -139,7 +139,7 @@ Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für
 
 Der Durchstich `fabrikhalle` → `roboterzelle` → `robotergelenk` ist gezeichnet und begehbar. Zoom, Herauszoomen, Pfadanzeige, Eintrittskarte, Hinweis mit Tastaturbedienung, Kartenansicht mit Kartenumfeld und Verlauf sowie die Sammlung sind umgesetzt (Nächste Schritte 1, 1a bis 1c, 2 und 4).
 
-**Aktuell: Das Schließen der Sammlung per Klick zwischen den Themengebietsgruppen (Chronik 4e, Commit `db36ee1`) wartet auf die Nachprüfung durch den Nutzer; die Optik prüft er selbst, das Verhalten ist nur von Luna im Browser gemessen, ohne Bildschirmfotos. Nach seiner Rückmeldung wählt der Nutzer den nächsten Punkt (3: Servomotor, 5: Bedienhilfen und Zurücksetzen, 6: Rest des Prüfskripts). Keinen davon ohne Auswahl starten.**
+**Aktuell: Das Schließen der Sammlung per Klick zwischen den Themengebietsgruppen (Chronik 4e, Commit `db36ee1`) wartet auf die Nachprüfung durch den Nutzer; die Optik prüft er selbst, das Verhalten ist nur von Luna im Browser gemessen, ohne Bildschirmfotos. Nach seiner Rückmeldung wählt der Nutzer den nächsten Punkt (3: Servomotor, 5: Bedienhilfen und Zurücksetzen, 6: Rest des Prüfskripts, 6a: Zähler). Keinen davon ohne Auswahl starten.**
 
 `AGENTS.md`, `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` sind unversioniert und bleiben es, bis der Nutzer etwas anderes sagt.
 
@@ -179,7 +179,7 @@ Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er si
 
 ### Umgesetzte Anforderungen
 
-Umgesetzt: F1 bis F5, F4a, F7 bis F10, F13 bis F16, F17, F18, F21, F31, F32, F22, F24, F25, F23, F30, F33 bis F36. Teilweise: F6 (der Zähler fehlt; ein eigener, dauernd sichtbarer Zähler ist nicht gewünscht, der Fortschritt im Kopf der Sammlung reicht, Entscheidung des Nutzers vom 2026-11-17), F11 (Haken und Stand im Hinweis ja; Schalter fehlt), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe Nächste Schritte, Punkt 6), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
+Umgesetzt: F1 bis F5, F4a, F7 bis F10, F13 bis F16, F17, F18, F21, F31, F32, F22, F24, F25, F23, F30, F33 bis F36. Teilweise: F6 (der Zähler fehlt, siehe Nächste Schritte, Punkt 6a), F11 (Haken und Stand im Hinweis ja; Schalter fehlt), F19 (nur in der Logik, nicht in der Oberfläche), F20 (siehe Nächste Schritte, Punkt 6), F26 (Auslösen über das Symbol im Hinweis fehlt), F27 (das Abzeichen fehlt).
 
 ### Offene Entscheidungen des Nutzers
 
@@ -192,6 +192,7 @@ Reihenfolge als Vorschlag; der Nutzer entscheidet je Schritt. Erledigt sind die 
 - Punkt 3: Karte `servomotor` und Beziehungen; die Karte kommt an den Hotspot `motor` in `robotergelenk`.
 - Punkt 5: Abzeichen, Hilfe-Schalter, Schalter für die Haken, Auslösen über das Symbol im Hinweis, breitere Klickfläche (F26 bis F29, F37, F11), Zurücksetzen des Spielstands (F19 in der Oberfläche).
 - Punkt 6: Rest des Prüfskripts (F20): Längenvorgaben und Bausteinzahl, Karten ohne Hotspot, Kreise und Erreichbarkeit im Szenennetz (die Funktionen liegen in `src/logik/szenennetz.ts`), symmetrische Beziehungen an beiden Karten, Kreise bei `acyclic`, `linkLabel` ohne `link`, fehlende Bild- und Symboldateien, Prüfung von Kartenbildern und Symbolen auf verbotene Inhalte, Hotspot-Dichte.
+- Punkt 6a: Zähler für gefundene Karten (F6), der beim Aufdecken einer Karte steigt. Form und Ort klärt der Nutzer vor dem Start. Am 2026-11-17 hatte er einen eigenen, dauernd sichtbaren Zähler noch abgelehnt; die Spec verlangt ihn weiter, daher dieser Schritt.
 - Punkt 7: Abnahme nach Spec Abschnitt 10.
 
 ### Bekannte Mängel und Ungeprüftes

@@ -57,6 +57,7 @@ Seit `8f6e56d` erzeugt `npm run zoomansicht` das Grundgerüst einer Zoom-Ansicht
 Ursprünglich „Nächste Schritte in M1“ und „Offene Entscheidungen des Nutzers“ im Konzeptplan.
 
 - Startszene angeglichen (Entscheidung vom 2026-11-16).
+- F6, Zähler: Am 2026-11-17 entschied der Nutzer, dass ein eigener, dauernd sichtbarer Zähler nicht gewünscht ist und der Fortschritt im Kopf der Sammlung reicht. Später am selben Tag hat er den Zähler doch als eigenen Schritt (Punkt 6a) in den Konzeptplan aufnehmen lassen; F6 bleibt unverändert.
 - Punkt 1 (erledigt in 9a bis 9c): Zoom mit Pfadanzeige und Eintrittskarte (F3, F4, F30 bis F32), Stand im Hinweis eines Zoom-Hotspots (F11). Auftrag 2 war geteilt (Entscheidung des Nutzers vom 2026-11-16):
   - 2a: F30, F31, Stand im Hinweis (F11).
   - 2b: Hinweis bedienbar: lässt keine Klicks mehr durch, bleibt offen, solange der Zeiger darin ist, trägt den Kartenknopf (F32); schließt nach dem Schließen einer Karte. Dazu sitzt der Hinweis am Zeiger statt an der Begrenzungsbox: Anker ist der Eintrittspunkt der Maus (bei Touch der Tippunkt), etwa 12 px versetzt, im Fenster gehalten, darf den Hotspot verdecken; er läuft nicht mit, setzt sich aber neu an den Zeiger, wenn dieser sich im Hotspot mehr als etwa 120 px vom Anker entfernt. Bei Tastaturfokus bleibt die Lage an der Begrenzungsbox. (Das Neu-Ankern ist seit 9e entfernt.)
