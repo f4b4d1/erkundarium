@@ -141,7 +141,7 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-17, Stand Commit `1c71e63` und der folgende)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-17, Stand Commit `28b4be1` und der folgende Übergabecommit)
 
 Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
 
@@ -149,16 +149,14 @@ Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für
 
 Der Durchstich `fabrikhalle` → `roboterzelle` → `robotergelenk` ist gezeichnet und begehbar (Schritt 10c, Commit `dc21e3f`, vom Nutzer vorerst so abgenommen). Hinweis und Tastatur (1a, 1c) sind erledigt (Schritt 9e). **Gewählt (2026-11-17): Sammlung (Nächste Schritte, Punkt 4) in den Schritten 4a bis 4c**; Entscheidungen des Nutzers stehen dort. 4a bis 4c sind erledigt, Punkt 4 ist damit abgeschlossen (dazu farbige Kacheln mit Symbol, Commit `6d7b47d`). F6 bleibt vorerst teilweise: Ein eigener, dauernd sichtbarer Zähler ist nicht gewünscht, der Fortschritt im Kopf der Sammlung reicht (Entscheidung des Nutzers vom 2026-11-17).
 
-**Als Nächstes zwei kleine Schritte zur Sammlung (Wunsch des Nutzers vom 2026-11-17), danach wählt der Nutzer den nächsten Punkt (3, 5 oder 6):**
+**Aktuell: Sammlungskacheln vergrößert (Commit `28b4be1`); die optische Abnahme durch den Nutzer steht aus. Danach folgt der zweite kleine Schritt, anschließend wählt der Nutzer den nächsten Punkt (3, 5 oder 6).**
 
-1. Kacheln der Sammlung etwas größer machen (heute Rasterbreite mindestens 140 px, bei höchstens 480 px Fensterbreite 120 px; Kacheln etwa 137 × 193 px bei 1280×800). Reine CSS-Änderung in `src/oberflaeche/sammlung.css`, kein Review; bei 360×640 weiter ohne waagerechtes Scrollen und ohne abgeschnittene Titel.
-2. Klick neben die Karten in der Sammlung schließt sie wie „Schließen“ (zurück in die Szene darunter, Fokus auf den Sammlungsknopf). Das ändert die bisherige Entscheidung „Klick daneben gibt es nicht“; Spec F14 entsprechend ergänzen. Vor dem Auftrag mit dem Nutzer klären: ob Klicks auf Schatten, Gruppenüberschriften und den Kopf auch schließen (Vorschlag: nur Kacheln und Knöpfe schließen nicht, alles andere schon, wie beim Klick neben die Karte in der Kartenansicht) und dass ein Klick bei offener Karte über der Sammlung weiter nur die Karte schließt.
-
-Bei den farbigen Kacheln prüfte der Nutzer die Optik selbst, ohne Bildschirmfotos von Agent oder Hauptsession (2026-11-17). Ob das auch für Schritt 1 und künftig gilt, beim Nutzer nachfragen.
+1. **Erledigt:** Kacheln der Sammlung größer gemacht, ausschließlich in `src/oberflaeche/sammlung.css`: Raster-Mindestbreite 160 statt 140 px, bis 480 px Fensterbreite 140 statt 120 px. Luna Medium hat umgesetzt und mit `npm run browser` alle elf gefundenen Karten bei 1280×800 (etwa 166×233 px, sechs Spalten) und 360×640 (etwa 150×209 px, zwei Spalten) sowie einen Schatten bei 360×640 vermessen: keine abgeschnittenen Titel, kein waagerechter Überlauf. Die Hauptsession hat den CSS-Diff und das Browserszenario gelesen sowie Typprüfung, alle 512 Tests und `npm run pruefen` selbst ausgeführt (0 Fehler, 11 bekannte Entwurfswarnungen). Kein Review für diese reine CSS-Änderung. Die Browsermessungen stammen vom Agenten; die Optik prüft der Nutzer selbst, ausdrücklich ohne Bildschirmfotos durch Agenten oder Hauptsession (Entscheidung vom 2026-11-17).
+2. **Nach der Rückmeldung zu Schritt 1:** Klick auf freie Flächen zwischen den Gruppen schließt die Sammlung wie „Schließen“ (zurück in die Szene darunter, Fokus auf den Sammlungsknopf). Entscheidung des Nutzers vom 2026-11-17: **nur freie Flächen zwischen den Gruppen**; Klicks auf Schatten, Gruppenüberschriften oder den Kopf schließen nicht (der Knopf „Schließen“ bleibt wirksam). Ein Klick neben eine offene Karte über der Sammlung schließt weiterhin nur die Karte. Das ändert die bisherige Entscheidung „Klick daneben gibt es nicht“; Spec F14 im Umsetzungsschritt entsprechend ergänzen.
 
 Seit `8f6e56d` erzeugt `npm run zoomansicht` das Grundgerüst einer Zoom-Ansicht (Wunsch des Nutzers: wiederverwendbar im Projekt statt im Scratchpad). Das Werkzeug hat Tests, aber kein Review (vom Nutzer nicht verlangt).
 
-Der Arbeitsbaum ist sauber; nur `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` liegen absichtlich unversioniert da.
+Die versionierten Dateien sind nach den Commits sauber; `AGENTS.md`, `CLAUDE.md` und zwei Vergleichsbilder `farbvergleich-*.png` bleiben unversioniert und wurden in diesem Schritt nicht bearbeitet.
 
 Kartenknopf und Aktionssymbol (Lupe „Hineinzoomen“) stehen im Hinweis nebeneinander und sehen gleich aus; nur der Kartenknopf ist ein Knopf. Der Nutzer lässt das vorerst so (2026-11-16).
 
@@ -175,7 +173,7 @@ Kartenknopf und Aktionssymbol (Lupe „Hineinzoomen“) stehen im Hinweis nebene
 Diese Regeln hat der Nutzer für die Umsetzung festgelegt. Sie gelten, bis er sie ändert; in `CLAUDE.md` stehen sie nicht.
 
 - Die Hauptsession orchestriert und schreibt selbst keinen Anwendungscode. Dokumente, kleine Inhaltsänderungen und Werkzeuge unter `tools/` (etwa `browser.ts`) darf sie selbst machen.
-- Die Hauptsession läuft auf Opus, Stufe medium. Code schreiben Subagenten mit dem Modell Sonnet (seit 2026-11-16 für alle Coding-Aufgaben), nacheinander, je Auftrag ein abgegrenzter Schritt mit Verweis auf Spec, Glossar und ADRs.
+- Modellvorgabe des Nutzers vom 2026-11-17: Sol High als Orchestrator; Sol Medium für Implementierungen und schwierige Aufgaben, Luna Medium für einfache Fixes und Tests. Code schreiben Subagenten, nacheinander, je Auftrag ein abgegrenzter Schritt mit Verweis auf Spec, Glossar und ADRs. Diese Vorgabe ersetzt die frühere Aufteilung Opus/Sonnet.
 - Der Nutzer arbeitet nah am 5-Stunden-Limit: nichts Großes ohne Rückfrage starten.
 - Ablauf je Schritt nach dem implement-Skill: testgetrieben an den vereinbarten Nahtstellen (Szenennetz, Fundorte, Fortschritt und Abschluss, Spielstand, Prüfskript; dazu jede weitere reine Logik), Typprüfung und Tests regelmäßig. Danach Code-Review, Befunde in einem eigenen Commit beheben.
 - Review nach Größe des Schritts (seit 2026-11-16, um Tokens zu sparen): Neue Logik oder neue Abläufe bekommen ein Review durch einen einzigen Agenten, der beide Achsen (Standards und Spec) in einem Bericht prüft. Reine Inhalts- und CSS-Änderungen und kleine Fixes bekommen kein Review, nur die Nachprüfung durch die Hauptsession.
