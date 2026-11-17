@@ -1,0 +1,158 @@
+/* Die Sammlung (F13 bis F15): ein Dialog über dem ganzen Spielbereich. Karten und Schatten
+   lehnen sich an die Kartenansicht und ihre Umfeldblöcke an (karte.css). */
+.sammlung {
+  --sammlung-papier: #f7f9fb;
+  --sammlung-kontur: #26262e;
+  --sammlung-schatten: rgb(0 0 0 / 0.38);
+  --sammlung-linie: rgb(247 249 251 / 0.5);
+  --sammlung-eintragsbreite: 140px;
+
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: rgb(24 24 32 / 0.94);
+  color: var(--sammlung-papier);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.sammlung::backdrop {
+  background: transparent;
+}
+
+.sammlung:focus {
+  outline: none;
+}
+
+.sammlung-kopf {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 10px 16px;
+  background: rgb(24 24 32 / 0.98);
+  border-bottom: 2px solid var(--sammlung-linie);
+}
+
+.sammlung-titel {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.sammlung-fortschritt {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 24px;
+}
+
+.sammlung-fortschritt p {
+  margin: 0;
+}
+
+.sammlung-fortschritt-name {
+  font-weight: 700;
+}
+
+.sammlung-schliessen {
+  margin-left: auto;
+}
+
+.sammlung-inhalt {
+  box-sizing: border-box;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.sammlung-gruppe + .sammlung-gruppe {
+  margin-top: 24px;
+}
+
+.sammlung-gruppentitel {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sammlung-karten {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--sammlung-eintragsbreite), 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Beide haben das Seitenverhältnis der Karte (5 : 7). */
+.sammlung-eintrag,
+.sammlung-schatten {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  border-radius: 12px;
+}
+
+.sammlung-eintrag {
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  text-align: center;
+  color: var(--sammlung-kontur);
+  background: var(--sammlung-papier);
+  border: 2.5px solid var(--sammlung-kontur);
+  box-shadow: 3px 3px 0 var(--sammlung-schatten);
+  cursor: pointer;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+
+.sammlung-eintrag:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--sammlung-schatten);
+}
+
+.sammlung-eintrag:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--sammlung-schatten);
+}
+
+.sammlung-eintrag:focus-visible,
+.sammlung-schliessen:focus-visible {
+  outline: 3px solid #f6c945;
+  outline-offset: 3px;
+}
+
+/* Nicht gefunden: nur die Form, ohne Titel (wie die Schatten der Umfeldblöcke). */
+.sammlung-schatten {
+  background: rgb(247 249 251 / 0.14);
+  border: 2.5px dashed var(--sammlung-linie);
+}
+
+@media (max-width: 480px) {
+  .sammlung {
+    --sammlung-eintragsbreite: 120px;
+  }
+}

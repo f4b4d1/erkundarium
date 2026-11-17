@@ -1,9 +1,10 @@
 // Die Pfadanzeige (F4): der Weg von der Startszene zur aktuellen Szene. Frühere Ebenen sind
 // Knöpfe, die aktuelle ist nur beschriftet und mit `aria-current` markiert. Trägt sie eine
-// Eintrittskarte, steht daneben der Kartenknopf (F31).
+// Eintrittskarte, steht daneben der Kartenknopf (F31). Rechts außen öffnet der Sammlungsknopf die
+// Sammlung (F14).
 
 import type { Ref } from 'preact';
-import { SymbolKarte } from './symbole.tsx';
+import { SymbolKarte, SymbolSammlung } from './symbole.tsx';
 import { TEXTE } from './texte.ts';
 
 export interface Ebene {
@@ -19,9 +20,19 @@ interface Eigenschaften {
   onOeffneEintrittskarte: () => void;
   /** Für den Fokus, wenn die Karte zugeht. */
   kartenknopfRef: Ref<HTMLButtonElement>;
+  onOeffneSammlung: () => void;
+  /** Für den Fokus, wenn die Sammlung zugeht. */
+  sammlungsknopfRef: Ref<HTMLButtonElement>;
 }
 
-export function Pfadanzeige({ ebenen, onWaehle, onOeffneEintrittskarte, kartenknopfRef }: Eigenschaften) {
+export function Pfadanzeige({
+  ebenen,
+  onWaehle,
+  onOeffneEintrittskarte,
+  kartenknopfRef,
+  onOeffneSammlung,
+  sammlungsknopfRef,
+}: Eigenschaften) {
   return (
     <nav class="pfad" aria-label={TEXTE.pfad}>
       <ol>
@@ -57,6 +68,15 @@ export function Pfadanzeige({ ebenen, onWaehle, onOeffneEintrittskarte, kartenkn
           </li>
         ))}
       </ol>
+      <button
+        ref={sammlungsknopfRef}
+        type="button"
+        class="pfad-sammlung"
+        aria-label={TEXTE.sammlung.oeffnen}
+        onClick={onOeffneSammlung}
+      >
+        <SymbolSammlung />
+      </button>
     </nav>
   );
 }

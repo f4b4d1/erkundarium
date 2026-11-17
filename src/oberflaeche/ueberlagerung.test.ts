@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { fokusErledigt, mitKarte, ohneKarte, ueberlagert, type Ueberlagerung } from './ueberlagerung.ts';
+import {
+  fokusBereit,
+  fokusErledigt,
+  mitKarte,
+  mitSammlung,
+  ohneKarte,
+  ohneSammlung,
+  ueberlagert,
+  type Ueberlagerung,
+} from './ueberlagerung.ts';
 
 const leer: Ueberlagerung = {};
 
@@ -59,5 +68,79 @@ describe('fokusErledigt', () => {
   it('entfernt den ausstehenden Fokus', () => {
     const zu = ohneKarte(mitKarte(leer, 'a', false, { art: 'szene' }));
     expect(fokusErledigt(zu)).toEqual({});
+  });
+});
+
+describe('Sammlung', () => {
+  const knopf = { art: 'sammlungsknopf' } as const;
+  const eintrag = { art: 'eintrag', karte: 'a' } as const;
+
+  it('mitSammlung öffnet die Sammlung mit Fokusziel und überlagert die Szene', () => {
+    const u = mitSammlung(leer, knopf);
+    expect(u).toEqual({ sammlung: { fokus: knopf } });
+    expect(ueberlagert(u)).toBe(true);
+  });
+
+  it('mitSammlung verwirft einen ausstehenden Fokus', () => {
+    const zu = ohneKarte(mitKarte(leer, 'a', false, { art: 'szene' }));
+    expect(mitSammlung(zu, knopf).fokusAusstehend).toBeUndefined();
+  });
+
+  it('ohneSammlung merkt sich das Fokusziel und überlagert nicht mehr', () => {
+    const zu = ohneSammlung(mitSammlung(leer, knopf));
+    expect(zu).toEqual({ fokusAusstehend: knopf });
+    expect(ueberlagert(zu)).toBe(false);
+  });
+
+  it('ohneSammlung lässt eine Überlagerung ohne Sammlung unverändert', () => {
+    expect(ohneSammlung(leer)).toBe(leer);
+  });
+
+  it('eine Karte über der Sammlung lässt die Sammlung stehen', () => {
+    const u = mitKarte(mitSammlung(leer, knopf), 'a', false, eintrag);
+    expect(u.sammlung).toEqual({ fokus: knopf });
+    expect(u.karte?.karte).toBe('a');
+  });
+
+  it('ohneKarte lässt die Sammlung offen und merkt sich den Eintrag', () => {
+    const u = ohneKarte(mitKarte(mitSammlung(leer, knopf), 'a', false, eintrag));
+    expect(u).toEqual({ sammlung: { fokus: knopf }, fokusAusstehend: eintrag });
+    expect(ueberlagert(u)).toBe(true);
+  });
+
+  it('eine Karte ersetzt eine offene, die Sammlung bleibt', () => {
+    const u = mitKarte(mitKarte(mitSammlung(leer, knopf), 'a', false, eintrag), 'b', false, eintrag);
+    expect(u.sammlung).toBeDefined();
+    expect(u.karte?.nummer).toBe(2);
+  });
+});
+
+describe('fokusBereit', () => {
+  const knopf = { art: 'sammlungsknopf' } as const;
+  const eintrag = { art: 'eintrag', karte: 'a' } as const;
+
+  it('ist ohne ausstehenden Fokus falsch', () => {
+    expect(fokusBereit(leer)).toBe(false);
+  });
+
+  it('wartet bei überlagerter Szene, solange die Karte offen ist', () => {
+    expect(fokusBereit({ karte: mitKarte(leer, 'a', false, eintrag).karte!, fokusAusstehend: eintrag })).toBe(false);
+  });
+
+  it('der Eintrag ist bereit, sobald die Karte weg ist, auch bei stehender Sammlung', () => {
+    expect(fokusBereit(ohneKarte(mitKarte(mitSammlung(leer, knopf), 'a', false, eintrag)))).toBe(true);
+  });
+
+  it('andere Ziele warten, solange die Sammlung steht', () => {
+    expect(fokusBereit({ sammlung: { fokus: knopf }, fokusAusstehend: knopf })).toBe(false);
+    expect(fokusBereit({ sammlung: { fokus: knopf }, fokusAusstehend: { art: 'szene' } })).toBe(false);
+  });
+
+  it('der Sammlungsknopf ist bereit, wenn die Sammlung zu ist', () => {
+    expect(fokusBereit(ohneSammlung(mitSammlung(leer, knopf)))).toBe(true);
+  });
+
+  it('ein Ziel der Szene ist bereit, wenn nichts mehr überlagert', () => {
+    expect(fokusBereit(ohneKarte(mitKarte(leer, 'a', false, { art: 'hotspot', id: 'h' })))).toBe(true);
   });
 });

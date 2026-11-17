@@ -16,6 +16,15 @@ export const TEXTE = {
   /** Stand einer Szene samt tieferen Szenen (F11). */
   stand: ({ gefunden, vorhanden }: Stand): string =>
     vorhanden === 0 ? 'Keine Karten' : `${gefunden} von ${vorhanden} ${vorhanden === 1 ? 'Karte' : 'Karten'}`,
+  /** Die Sammlung (F13 bis F15). */
+  sammlung: {
+    name: 'Sammlung',
+    oeffnen: 'Sammlung öffnen',
+    schliessen: 'Schließen',
+    gesamt: 'Gesamt',
+    /** Name eines Schattens: Titel und Inhalt der noch nicht gefundenen Karte bleiben verborgen. */
+    nichtGefunden: 'Noch nicht gefundene Karte',
+  },
   neuereVersion: 'Dieser Spielstand stammt von einer neueren Version. In dieser Sitzung wird nichts gespeichert.',
   speichernFehlgeschlagen:
     'Der Spielstand konnte nicht gespeichert werden. Was du in dieser Sitzung findest, geht beim Schließen verloren.',

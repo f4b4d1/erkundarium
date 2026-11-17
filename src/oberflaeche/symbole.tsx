@@ -25,3 +25,13 @@ export function SymbolKarte({ gefunden }: { gefunden: boolean }) {
     </svg>
   );
 }
+
+/** Der Stapel Karten für die Sammlung: eine hintere Karte, eine vordere. */
+export function SymbolSammlung() {
+  return (
+    <svg class="symbol" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="9" y="2.5" width="12" height="16" rx="2" transform="rotate(10 15 10.5)" fill="#6B7785" stroke={KONTUR} stroke-width="2" />
+      <rect x="3.5" y="5.5" width="12" height="16" rx="2" fill={WEISS} stroke={KONTUR} stroke-width="2" />
+    </svg>
+  );
+}

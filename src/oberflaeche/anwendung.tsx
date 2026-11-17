@@ -1,5 +1,5 @@
 // Die Anwendung hält den Zustand zusammen: geladene Szene, Spielstand, offener Hinweis, offene
-// Karte und Meldungen. Sie startet immer in der Startszene der ersten Welt (F1).
+// Sammlung und Karte und Meldungen. Sie startet immer in der Startszene der ersten Welt (F1).
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { abgehakteHotspots, hinweisinhalt } from '../logik/hinweis.ts';
@@ -15,9 +15,20 @@ import { pruefeSvg, type Punkt, type Rechteck, type Szene, type Szenenereignis }
 import { Hinweis } from './hinweis.tsx';
 import { Kartenansicht } from './kartenansicht.tsx';
 import { Pfadanzeige, type Ebene } from './pfadanzeige.tsx';
+import { Sammlung } from './sammlung.tsx';
 import { Szenenansicht } from './szenenansicht.tsx';
 import { deuteTaste } from './tasten.ts';
-import { fokusErledigt, mitKarte, ohneKarte, ueberlagert, type Fokusziel, type Ueberlagerung } from './ueberlagerung.ts';
+import {
+  fokusBereit,
+  fokusErledigt,
+  mitKarte,
+  mitSammlung,
+  ohneKarte,
+  ohneSammlung,
+  ueberlagert,
+  type Fokusziel,
+  type Ueberlagerung,
+} from './ueberlagerung.ts';
 import { wenigerBewegung } from './bewegung.ts';
 import { TEXTE } from './texte.ts';
 
@@ -58,6 +69,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const szeneRef = useRef<Szene | undefined>(undefined);
   const buehneRef = useRef<HTMLElement>(null);
   const kartenknopfRef = useRef<HTMLButtonElement>(null);
+  const sammlungsknopfRef = useRef<HTMLButtonElement>(null);
   /** Der Kartenknopf im Hinweis, falls einer offen ist und einen trägt. */
   const hinweisknopfRef = useRef<HTMLButtonElement>(null);
   /** Solange der Fokus von der Anwendung zurück an einen Hotspot gelegt wird, öffnet das keinen Hinweis. */
@@ -94,9 +106,10 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   // Ein ausstehendes Schließen darf nach dem Abbau nichts mehr setzen.
   useEffect(() => () => window.clearTimeout(schliesstimer.current), []);
 
-  // Erst wenn die Kartenansicht aus der Seite ist, ist die Szene wieder bedienbar und fokussierbar.
+  // Erst wenn das Ziel wieder erreichbar ist (Kartenansicht aus der Seite, bei Szene und Knopf auch
+  // die Sammlung), legt die Anwendung den Fokus dorthin.
   useEffect(() => {
-    if (ueberlagert(ueberlagerung) || ueberlagerung.fokusAusstehend === undefined) return;
+    if (!fokusBereit(ueberlagerung) || ueberlagerung.fokusAusstehend === undefined) return;
     fokussiere(ueberlagerung.fokusAusstehend);
     setUeberlagerung(fokusErledigt);
   }, [ueberlagerung]);
@@ -192,6 +205,12 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
         break;
       case 'szene':
         szeneRef.current?.fokussiereSzene();
+        break;
+      case 'sammlungsknopf':
+        sammlungsknopfRef.current?.focus();
+        break;
+      case 'eintrag':
+        document.querySelector<HTMLElement>(`.sammlung [data-karte="${CSS.escape(ziel.karte)}"]`)?.focus();
         break;
     }
   }
@@ -295,6 +314,14 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 
   function schliesseKarte(): void {
     setUeberlagerung(ohneKarte);
+  }
+
+  /** Öffnet die Sammlung; der Hinweis ist dann zu und bleibt es. Während eines Wechsels tut das nichts. */
+  function oeffneSammlung(): void {
+    if (wechselt.current) return;
+    stoppeSchliesstimer();
+    setOffen(undefined);
+    setUeberlagerung((bisher) => mitSammlung(bisher, { art: 'sammlungsknopf' }));
   }
 
   function stoppeSchliesstimer(): void {
@@ -441,6 +468,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
         ebenen={ebenen}
         onWaehle={(id) => void geheZurEbene(id)}
         kartenknopfRef={kartenknopfRef}
+        sammlungsknopfRef={sammlungsknopfRef}
+        onOeffneSammlung={oeffneSammlung}
         onOeffneEintrittskarte={() => {
           if (!wechselt.current && eintrittskarte !== undefined) zeigeKarte(eintrittskarte, { art: 'kartenknopf' });
         }}
@@ -478,6 +507,16 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           }}
           kartenknopfRef={hinweisknopfRef}
           onKartenknopfFokusVerloren={() => planeSchliessen(offen.hotspot)}
+        />
+      )}
+      {ueberlagerung.sammlung && (
+        <Sammlung
+          verzeichnis={verzeichnis}
+          gefunden={gefunden}
+          fassung={FASSUNG}
+          welt={szeneEintrag(pfad[pfad.length - 1]!.szene)?.world ?? ''}
+          onOeffneKarte={(karte) => zeigeKarte(karte, { art: 'eintrag', karte })}
+          onSchliessen={() => setUeberlagerung(ohneSammlung)}
         />
       )}
       {ueberlagerung.karte && (

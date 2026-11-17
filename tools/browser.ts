@@ -57,7 +57,7 @@ export interface Browser {
   taste(name: 'Enter' | 'Escape' | 'Tab' | ' ' | 'ArrowLeft' | 'ArrowRight' | 'ArrowUp' | 'ArrowDown', umschalt?: boolean): Promise<void>;
   /** Speichert ein Bildschirmfoto im Ausgabeordner und gibt den absoluten Pfad zurück. */
   foto(name: string): Promise<string>;
-  /** Kurzer Überblick: Pfad, Fokus, Hinweis, Meldungen, offene Karte, Spielstand. */
+  /** Kurzer Überblick: Pfad, Fokus, Hinweis, Meldungen, offene Karte und Sammlung, Spielstand. */
   zustand(): Promise<Record<string, unknown>>;
   /** Fenstergröße in CSS-Pixeln (Standard 1280 × 800). */
   fenster(breite: number, hoehe: number): Promise<void>;
@@ -176,13 +176,17 @@ async function verbinde(ausgabeordner: string): Promise<{ browser: Browser; schl
     throw new Error(`Nach ${ms} ms noch nicht wahr: ${ausdruck}`);
   }
 
-  /** Ein Punkt, an dem `elementFromPoint` das Element trifft; wirft, wenn es überall verdeckt ist. */
+  /** Ein Punkt, an dem `elementFromPoint` das Element trifft, möglichst nah an der Mitte; wirft, wenn es überall verdeckt ist. */
   async function trefferpunkt(selektor: string): Promise<[number, number]> {
     const punkt = await werte<[number, number] | null | 'verdeckt'>(`(() => {
       const el = document.querySelector(${JSON.stringify(selektor)});
       if (!el) return null;
       const b = el.getBoundingClientRect();
-      for (let i = 1; i < 20; i++) for (let j = 1; j < 20; j++) {
+      // Von der Mitte nach außen: Am Rand verschiebt :active Knöpfe unter dem Zeiger weg, der Klick ginge verloren.
+      const stellen = [];
+      for (let i = 1; i < 20; i++) for (let j = 1; j < 20; j++) stellen.push([i, j]);
+      stellen.sort((p, q) => Math.hypot(p[0] - 10, p[1] - 10) - Math.hypot(q[0] - 10, q[1] - 10));
+      for (const [i, j] of stellen) {
         const x = b.left + (b.width * i) / 20, y = b.top + (b.height * j) / 20;
         const t = document.elementFromPoint(x, y);
         // Hotspots können ineinander liegen (Gelenke im Roboter): Der nächste Hotspot über dem Treffer muss dieser sein.
@@ -263,6 +267,8 @@ async function verbinde(ausgabeordner: string): Promise<{ browser: Browser; schl
           hinweis: document.querySelector('.hinweis')?.textContent ?? null,
           meldungen: [...document.querySelectorAll('.meldungen p')].map((p) => p.textContent),
           karteOffen: !!document.querySelector('dialog[open]'),
+          sammlungOffen: !!document.querySelector('dialog.sammlung[open]'),
+          kartenansichtOffen: !!document.querySelector('dialog.kartenansicht[open]'),
           fehler: document.querySelector('.fehler')?.textContent ?? null,
           spielstand: Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)])),
         };
