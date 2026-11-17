@@ -7,14 +7,16 @@ import { TEXTE } from './texte.ts';
 
 interface Eigenschaften {
   umfeld: Kartenumfeld;
+  /** Beim Aufdecken: Der Platz bleibt, die Blöcke sind aber weder zu sehen noch zu bedienen. */
+  verdeckt: boolean;
   onOeffne: (karte: string) => void;
 }
 
-export function Umfeldbloecke({ umfeld, onOeffne }: Eigenschaften) {
+export function Umfeldbloecke({ umfeld, verdeckt, onOeffne }: Eigenschaften) {
   const kennung = useId();
   const { fundorte, beziehungen } = umfeld;
   return (
-    <div class="kartenumfeld">
+    <div class={verdeckt ? 'kartenumfeld kartenumfeld-verdeckt' : 'kartenumfeld'}>
       {fundorte.length > 0 && (
         <section class="umfeldblock" aria-labelledby={`${kennung}-fundorte`}>
           <h3 class="umfeldtitel" id={`${kennung}-fundorte`}>

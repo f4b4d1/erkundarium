@@ -110,7 +110,7 @@
 
 @media (orientation: landscape) {
   .kartenansicht.kartenansicht-mit-umfeld {
-    --karte-umfeldzone: 180px;
+    --karte-umfeldzone: 210px;
   }
 
   /* Querformat: Knöpfe rechts neben der Karte, die Karte nutzt die ganze Höhe */
@@ -320,6 +320,30 @@
   background: rgb(38 38 46 / 0.14);
   border: 2.5px dashed var(--karte-linie-fakten);
   border-radius: 999px;
+}
+
+/* Die Blöcke blenden mit der Karte ein; beim Aufdecken erst danach (Klasse verdeckt, Platz bleibt).
+   Beim Entfernen der Klasse beginnt die Animation. */
+.kartenumfeld {
+  animation: umfeld-einblenden 0.25s ease-out backwards;
+}
+
+.kartenumfeld-verdeckt {
+  visibility: hidden;
+  animation: none;
+}
+
+@keyframes umfeld-einblenden {
+  from {
+    opacity: 0;
+    transform: translateY(4%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kartenumfeld {
+    animation: none;
+  }
 }
 
 /* Erscheint nur, wenn das Laden spürbar dauert. */

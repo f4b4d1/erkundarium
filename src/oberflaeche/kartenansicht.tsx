@@ -250,11 +250,11 @@ export function Kartenansicht({
           </button>
         </div>
         {laden.art !== 'laedt' && hatUmfeld && (
-          <Umfeldbloecke umfeld={umfeld} onOeffne={(id) => zeigeVerlauf([...verlauf, id])} />
+          <Umfeldbloecke umfeld={umfeld} verdeckt={deckeAuf} onOeffne={(id) => zeigeVerlauf([...verlauf, id])} />
         )}
         {/* Die Region steht von Anfang an da; nur ein später gesetzter Text wird vorgelesen. */}
         <p class="nur-vorlesen" role="status">
-          {aufdecken && wechsel === 0 && laden.art === 'bereit' ? `${TEXTE.karte.neuGefunden}: ${laden.text.title}` : ''}
+          {laden.art !== 'bereit' ? '' : wechsel > 0 ? laden.text.title : aufdecken ? `${TEXTE.karte.neuGefunden}: ${laden.text.title}` : ''}
         </p>
       </div>
     </dialog>

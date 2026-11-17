@@ -114,7 +114,7 @@ Maßgeblich ist `GLOSSARY.md`. Die Feldnamen in den Daten:
 
 - F14: Die Sammlung zeigt alle Karten nach Themengebiet. Nicht gefundene Karten erscheinen als Schatten ohne Inhalt.
 - F15: Gefundene Karten lassen sich in der Sammlung öffnen und wenden.
-- F16: Eine geöffnete Karte zeigt unter der Karte zwei Blöcke: „Zu finden in“ mit den Namen ihrer Fundorte (berechnet, nur Text, kein Sprung) und ihre Beziehungen, gruppiert nach Typ und Richtung mit den Bezeichnungen aus `relations.json`. Gefundene Nachbarkarten sind Knöpfe und öffnen sich in der Kartenansicht (F8a); nicht gefundene erscheinen als Schatten ohne Titel und lassen sich nicht öffnen, also deckt sich über die Beziehungen nie eine Karte auf. Ein leerer Block entfällt.
+- F16: Eine geöffnete Karte zeigt unter der Karte zwei Blöcke: „Zu finden in“ mit den Namen ihrer Fundorte (berechnet, nur Text, kein Sprung) und ihre Beziehungen, gruppiert nach Typ und Richtung mit den Bezeichnungen aus `relations.json`. Gefundene Nachbarkarten sind Knöpfe und öffnen sich in der Kartenansicht (F8a); nicht gefundene erscheinen als Schatten ohne Titel und lassen sich nicht öffnen, also deckt sich über die Beziehungen nie eine Karte auf. Ein leerer Block entfällt. Beim ersten Fund blenden die Blöcke erst nach dem Aufdecken ein; ihr Platz bleibt von Anfang an frei.
 
 **Speichern**
 
