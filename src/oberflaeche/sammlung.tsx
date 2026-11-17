@@ -3,7 +3,7 @@
 // gefundene sind Knöpfe, nicht gefundene Schatten ohne Titel. Die Szene bleibt darunter stehen. Die
 // Karte öffnet die Anwendung in der Kartenansicht darüber; den Fokus zurück legt sie nach dem Schließen.
 
-import type { CSSProperties } from 'preact';
+import type { CSSProperties, TargetedMouseEvent } from 'preact';
 import { useId, useLayoutEffect, useMemo, useRef } from 'preact/hooks';
 import { fortschrittDerWelt, gesamtfortschritt } from '../logik/fortschritt.ts';
 import type { Inhaltsverzeichnis } from '../logik/inhaltsverzeichnis.ts';
@@ -27,6 +27,7 @@ export function Sammlung({ verzeichnis, gefunden, fassung, welt, onOeffneKarte, 
   const kennung = useId();
   const dialog = useRef<HTMLDialogElement>(null);
   const schliessen = useRef<HTMLButtonElement>(null);
+  const druckZwischenGruppen = useRef(false);
   const gruppen = useMemo(() => sammlungsinhalt(verzeichnis, gefunden, fassung), [verzeichnis, gefunden, fassung]);
   const weltTitel = text(verzeichnis.worlds.find((w) => w.id === welt)?.title ?? {}, fassung) || welt;
 
@@ -38,6 +39,20 @@ export function Sammlung({ verzeichnis, gefunden, fassung, welt, onOeffneKarte, 
     schliessen.current?.focus();
     return () => element.close();
   }, []);
+
+  function zwischenGruppen(e: TargetedMouseEvent<HTMLDivElement>): boolean {
+    if (e.target !== e.currentTarget) return false;
+    // Nur die Lücke zwischen zwei Gruppen zählt; Gruppen und äußeres Padding nicht.
+    // Viewport-Koordinaten berücksichtigen auch die gescrollte Sammlung.
+    const rechtecke = Array.from(e.currentTarget.children, (gruppe) => gruppe.getBoundingClientRect());
+    return rechtecke.some((naechste, i) => {
+      const vorige = rechtecke[i - 1];
+      return vorige !== undefined
+        && e.clientY > vorige.bottom && e.clientY < naechste.top
+        && e.clientX >= Math.max(vorige.left, naechste.left)
+        && e.clientX <= Math.min(vorige.right, naechste.right);
+    });
+  }
 
   return (
     <dialog
@@ -70,7 +85,17 @@ export function Sammlung({ verzeichnis, gefunden, fassung, welt, onOeffneKarte, 
           <span>{TEXTE.sammlung.schliessen}</span>
         </button>
       </header>
-      <div class="sammlung-inhalt">
+      <div
+        class="sammlung-inhalt"
+        onPointerDown={(e) => { druckZwischenGruppen.current = zwischenGruppen(e); }}
+        onPointerCancel={() => { druckZwischenGruppen.current = false; }}
+        onClick={(e) => {
+          // Markieren innerhalb einer Gruppe und Loslassen in der Lücke schließt nicht.
+          const dortGedrueckt = druckZwischenGruppen.current;
+          druckZwischenGruppen.current = false;
+          if (dortGedrueckt && zwischenGruppen(e)) onSchliessen();
+        }}
+      >
         {gruppen.map((gruppe) => (
           <section class="sammlung-gruppe" key={gruppe.id} aria-labelledby={`${kennung}-${gruppe.id}`}>
             <h3 class="sammlung-gruppentitel" id={`${kennung}-${gruppe.id}`}>
