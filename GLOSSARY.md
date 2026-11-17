@@ -96,6 +96,34 @@ _Avoid_: Link, Verknüpfung
 Die Art einer Beziehung mit einer Bezeichnung je Richtung, zum Beispiel „steuert“ und „wird gesteuert von“.
 _Avoid_: Relationsart, Kantentyp
 
+**Nachbarkarte**:
+Eine Karte, die über eine Beziehung mit einer anderen Karte verbunden ist.
+_Avoid_: verwandte Karte, verlinkte Karte
+
+**Fortschritt**:
+Der berechnete Anteil gefundener Karten, je Welt und gesamt, angezeigt als „x von y Karten“. Wird nie gespeichert.
+_Avoid_: Spielstand (das sind die gespeicherten Funde), Quote
+
+**Kartenansicht**:
+Der modale Dialog, in dem eine Karte offen liegt: die Karte mit „Wenden“, „Schließen“ und gegebenenfalls „Zurück“, darunter die Blöcke „Zu finden in“ und Beziehungen.
+_Avoid_: Kartendialog, Overlay, Popup
+
+**Verlauf**:
+Die Folge der Karten, die in einer offenen Kartenansicht über Nachbarkarten nacheinander geöffnet wurden; „Zurück“ zeigt die vorige. Er endet mit dem Schließen der Kartenansicht.
+_Avoid_: History, Pfad (das ist der Weg durch die Szenen)
+
+**Sammlung**:
+Die Übersicht über alle Karten des Kartenvorrats, gruppiert nach Themengebiet, mit dem Fortschritt im Kopf. Gefundene Karten öffnen sich daraus in der Kartenansicht. Ein Platz einer Karte in der Sammlung heißt Eintrag.
+_Avoid_: Album, Inventar, Deck
+
+**Schatten**:
+Der Platzhalter einer nicht gefundenen Karte in der Sammlung oder bei den Beziehungen: Form ohne Titel und Inhalt, nicht bedienbar.
+_Avoid_: Silhouette, ausgegraute Karte
+
+**Überlagerung**:
+Was über der Szene liegt und sie unbedienbar macht: die Sammlung, die Kartenansicht oder beide, die Kartenansicht dann obenauf. Der Hinweis zählt nicht dazu. Im Code: `Ueberlagerung`.
+_Avoid_: Overlay, Stapel, Modal
+
 **Fundort**:
 Eine Szene, in der eine Karte vorkommt, als Eintrittskarte oder über einen Hotspot. Fundorte ergeben sich aus den Szenen und werden nie von Hand gesetzt.
 _Avoid_: enthält, ist Teil von, Vorkommen
