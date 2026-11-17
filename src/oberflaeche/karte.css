@@ -96,6 +96,8 @@
 }
 
 .kartenansicht.kartenansicht-mit-umfeld {
+  /* Die Leiste erscheint erst mit den Blöcken nach dem Laden; ohne festen Platz rückte die Karte seitlich. */
+  scrollbar-gutter: stable;
   /* Hochformat: gerade genug, dass die Blöcke sichtbar anfangen; die Karte soll nicht schrumpfen. */
   --karte-umfeldzone: 90px;
 }
@@ -164,6 +166,12 @@
   place-content: center;
   justify-items: center;
   gap: var(--karte-knopfabstand);
+}
+
+/* Mit Blöcken beginnt die Fläche oben: Während des Ladens fehlt die Zeile der Blöcke, und zentriert
+   würden die Knöpfe nach dem Laden nach oben springen. */
+.kartenansicht-mit-umfeld .kartenansicht-flaeche {
+  align-content: start;
 }
 
 @media (orientation: landscape) {
@@ -322,6 +330,26 @@
   border-radius: 999px;
 }
 
+/* Die Knöpfe blenden beim ersten Laden mit der Karte ein, mit deren Dauer und Kurve. */
+.kartenansicht-knoepfe {
+  animation: karte-einblenden var(--karte-dauer-oeffnen) cubic-bezier(0.3, 0.1, 0.25, 1) backwards;
+}
+
+.kartenansicht-knoepfe.knoepfe-aufdecken {
+  animation: karte-einblenden calc(var(--karte-dauer-aufdecken) * 0.2) ease-out backwards;
+}
+
+.kartenansicht-knoepfe.knoepfe-verdeckt {
+  opacity: 0;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kartenansicht-knoepfe {
+    animation: none;
+  }
+}
+
 /* Die Blöcke blenden mit der Karte ein; beim Aufdecken erst danach (Klasse verdeckt, Platz bleibt).
    Beim Entfernen der Klasse beginnt die Animation. */
 .kartenumfeld {
@@ -348,8 +376,13 @@
 
 /* Erscheint nur, wenn das Laden spürbar dauert. */
 .karte-laedt {
+  /* Nimmt die Maße der Karte ein, damit das Raster und die Knöpfe von Anfang an stehen, wo sie bleiben. */
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
   margin: 0;
   width: var(--karte-breite);
+  aspect-ratio: var(--karte-format-breite) / var(--karte-format-hoehe);
   text-align: center;
   color: var(--karte-papier);
   animation: karte-laedt-spaet 0.4s steps(1) both;

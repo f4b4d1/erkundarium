@@ -224,7 +224,16 @@ export function Kartenansicht({
             onAufgedeckt={() => setDeckeAuf(false)}
           />
         )}
-        <div class="kartenansicht-knoepfe">
+        <div
+          class={[
+            'kartenansicht-knoepfe',
+            // Beim ersten Laden blenden die Knöpfe mit der Karte ein; fokussierbar sind sie von Anfang an.
+            wechsel === 0 && laden.art === 'laedt' && 'knoepfe-verdeckt',
+            aufdecken && wechsel === 0 && 'knoepfe-aufdecken',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           {verlauf.length > 1 && (
             <button ref={zurueck} type="button" class="kartenknopf" onClick={() => zeigeVerlauf(verlauf.slice(0, -1))}>
               <SymbolZurueck />
