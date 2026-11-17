@@ -141,13 +141,20 @@ Danach folgen innerhalb von M1: Kartenansicht mit Wenden, Zoom und Pfadanzeige m
 
 Diese sieben Schritte sind erledigt. Den aktuellen Stand beschreibt Abschnitt 6.
 
-## 6 Stand und nächste Schritte (Übergabe vom 2026-11-17, Stand Commit `6d7b47d` und der folgende)
+## 6 Stand und nächste Schritte (Übergabe vom 2026-11-17, Stand Commit `1c71e63` und der folgende)
 
 Eine neue Session liest diesen Abschnitt zuerst und beginnt mit „Einstieg für die nächste Session“.
 
 ### Einstieg für die nächste Session
 
-Der Durchstich `fabrikhalle` → `roboterzelle` → `robotergelenk` ist gezeichnet und begehbar (Schritt 10c, Commit `dc21e3f`, vom Nutzer vorerst so abgenommen). Hinweis und Tastatur (1a, 1c) sind erledigt (Schritt 9e). **Gewählt (2026-11-17): Sammlung (Nächste Schritte, Punkt 4) in den Schritten 4a bis 4c**; Entscheidungen des Nutzers stehen dort. 4a bis 4c sind erledigt, Punkt 4 ist damit abgeschlossen; Rückmeldung des Nutzers zur Sammlung steht aus. Danach wählt der Nutzer den nächsten Punkt (3, 5 oder 6).
+Der Durchstich `fabrikhalle` → `roboterzelle` → `robotergelenk` ist gezeichnet und begehbar (Schritt 10c, Commit `dc21e3f`, vom Nutzer vorerst so abgenommen). Hinweis und Tastatur (1a, 1c) sind erledigt (Schritt 9e). **Gewählt (2026-11-17): Sammlung (Nächste Schritte, Punkt 4) in den Schritten 4a bis 4c**; Entscheidungen des Nutzers stehen dort. 4a bis 4c sind erledigt, Punkt 4 ist damit abgeschlossen (dazu farbige Kacheln mit Symbol, Commit `6d7b47d`). F6 bleibt vorerst teilweise: Ein eigener, dauernd sichtbarer Zähler ist nicht gewünscht, der Fortschritt im Kopf der Sammlung reicht (Entscheidung des Nutzers vom 2026-11-17).
+
+**Als Nächstes zwei kleine Schritte zur Sammlung (Wunsch des Nutzers vom 2026-11-17), danach wählt der Nutzer den nächsten Punkt (3, 5 oder 6):**
+
+1. Kacheln der Sammlung etwas größer machen (heute Rasterbreite mindestens 140 px, bei höchstens 480 px Fensterbreite 120 px; Kacheln etwa 137 × 193 px bei 1280×800). Reine CSS-Änderung in `src/oberflaeche/sammlung.css`, kein Review; bei 360×640 weiter ohne waagerechtes Scrollen und ohne abgeschnittene Titel.
+2. Klick neben die Karten in der Sammlung schließt sie wie „Schließen“ (zurück in die Szene darunter, Fokus auf den Sammlungsknopf). Das ändert die bisherige Entscheidung „Klick daneben gibt es nicht“; Spec F14 entsprechend ergänzen. Vor dem Auftrag mit dem Nutzer klären: ob Klicks auf Schatten, Gruppenüberschriften und den Kopf auch schließen (Vorschlag: nur Kacheln und Knöpfe schließen nicht, alles andere schon, wie beim Klick neben die Karte in der Kartenansicht) und dass ein Klick bei offener Karte über der Sammlung weiter nur die Karte schließt.
+
+Bei den farbigen Kacheln prüfte der Nutzer die Optik selbst, ohne Bildschirmfotos von Agent oder Hauptsession (2026-11-17). Ob das auch für Schritt 1 und künftig gilt, beim Nutzer nachfragen.
 
 Seit `8f6e56d` erzeugt `npm run zoomansicht` das Grundgerüst einer Zoom-Ansicht (Wunsch des Nutzers: wiederverwendbar im Projekt statt im Scratchpad). Das Werkzeug hat Tests, aber kein Review (vom Nutzer nicht verlangt).
 
