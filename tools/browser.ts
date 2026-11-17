@@ -266,9 +266,8 @@ async function verbinde(ausgabeordner: string): Promise<{ browser: Browser; schl
           fokus: f ? f.tagName.toLowerCase() + (f.getAttribute('data-hotspot') ? '#' + f.getAttribute('data-hotspot') : '') : null,
           hinweis: document.querySelector('.hinweis')?.textContent ?? null,
           meldungen: [...document.querySelectorAll('.meldungen p')].map((p) => p.textContent),
-          karteOffen: !!document.querySelector('dialog[open]'),
+          karteOffen: !!document.querySelector('dialog.kartenansicht[open]'),
           sammlungOffen: !!document.querySelector('dialog.sammlung[open]'),
-          kartenansichtOffen: !!document.querySelector('dialog.kartenansicht[open]'),
           fehler: document.querySelector('.fehler')?.textContent ?? null,
           spielstand: Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)])),
         };

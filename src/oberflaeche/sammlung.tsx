@@ -46,6 +46,9 @@ export function Sammlung({ verzeichnis, gefunden, fassung, welt, onOeffneKarte, 
         e.preventDefault();
         onSchliessen();
       }}
+      // Schließt der Browser den Dialog selbst, soll die Anwendung ihn nicht weiter für offen halten;
+      // `ohneSammlung` ist wiederholt aufrufbar, das close aus dem Aufräumen schadet also nicht.
+      onClose={onSchliessen}
     >
       <header class="sammlung-kopf">
         <h2 class="sammlung-titel">{TEXTE.sammlung.name}</h2>
