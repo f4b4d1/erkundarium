@@ -6,6 +6,7 @@
   --sammlung-schatten: rgb(0 0 0 / 0.38);
   --sammlung-linie: rgb(247 249 251 / 0.5);
   --sammlung-eintragsbreite: 140px;
+  --gebietsfarbe: var(--sammlung-papier);
 
   position: fixed;
   inset: 0;
@@ -109,18 +110,15 @@
 }
 
 .sammlung-eintrag {
-  display: grid;
-  place-items: center;
-  padding: 10px;
+  display: block;
+  padding: 7px;
   font-family: inherit;
   font-size: 16px;
   font-weight: 700;
   line-height: 1.25;
-  overflow-wrap: anywhere;
-  hyphens: auto;
-  text-align: center;
   color: var(--sammlung-kontur);
-  background: var(--sammlung-papier);
+  /* Der Rahmen trägt die Farbe des Wissensgebiets wie die Kartenvorderseite. */
+  background: var(--gebietsfarbe);
   border: 2.5px solid var(--sammlung-kontur);
   box-shadow: 3px 3px 0 var(--sammlung-schatten);
   cursor: pointer;
@@ -143,6 +141,28 @@
 .sammlung-schliessen:focus-visible {
   outline: 3px solid #f6c945;
   outline-offset: 3px;
+}
+
+.sammlung-eintrag-innen {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px;
+  background: var(--sammlung-papier);
+  border-radius: 7px;
+  text-align: center;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+.sammlung-eintrag .symbol-gebiet {
+  width: 40px;
+  height: 40px;
+  flex: none;
 }
 
 /* Nicht gefunden: nur die Form, ohne Titel (wie die Schatten der Umfeldblöcke). */

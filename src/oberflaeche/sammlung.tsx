@@ -3,11 +3,14 @@
 // gefundene sind Knöpfe, nicht gefundene Schatten ohne Titel. Die Szene bleibt darunter stehen. Die
 // Karte öffnet die Anwendung in der Kartenansicht darüber; den Fokus zurück legt sie nach dem Schließen.
 
+import type { CSSProperties } from 'preact';
 import { useId, useLayoutEffect, useMemo, useRef } from 'preact/hooks';
 import { fortschrittDerWelt, gesamtfortschritt } from '../logik/fortschritt.ts';
 import type { Inhaltsverzeichnis } from '../logik/inhaltsverzeichnis.ts';
 import { sammlungsinhalt } from '../logik/sammlung.ts';
 import { text } from '../logik/textfassung.ts';
+import { symbolPfad } from '../inhalte/laden.ts';
+import { Symbol } from './kartenseiten.tsx';
 import { TEXTE } from './texte.ts';
 
 interface Eigenschaften {
@@ -73,12 +76,18 @@ export function Sammlung({ verzeichnis, gefunden, fassung, welt, onOeffneKarte, 
             <h3 class="sammlung-gruppentitel" id={`${kennung}-${gruppe.id}`}>
               {gruppe.titel}
             </h3>
-            <ul class="sammlung-karten">
+            <ul
+              class="sammlung-karten"
+              style={gruppe.farbe === undefined ? undefined : ({ '--gebietsfarbe': gruppe.farbe } as CSSProperties)}
+            >
               {gruppe.karten.map((karte) => (
                 <li key={karte.id}>
                   {karte.gefunden ? (
                     <button type="button" class="sammlung-eintrag" data-karte={karte.id} onClick={() => onOeffneKarte(karte.id)}>
-                      {karte.titel}
+                      <span class="sammlung-eintrag-innen">
+                        <Symbol pfad={symbolPfad(gruppe.symbol)} />
+                        <span class="sammlung-eintrag-titel">{karte.titel}</span>
+                      </span>
                     </button>
                   ) : (
                     <span class="sammlung-schatten" role="img" aria-label={TEXTE.sammlung.nichtGefunden} />

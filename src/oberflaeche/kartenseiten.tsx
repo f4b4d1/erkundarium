@@ -135,7 +135,7 @@ function Bildfeld({ bild, symbol }: { bild: string | undefined; symbol: string |
 }
 
 /** Symbol des Themengebiets als Bild; ohne Datei oder wenn sie nicht lädt, eine leere Fläche gleicher Größe. */
-function Symbol({ pfad }: { pfad: string | undefined }) {
+export function Symbol({ pfad }: { pfad: string | undefined }) {
   const [fehlt, setFehlt] = useState(false);
   if (pfad === undefined || fehlt) return <span class="symbol-gebiet symbol-leer" aria-hidden="true" />;
   return <img class="symbol-gebiet" src={pfad} alt="" draggable={false} onError={() => setFehlt(true)} />;

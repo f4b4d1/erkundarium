@@ -45,6 +45,16 @@ describe('sammlungsinhalt', () => {
     expect(sammlungsinhalt(verzeichnis, new Set(['d']), 'de')[0]!.karten[1]).toEqual({ id: 'd', gefunden: true, titel: 'd' });
   });
 
+  it('gibt jeder Gruppe Symbol und Farbe des Wissensgebiets', () => {
+    const [antrieb] = sammlungsinhalt(verzeichnis, new Set(), 'de');
+    expect(antrieb).toMatchObject({ symbol: 'x.svg', farbe: '#112233' });
+  });
+
+  it('lässt die Farbe weg, wenn das Wissensgebiet fehlt', () => {
+    const ohne = { ...verzeichnis, domains: [] };
+    expect(sammlungsinhalt(ohne, new Set(), 'de')[0]).not.toHaveProperty('farbe');
+  });
+
   it('nennt die Themengebiete in der Textfassung', () => {
     expect(sammlungsinhalt(verzeichnis, new Set(), 'en')[0]!.titel).toBe('Drive');
   });
