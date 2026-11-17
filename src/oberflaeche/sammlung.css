@@ -5,7 +5,7 @@
   --sammlung-kontur: #26262e;
   --sammlung-schatten: rgb(0 0 0 / 0.38);
   --sammlung-linie: rgb(247 249 251 / 0.5);
-  --sammlung-eintragsbreite: 140px;
+  --sammlung-eintragsbreite: 160px;
   --gebietsfarbe: var(--sammlung-papier);
 
   position: fixed;
@@ -173,6 +173,6 @@
 
 @media (max-width: 480px) {
   .sammlung {
-    --sammlung-eintragsbreite: 120px;
+    --sammlung-eintragsbreite: 140px;
   }
 }
