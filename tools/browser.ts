@@ -45,6 +45,8 @@ export interface Browser {
   /** Mausklick auf eine Stelle, an der das Element wirklich getroffen wird (nicht verdeckt). */
   klicke(selektor: string): Promise<void>;
   klickeHotspot(id: string): Promise<void>;
+  /** Scrollt das Element in die Mitte des Sichtbereichs (etwa in einem scrollenden Dialog). */
+  scrolleHin(selektor: string): Promise<void>;
   /** Fährt mit der Maus über das Element, ohne zu klicken. */
   zeigeAuf(selektor: string): Promise<void>;
   /** Bewegt die Maus an die Stelle (CSS-Pixel im Fenster), ohne zu klicken. */
@@ -224,6 +226,9 @@ async function verbinde(ausgabeordner: string): Promise<{ browser: Browser; schl
     },
     klickeHotspot(id) {
       return browser.klicke(`[data-hotspot="${id}"]`);
+    },
+    async scrolleHin(selektor) {
+      await werte(`document.querySelector(${JSON.stringify(selektor)})?.scrollIntoView({ block: 'center' })`);
     },
     async zeigeAuf(selektor) {
       const [x, y] = await trefferpunkt(selektor);

@@ -25,6 +25,13 @@ export const TEXTE = {
     zoom: 'Hineinzoomen',
     info: 'Info',
   },
+  /** Die Blöcke unter der Karte (F16). */
+  umfeld: {
+    zuFindenIn: 'Zu finden in',
+    beziehungen: 'Beziehungen',
+    /** Name eines Schattens: Titel und Inhalt der noch nicht gefundenen Karte bleiben verborgen. */
+    nichtGefunden: 'Noch nicht gefundene Karte',
+  },
   karte: {
     laedt: 'Karte wird geladen …',
     neuGefunden: 'Neue Karte gefunden',
@@ -33,6 +40,7 @@ export const TEXTE = {
     wendenZurRueckseite: 'Wenden, Rückseite zeigen',
     wendenZurVorderseite: 'Wenden, Vorderseite zeigen',
     schliessen: 'Schließen',
+    zurueck: 'Zurück',
     vorderseite: 'Vorderseite',
     rueckseite: 'Rückseite',
     entwurf: 'Entwurf',

@@ -5,15 +5,17 @@
 // Aufrufer nach dem Schließen.
 
 import type { CSSProperties, TargetedMouseEvent, TargetedPointerEvent } from 'preact';
-import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { gebietsfarbe } from '../logik/gebietsfarbe.ts';
-import type { Themengebiet, Wissensgebiet } from '../logik/inhaltsverzeichnis.ts';
+import type { Inhaltsverzeichnis, Themengebiet, Wissensgebiet } from '../logik/inhaltsverzeichnis.ts';
 import type { Kartendatei, Kartentext } from '../logik/kartendatei.ts';
+import { kartenumfeld } from '../logik/kartenumfeld.ts';
 import { text as textAus, waehleFassung } from '../logik/textfassung.ts';
 import { kartenbildPfad, ladeKarte, symbolPfad } from '../inhalte/laden.ts';
 import { wenigerBewegung } from './bewegung.ts';
 import { Deckblatt, Rueckseite, Vorderseite, type Kartengebiet } from './kartenseiten.tsx';
 import { TEXTE } from './texte.ts';
+import { Umfeldbloecke } from './umfeldbloecke.tsx';
 
 interface Eigenschaften {
   karte: string;
@@ -22,6 +24,9 @@ interface Eigenschaften {
   themengebiete: readonly Themengebiet[];
   wissensgebiete: readonly Wissensgebiet[];
   fassung: string;
+  /** Für die Blöcke unter der Karte (F16): Fundorte, Beziehungen und Titel der Nachbarkarten. */
+  verzeichnis: Inhaltsverzeichnis;
+  gefunden: ReadonlySet<string>;
   onSchliessen: () => void;
 }
 
@@ -35,9 +40,24 @@ const AUFDECKEN_HOECHSTENS_MS = 2500;
 /** Endet die Schließ-Animation nicht von selbst, etwa weil der Dialog schon verborgen ist. */
 const SCHLIESSEN_HOECHSTENS_MS = 500;
 
-export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete, fassung, onSchliessen }: Eigenschaften) {
+export function Kartenansicht({
+  karte: ersteKarte,
+  aufdecken,
+  themengebiete,
+  wissensgebiete,
+  fassung,
+  verzeichnis,
+  gefunden,
+  onSchliessen,
+}: Eigenschaften) {
   const dialog = useRef<HTMLDialogElement>(null);
   const schliessen = useRef<HTMLButtonElement>(null);
+  const zurueck = useRef<HTMLButtonElement>(null);
+  // Der Verlauf der gezeigten Karten (F8a); die letzte ist die gezeigte. Er gilt nur, solange die Ansicht offen ist.
+  const [verlauf, setVerlauf] = useState<readonly string[]>([ersteKarte]);
+  const karte = verlauf[verlauf.length - 1]!;
+  // Zählt die Wechsel der Karte innerhalb der Ansicht; nur die erste Karte kann sich aufdecken.
+  const [wechsel, setWechsel] = useState(0);
   const [laden, setLaden] = useState<Ladezustand>({ art: 'laedt' });
   const [deckeAuf, setDeckeAuf] = useState(aufdecken);
   const [gewendet, setGewendet] = useState(false);
@@ -72,12 +92,25 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
     };
   }, [karte, fassung]);
 
+  const umfeld = useMemo(
+    () => kartenumfeld(verzeichnis, karte, gefunden, fassung),
+    [verzeichnis, karte, gefunden, fassung],
+  );
+  const hatUmfeld = umfeld.fundorte.length > 0 || umfeld.beziehungen.length > 0;
+
   const bereit = laden.art === 'bereit';
   const fehlgeschlagen = laden.art === 'fehler';
   useEffect(() => {
     // Der Knopf Wenden verschwindet mit dem Fehler; der Fokus bleibt im Dialog.
     if (fehlgeschlagen) schliessen.current?.focus();
   }, [fehlgeschlagen]);
+
+  useEffect(() => {
+    // Der Knopf, über den der Spieler gekommen ist, verschwindet mit dem Wechsel (der Nachbarknopf
+    // mit der Karte, „Zurück“ bei der ersten Karte): Der Fokus bliebe sonst im Nichts. Er geht auf
+    // „Zurück“, wo es ihn gibt, sonst auf „Schließen“; beide stehen auch während des Ladens da.
+    if (wechsel > 0) (zurueck.current ?? schliessen.current)?.focus();
+  }, [wechsel]);
 
   useEffect(() => {
     if (!bereit || !deckeAuf) return;
@@ -103,6 +136,16 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
     if (gemeldet.current) return;
     gemeldet.current = true;
     aufrufer.current();
+  }
+
+  /** Zeigt eine andere Karte in derselben Ansicht, auf der Vorderseite und mit der Öffnen-Animation. */
+  function zeigeVerlauf(neu: readonly string[]): void {
+    if (schliesst) return;
+    setVerlauf(neu);
+    setLaden({ art: 'laedt' });
+    setDeckeAuf(false);
+    setGewendet(false);
+    setWechsel((n) => n + 1);
   }
 
   function wende(): void {
@@ -136,7 +179,9 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
   return (
     <dialog
       ref={dialog}
-      class={schliesst ? 'kartenansicht kartenansicht-schliesst' : 'kartenansicht'}
+      class={['kartenansicht', hatUmfeld && 'kartenansicht-mit-umfeld', schliesst && 'kartenansicht-schliesst']
+        .filter(Boolean)
+        .join(' ')}
       aria-label={titel}
       onCancel={(e) => {
         // Escape schließt; der Aufrufer nimmt den Dialog nach dem Ausblenden aus der Seite.
@@ -173,13 +218,19 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
             gebiet={gebiet(laden.datei.topic, themengebiete, fassung)}
             farbe={gebietsfarbe(laden.datei.topic, themengebiete, wissensgebiete)}
             deckeAuf={deckeAuf}
-            oeffnen={!aufdecken}
+            oeffnen={!aufdecken || wechsel > 0}
             gewendet={gewendet}
             onKlick={beimKlickAufKarte}
             onAufgedeckt={() => setDeckeAuf(false)}
           />
         )}
         <div class="kartenansicht-knoepfe">
+          {verlauf.length > 1 && (
+            <button ref={zurueck} type="button" class="kartenknopf" onClick={() => zeigeVerlauf(verlauf.slice(0, -1))}>
+              <SymbolZurueck />
+              <span>{TEXTE.karte.zurueck}</span>
+            </button>
+          )}
           {/* Schon während des Ladens da, damit der Dialog mit dem Fokus auf ihm öffnet. */}
           {laden.art !== 'fehler' && (
             <button
@@ -198,9 +249,12 @@ export function Kartenansicht({ karte, aufdecken, themengebiete, wissensgebiete,
             <span>{TEXTE.karte.schliessen}</span>
           </button>
         </div>
+        {laden.art !== 'laedt' && hatUmfeld && (
+          <Umfeldbloecke umfeld={umfeld} onOeffne={(id) => zeigeVerlauf([...verlauf, id])} />
+        )}
         {/* Die Region steht von Anfang an da; nur ein später gesetzter Text wird vorgelesen. */}
         <p class="nur-vorlesen" role="status">
-          {aufdecken && laden.art === 'bereit' ? `${TEXTE.karte.neuGefunden}: ${laden.text.title}` : ''}
+          {aufdecken && wechsel === 0 && laden.art === 'bereit' ? `${TEXTE.karte.neuGefunden}: ${laden.text.title}` : ''}
         </p>
       </div>
     </dialog>
@@ -252,7 +306,7 @@ function Karte({ datei, text, gebiet, farbe, deckeAuf, oeffnen, gewendet, onKlic
 
 /** Liegt das Ziel eines Zeigerereignisses neben Karte, Knöpfen und Fehlermeldung? */
 function nebenKarte(ziel: EventTarget | null): boolean {
-  return !(ziel instanceof Element) || ziel.closest('.karte, .kartenansicht-knoepfe, .karte-fehler') === null;
+  return !(ziel instanceof Element) || ziel.closest('.karte, .kartenansicht-knoepfe, .karte-fehler, .kartenumfeld') === null;
 }
 
 function gebiet(id: string, themengebiete: readonly Themengebiet[], fassung: string): Kartengebiet {
@@ -270,6 +324,21 @@ function SymbolWenden() {
         fill="none"
         stroke="currentColor"
         stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+
+function SymbolZurueck() {
+  return (
+    <svg class="knopf-symbol" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M20,12H5M11,5.5L4.5,12L11,18.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.6"
         stroke-linecap="round"
         stroke-linejoin="round"
       />

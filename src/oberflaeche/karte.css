@@ -36,6 +36,9 @@
   --karte-knopfleiste: 48px;
   --karte-knopfspalte: 160px;
   --karte-knopfabstand: 14px;
+  /* Platz unter den Knöpfen, damit die Blöcke unter der Karte (Fundorte, Beziehungen) schon
+     zu sehen sind; der Rest scrollt. Nur mit Blöcken gesetzt, sonst 0. */
+  --karte-umfeldzone: 0px;
   /* Grundschrift der Karte als Bruchteil der Kartenbreite: Breite / 28 */
   --karte-schriftteiler: 28;
 
@@ -78,7 +81,8 @@
   margin: 0;
   padding: 0;
   border: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--karte-abdunklung);
   color: var(--karte-kontur);
   animation: kartenansicht-einblenden 0.2s ease-out;
@@ -86,9 +90,14 @@
   --karte-breite: min(
     var(--karte-hoechstbreite),
     100vw - 2 * var(--karte-fensterrand),
-    (100dvh - 2 * var(--karte-fensterrand) - var(--karte-knopfleiste) - var(--karte-knopfabstand)) *
+    (100dvh - 2 * var(--karte-fensterrand) - var(--karte-knopfleiste) - var(--karte-knopfabstand) - var(--karte-umfeldzone)) *
       var(--karte-format-breite) / var(--karte-format-hoehe)
   );
+}
+
+.kartenansicht.kartenansicht-mit-umfeld {
+  /* Hochformat: gerade genug, dass die Blöcke sichtbar anfangen; die Karte soll nicht schrumpfen. */
+  --karte-umfeldzone: 90px;
 }
 
 .kartenansicht:focus {
@@ -100,12 +109,17 @@
 }
 
 @media (orientation: landscape) {
+  .kartenansicht.kartenansicht-mit-umfeld {
+    --karte-umfeldzone: 180px;
+  }
+
   /* Querformat: Knöpfe rechts neben der Karte, die Karte nutzt die ganze Höhe */
   .kartenansicht {
     --karte-breite: min(
       var(--karte-hoechstbreite),
       100vw - 2 * var(--karte-fensterrand) - var(--karte-knopfspalte) - var(--karte-knopfabstand),
-      (100dvh - 2 * var(--karte-fensterrand)) * var(--karte-format-breite) / var(--karte-format-hoehe)
+      (100dvh - 2 * var(--karte-fensterrand) - var(--karte-umfeldzone)) * var(--karte-format-breite) /
+        var(--karte-format-hoehe)
     );
   }
 }
@@ -141,7 +155,8 @@
 
 .kartenansicht-flaeche {
   box-sizing: border-box;
-  height: 100%;
+  /* Mit den Blöcken unter der Karte wird die Fläche höher als das Fenster; dann scrollt der Dialog. */
+  min-height: 100%;
   padding: var(--karte-fensterrand);
   display: grid;
   grid-template-columns: auto;
@@ -215,6 +230,96 @@
   width: 20px;
   height: 20px;
   flex: none;
+}
+
+/* ---------- Blöcke unter der Karte: Fundorte und Beziehungen (F16) ---------- */
+.kartenumfeld {
+  box-sizing: border-box;
+  width: var(--karte-breite);
+  padding: 12px 16px;
+  background: var(--karte-papier);
+  border: 3px solid var(--karte-kontur);
+  border-radius: 14px;
+  box-shadow: 5px 5px 0 var(--karte-schatten);
+  font-family: var(--karte-schrift);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.umfeldblock + .umfeldblock {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px dashed var(--karte-linie-fakten);
+}
+
+.umfeldtitel {
+  margin: 0 0 4px;
+  font-family: var(--karte-schrift-titel);
+  font-size: 0.85em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fundorte {
+  margin: 0;
+}
+
+.gruppentitel {
+  margin: 8px 0 4px;
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--karte-text-leise);
+}
+
+.nachbarn {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nachbarknopf {
+  min-height: 40px;
+  padding: 0 14px;
+  font: 600 15px/1.2 var(--karte-schrift);
+  color: var(--karte-kontur);
+  background: var(--karte-papier);
+  border: 2.5px solid var(--karte-kontur);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--karte-schatten);
+  cursor: pointer;
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+
+.nachbarknopf:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--karte-schatten);
+}
+
+.nachbarknopf:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--karte-schatten);
+}
+
+.nachbarknopf:focus-visible {
+  outline: 3px solid var(--karte-kontur);
+  outline-offset: 2px;
+}
+
+/* Nicht gefunden: nur die Form, ohne Titel. */
+.nachbar-schatten {
+  display: block;
+  width: 5.5em;
+  height: 40px;
+  box-sizing: border-box;
+  background: rgb(38 38 46 / 0.14);
+  border: 2.5px dashed var(--karte-linie-fakten);
+  border-radius: 999px;
 }
 
 /* Erscheint nur, wenn das Laden spürbar dauert. */

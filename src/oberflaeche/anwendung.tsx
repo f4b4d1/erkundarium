@@ -505,6 +505,8 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           themengebiete={themengebiete}
           wissensgebiete={wissensgebiete}
           fassung={FASSUNG}
+          verzeichnis={verzeichnis}
+          gefunden={gefunden}
           onSchliessen={schliesseKarte}
         />
       )}
