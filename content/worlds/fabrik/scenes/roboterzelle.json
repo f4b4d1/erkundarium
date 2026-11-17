@@ -64,7 +64,7 @@
     { "id": "achse-2", "action": "info",
       "label": { "de": "Achse 2" },
       "hint": { "de": "Das Schultergelenk schwenkt den ganzen Arm nach vorn und zurück." } },
-    { "id": "achse-3", "action": "info",
+    { "id": "achse-3", "action": "scene", "target": "robotergelenk",
       "label": { "de": "Achse 3" },
       "hint": { "de": "Das Ellbogengelenk hebt und senkt den vorderen Arm. Ein Servomotor treibt es über ein Getriebe an." } },
     { "id": "achse-5", "action": "info",
