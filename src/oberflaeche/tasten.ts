@@ -5,7 +5,7 @@
 export interface Tastenlage {
   taste: string;
   umschalt: boolean;
-  karteOffen: boolean;
+  ueberlagert: boolean;
   hinweisOffen: boolean;
   /** Der offene Hinweis trägt einen Kartenknopf. */
   hatKartenknopf: boolean;
@@ -25,7 +25,7 @@ export type Tastenaktion =
 
 export function deuteTaste(lage: Tastenlage): Tastenaktion {
   // Bei offener Karte bedient sie die Tasten selbst.
-  if (lage.karteOffen) return 'nichts';
+  if (lage.ueberlagert) return 'nichts';
   if (lage.taste === 'Escape') {
     if (!lage.hinweisOffen) return 'ebene-zurueck';
     return lage.fokus === 'kartenknopf' ? 'hinweis-schliessen-fokus-zum-hotspot' : 'hinweis-schliessen';

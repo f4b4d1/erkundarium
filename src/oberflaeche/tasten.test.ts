@@ -4,7 +4,7 @@ import { deuteTaste, type Tastenlage } from './tasten.ts';
 const lage = (teil: Partial<Tastenlage>): Tastenlage => ({
   taste: 'Escape',
   umschalt: false,
-  karteOffen: false,
+  ueberlagert: false,
   hinweisOffen: false,
   hatKartenknopf: false,
   fokus: 'sonst',
@@ -28,8 +28,8 @@ describe('Escape', () => {
   });
 
   it('tut bei offener Karte nichts (sie schließt selbst)', () => {
-    expect(deuteTaste(lage({ karteOffen: true }))).toBe('nichts');
-    expect(deuteTaste(lage({ karteOffen: true, hinweisOffen: true }))).toBe('nichts');
+    expect(deuteTaste(lage({ ueberlagert: true }))).toBe('nichts');
+    expect(deuteTaste(lage({ ueberlagert: true, hinweisOffen: true }))).toBe('nichts');
   });
 });
 
@@ -60,7 +60,7 @@ describe('Tab', () => {
   });
 
   it('tut bei offener Karte nichts', () => {
-    expect(deuteTaste(lage({ ...tab, ...mitKnopf, karteOffen: true, fokus: 'hotspot' }))).toBe('nichts');
+    expect(deuteTaste(lage({ ...tab, ...mitKnopf, ueberlagert: true, fokus: 'hotspot' }))).toBe('nichts');
   });
 });
 
@@ -74,7 +74,7 @@ describe('weitere Fälle', () => {
   });
 
   it('lässt Escape bei offener Karte der Karte, auch mit Kartenknopf', () => {
-    expect(deuteTaste(lage({ karteOffen: true, hinweisOffen: true, hatKartenknopf: true, fokus: 'kartenknopf' }))).toBe('nichts');
+    expect(deuteTaste(lage({ ueberlagert: true, hinweisOffen: true, hatKartenknopf: true, fokus: 'kartenknopf' }))).toBe('nichts');
   });
 });
 

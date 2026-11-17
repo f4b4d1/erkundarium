@@ -17,6 +17,7 @@ import { Kartenansicht } from './kartenansicht.tsx';
 import { Pfadanzeige, type Ebene } from './pfadanzeige.tsx';
 import { Szenenansicht } from './szenenansicht.tsx';
 import { deuteTaste } from './tasten.ts';
+import { fokusErledigt, mitKarte, ohneKarte, ueberlagert, type Fokusziel, type Ueberlagerung } from './ueberlagerung.ts';
 import { wenigerBewegung } from './bewegung.ts';
 import { TEXTE } from './texte.ts';
 
@@ -46,22 +47,6 @@ interface OffenerHinweis {
 /** So lange bleibt der Hinweis offen, wenn der Zeiger Hotspot und Hinweis verlassen hat. */
 const SCHLIESS_VERZOEGERUNG_MS = 150;
 
-/** Wohin der Fokus zurückkehrt, wenn die Karte zugeht: dorthin, wo sie ausgelöst wurde. */
-type Fokusziel =
-  | { art: 'hotspot'; id: string }
-  | { art: 'kartenknopf' }
-  /** Die Karte öffnete sich von selbst (F30), es gibt keinen Auslöser. */
-  | { art: 'szene' };
-
-interface OffeneKarte {
-  karte: string;
-  aufdecken: boolean;
-  /** Wohin der Fokus nach dem Schließen zurückkehrt. */
-  fokus: Fokusziel;
-  /** Zählt jedes Öffnen, damit die Kartenansicht jedes Mal neu beginnt. */
-  nummer: number;
-}
-
 export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const [ladezustand, setLadezustand] = useState<Ladezustand>({ art: 'laedt' });
   const [start] = useState(() => einlesen(speicher.laden()));
@@ -69,8 +54,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   const speichernErlaubt = start.art !== 'neuere-version';
   const [speichernFehlgeschlagen, setSpeichernFehlgeschlagen] = useState(false);
   const [offen, setOffen] = useState<OffenerHinweis | undefined>(undefined);
-  const [offeneKarte, setOffeneKarte] = useState<OffeneKarte | undefined>(undefined);
-  const fokusZurueck = useRef<Fokusziel | undefined>(undefined);
+  const [ueberlagerung, setUeberlagerung] = useState<Ueberlagerung>({});
   const szeneRef = useRef<Szene | undefined>(undefined);
   const buehneRef = useRef<HTMLElement>(null);
   const kartenknopfRef = useRef<HTMLButtonElement>(null);
@@ -112,10 +96,10 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
 
   // Erst wenn die Kartenansicht aus der Seite ist, ist die Szene wieder bedienbar und fokussierbar.
   useEffect(() => {
-    if (offeneKarte !== undefined || fokusZurueck.current === undefined) return;
-    fokussiere(fokusZurueck.current);
-    fokusZurueck.current = undefined;
-  }, [offeneKarte]);
+    if (ueberlagert(ueberlagerung) || ueberlagerung.fokusAusstehend === undefined) return;
+    fokussiere(ueberlagerung.fokusAusstehend);
+    setUeberlagerung(fokusErledigt);
+  }, [ueberlagerung]);
 
   // Nach dem Wechsel liegt der Fokus auf der Szene; erst jetzt ist die neue Szene gebaut.
   const aktuelleSzene = ladezustand.art === 'bereit' ? ladezustand.szene : undefined;
@@ -127,7 +111,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     if (!fokusAufSzene.current) return;
     fokusAufSzene.current = false;
     // Öffnet sich mit dem Wechsel eine Karte (F30), gehört der Fokus ihr.
-    if (offeneKarte === undefined) szeneRef.current?.fokussiereSzene();
+    if (!ueberlagert(ueberlagerung)) szeneRef.current?.fokussiereSzene();
   }, [aktuelleSzene]);
 
   const gefunden = useMemo(() => gefundeneKarten(spielstand), [spielstand]);
@@ -195,7 +179,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     // Mit der Karte ist der Hinweis zu und bleibt es auch danach.
     stoppeSchliesstimer();
     setOffen(undefined);
-    setOffeneKarte((bisher) => ({ karte, aufdecken, fokus, nummer: (bisher?.nummer ?? 0) + 1 }));
+    setUeberlagerung((bisher) => mitKarte(bisher, karte, aufdecken, fokus));
   }
 
   function fokussiere(ziel: Fokusziel): void {
@@ -310,8 +294,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
   }
 
   function schliesseKarte(): void {
-    fokusZurueck.current = offeneKarte?.fokus;
-    setOffeneKarte(undefined);
+    setUeberlagerung(ohneKarte);
   }
 
   function stoppeSchliesstimer(): void {
@@ -396,7 +379,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
     const aktion = deuteTaste({
       taste: e.key,
       umschalt: e.shiftKey,
-      karteOffen: offeneKarte !== undefined,
+      ueberlagert: ueberlagert(ueberlagerung),
       hinweisOffen: offen !== undefined,
       hatKartenknopf: knopf !== null,
       fokus:
@@ -483,7 +466,7 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           szeneRef={szeneRef}
         />
       </main>
-      {offen && offenerHotspot && !offeneKarte && (
+      {offen && offenerHotspot && !ueberlagert(ueberlagerung) && (
         <Hinweis
           inhalt={hinweisinhalt(offenerHotspot, gefunden, FASSUNG, verzeichnis)}
           ziel={offen.lage}
@@ -497,11 +480,11 @@ export function Anwendung({ speicher }: { speicher: Speicherschicht }) {
           onKartenknopfFokusVerloren={() => planeSchliessen(offen.hotspot)}
         />
       )}
-      {offeneKarte && (
+      {ueberlagerung.karte && (
         <Kartenansicht
-          key={offeneKarte.nummer}
-          karte={offeneKarte.karte}
-          aufdecken={offeneKarte.aufdecken}
+          key={ueberlagerung.karte.nummer}
+          karte={ueberlagerung.karte.karte}
+          aufdecken={ueberlagerung.karte.aufdecken}
           themengebiete={themengebiete}
           wissensgebiete={wissensgebiete}
           fassung={FASSUNG}
