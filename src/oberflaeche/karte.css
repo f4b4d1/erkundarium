@@ -92,7 +92,7 @@
   --karte-breite: min(
     var(--karte-hoechstbreite),
     100vw - 2 * var(--karte-fensterrand),
-    (100dvh - 2 * var(--karte-fensterrand) - var(--karte-knopfleiste) - var(--karte-knopfabstand) - var(--karte-umfeldzone)) *
+    (100dvh - var(--pfadleiste) - 2 * var(--karte-fensterrand) - var(--karte-knopfleiste) - var(--karte-knopfabstand) - var(--karte-umfeldzone)) *
       var(--karte-format-breite) / var(--karte-format-hoehe)
   );
 }
@@ -122,7 +122,7 @@
     --karte-breite: min(
       var(--karte-hoechstbreite),
       100vw - 2 * var(--karte-fensterrand) - var(--karte-knopfspalte) - var(--karte-knopfabstand),
-      (100dvh - 2 * var(--karte-fensterrand) - var(--karte-umfeldzone)) * var(--karte-format-breite) /
+      (100dvh - var(--pfadleiste) - 2 * var(--karte-fensterrand) - var(--karte-umfeldzone)) * var(--karte-format-breite) /
         var(--karte-format-hoehe)
     );
   }
@@ -161,7 +161,8 @@
   box-sizing: border-box;
   /* Mit den Blöcken unter der Karte wird die Fläche höher als das Fenster; dann scrollt der Dialog. */
   min-height: 100%;
-  padding: var(--karte-fensterrand);
+  /* Oben bleibt die Pfadanzeige frei (unter der Abdunklung sichtbar). */
+  padding: calc(var(--pfadleiste) + var(--karte-fensterrand)) var(--karte-fensterrand) var(--karte-fensterrand);
   display: grid;
   grid-template-columns: auto;
   grid-template-rows: auto auto;

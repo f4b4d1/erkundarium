@@ -5,6 +5,8 @@
   --weiss: #f7f9fb;
   --gelb: #f6c945;
   --rand: #3a3a44;
+  /* Mindesthöhe der Pfadanzeige: Knopf 44 + 2 * 6 Innenabstand + 2 Rand. Die Kartenansicht rechnet damit und lässt die Leiste frei. */
+  --pfadleiste: 58px;
 }
 
 html,
@@ -155,6 +157,8 @@ body {
 
 /* Pfadanzeige (F4). */
 .pfad {
+  box-sizing: border-box;
+  min-height: var(--pfadleiste);
   background: var(--weiss);
   border-bottom: 2px solid var(--kontur);
   padding: 6px 16px;

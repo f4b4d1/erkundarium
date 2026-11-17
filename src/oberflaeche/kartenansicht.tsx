@@ -75,6 +75,19 @@ export function Kartenansicht({
     return () => element.close();
   }, []);
 
+  // Die Pfadanzeige bleibt über der Karte frei. Ihre Höhe ändert sich, wenn sie umbricht (schmale
+  // Fenster); dann gilt die gemessene statt der Mindesthöhe `--pfadleiste` aus stil.css.
+  const [pfadleiste, setPfadleiste] = useState<number | undefined>(undefined);
+  useLayoutEffect(() => {
+    const messe = () => {
+      const leiste = document.querySelector('.pfad');
+      setPfadleiste(leiste === null ? undefined : Math.ceil(leiste.getBoundingClientRect().bottom));
+    };
+    messe();
+    window.addEventListener('resize', messe);
+    return () => window.removeEventListener('resize', messe);
+  }, []);
+
   useEffect(() => {
     let aktuell = true;
     ladeKarte(karte).then(
@@ -183,6 +196,7 @@ export function Kartenansicht({
         .filter(Boolean)
         .join(' ')}
       aria-label={titel}
+      style={pfadleiste === undefined ? undefined : ({ '--pfadleiste': `${pfadleiste}px` } as CSSProperties)}
       onCancel={(e) => {
         // Escape schließt; der Aufrufer nimmt den Dialog nach dem Ausblenden aus der Seite.
         e.preventDefault();
